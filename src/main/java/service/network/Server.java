@@ -21,9 +21,13 @@ public class Server implements Runnable {
 
 
     public Server(int port) throws IOException {
+        this("0.0.0.0", port);
+    }
+
+    public Server(String host, int port) throws IOException {
         selector = Selector.open();
         serverChannel = ServerSocketChannel.open();
-        serverChannel.bind(new InetSocketAddress("localhost", port), 1024);
+        serverChannel.bind(new InetSocketAddress(host, port), 1024);
         serverChannel.configureBlocking(false);
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
         clientList = new HashMap<>();
@@ -65,7 +69,7 @@ public class Server implements Runnable {
                 }
                 client.configureBlocking(false);
                 client.register(selector, SelectionKey.OP_READ);
-                String addr = serverChannel.getLocalAddress().toString();
+                String addr = client.getRemoteAddress().toString();
                 clientList.put(addr, client);
             }
             if (key.isReadable()) {
@@ -93,7 +97,6 @@ public class Server implements Runnable {
             channel.write(msg.serialize());
         }
     }
-
 
     public void stop() {
         this.stop = true;

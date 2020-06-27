@@ -97,10 +97,7 @@ public class Client implements Runnable {
             if (sc.isConnected() && key.isReadable()) {
                 doRead(sc);
             }
-//            key.cancel();
-//            sc.close();
         }
-
     }
 
     private void doWrite(SocketChannel sc) throws IOException {
