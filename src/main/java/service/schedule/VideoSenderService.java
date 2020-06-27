@@ -4,30 +4,40 @@ import com.github.sarxos.webcam.Webcam;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
-import org.bytedeco.javacv.*;
+import service.model.ImageFrame;
+import service.model.Message;
+import service.network.Client;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+import static service.model.MessageType.IMAGE;
 
 public class VideoSenderService extends ScheduledService<Image> {
-    FrameGrabber grabber;
-    FrameRecorder recorder;
+    public static final int BUFFER_SIZE = 10240;
     Webcam webcam;
     DatagramSocket server;
+    private Client client;
 
-    public VideoSenderService(String output) {
+    public VideoSenderService(Client client) {
         webcam = Webcam.getDefault();
+        webcam.setViewSize(new Dimension(640, 480));
         initialize();
+        this.client = client;
     }
 
     private void initialize() {
         try {
             server = new DatagramSocket(10234);
-            server.connect(InetAddress.getByName("192.168.0.105"), 12345);
+            server.connect(InetAddress.getByName("192.168.0.104"), 12345);
         } catch (SocketException | UnknownHostException e) {
             e.printStackTrace();
         }
@@ -42,8 +52,7 @@ public class VideoSenderService extends ScheduledService<Image> {
                 }
                 BufferedImage image = webcam.getImage();
                 byte[] data = imageToBytes(image);
-                DatagramPacket packet = new DatagramPacket(data, data.length);
-                server.send(packet);
+                client.addMessage(new Message(IMAGE, data.length, data));
                 return new Image(new ByteArrayInputStream(data));
             }
         };
@@ -61,19 +70,4 @@ public class VideoSenderService extends ScheduledService<Image> {
         }
     }
 
-    @Override
-    protected void cancelled() {
-        super.cancelled();
-        try {
-            if (recorder != null) {
-                recorder.stop();
-                recorder.release();
-            }
-            if (grabber != null) {
-                grabber.stop();
-            }
-        } catch (FrameRecorder.Exception | FrameGrabber.Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

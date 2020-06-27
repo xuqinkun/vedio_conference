@@ -11,11 +11,12 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import service.network.Client;
 import service.schedule.VideoReceiverService;
 import service.schedule.VideoSenderService;
 
-import java.io.FileNotFoundException;
-import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CameraClient extends Application {
 
@@ -49,10 +50,11 @@ public class CameraClient extends Application {
         primaryStage.show();
 
         startSender(startBtn, cancelBtn, resetBtn, restartBtn, iv);
+        startReceiver(iv2);
 
     }
 
-    private void startReceiver(ImageView iv2) throws FileNotFoundException {
+    private void startReceiver(ImageView iv2) {
 
         VideoReceiverService receiverService = new VideoReceiverService();
         receiverService.setRestartOnFailure(true);
@@ -69,14 +71,10 @@ public class CameraClient extends Application {
     }
 
     private void startSender(Button startBtn, Button cancelBtn, Button resetBtn, Button restartBtn, ImageView iv) {
-        Parameters parameters = getParameters();
-        List<String> params = parameters.getUnnamed();
-        if (params.size() < 2) {
-            System.out.println("Wrong parameters!");
-        }
-        String output = params.get(1);
-        VideoSenderService senderService = new VideoSenderService(output);
-        System.out.println("Push stream to " + output);
+        Client client = new Client("localhost", 8888);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        executor.submit(client);
+        VideoSenderService senderService = new VideoSenderService(client);
 
         senderService.setRestartOnFailure(true);
         senderService.setMaximumFailureCount(4);
