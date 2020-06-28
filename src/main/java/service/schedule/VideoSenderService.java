@@ -4,7 +4,6 @@ import com.github.sarxos.webcam.Webcam;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
-import service.model.ImageFrame;
 import service.model.Message;
 import service.network.Client;
 
@@ -22,14 +21,13 @@ import java.net.UnknownHostException;
 import static service.model.MessageType.IMAGE;
 
 public class VideoSenderService extends ScheduledService<Image> {
-    public static final int BUFFER_SIZE = 10240;
     Webcam webcam;
     DatagramSocket server;
     private Client client;
 
     public VideoSenderService(Client client) {
         webcam = Webcam.getDefault();
-        webcam.setViewSize(new Dimension(640, 480));
+        webcam.setViewSize(new Dimension(320, 240));
         initialize();
         this.client = client;
     }
@@ -62,9 +60,9 @@ public class VideoSenderService extends ScheduledService<Image> {
         if (img == null) {
             return null;
         }
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(img, "png", baos);
-            return baos.toByteArray();
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            ImageIO.write(img, "png", bos);
+            return bos.toByteArray();
         } catch (IOException ex) {
             return null;
         }

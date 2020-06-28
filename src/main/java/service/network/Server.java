@@ -4,6 +4,7 @@ import service.model.Message;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -18,7 +19,6 @@ public class Server implements Runnable {
     private ServerSocketChannel serverChannel;
     private volatile boolean stop;
     Map<String, SocketChannel> clientList;
-
 
     public Server(int port) throws IOException {
         this("0.0.0.0", port);
@@ -82,19 +82,13 @@ public class Server implements Runnable {
     }
 
     private void handleRead(SocketChannel sc) throws IOException {
-        Message msg = Message.fromChannel(sc);
-        if (msg == null) {
+        ByteBuffer[] buffers = Message.channelToBuffers(sc);
+        if (buffers == null) {
             System.out.println("Get message failed!");
             return;
         }
-//        MessageType type = msg.getMsgType();
-//        if (type == TEXT) {
-//            System.out.println("From " + sc.getRemoteAddress());
-//            System.out.println(new String(msg.getData()));
-//            sc.write(msg.serialize());
-//        }
         for (SocketChannel channel: clientList.values()) {
-            channel.write(msg.serialize());
+            channel.write(buffers);
         }
     }
 

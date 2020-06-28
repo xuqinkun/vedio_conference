@@ -1,10 +1,15 @@
 package service.model;
 
+import javafx.scene.image.Image;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 public class Message {
+    public static final int TYPE_BYTES_NUM = 2;
+    public static final int SIZE_BYTES_NUM = 4;
     private MessageType msgType;
 
     private int msgLen;
@@ -30,8 +35,8 @@ public class Message {
     }
 
     public ByteBuffer[] serialize() {
-        ByteBuffer typeBuffer = ByteBuffer.allocateDirect(2);
-        ByteBuffer sizeBuffer = ByteBuffer.allocateDirect(4);
+        ByteBuffer typeBuffer = ByteBuffer.allocateDirect(TYPE_BYTES_NUM);
+        ByteBuffer sizeBuffer = ByteBuffer.allocateDirect(SIZE_BYTES_NUM);
         ByteBuffer dataBuffer = ByteBuffer.allocateDirect(msgLen);
 
         typeBuffer.putShort(msgType.getVal());
@@ -48,20 +53,47 @@ public class Message {
         if (!sc.isConnected()) {
             return null;
         }
-        ByteBuffer typeBuffer = ByteBuffer.allocateDirect(2);
-        ByteBuffer sizeBuffer = ByteBuffer.allocateDirect(4);
+
+        ByteBuffer[] buffers = channelToBuffers(sc);
+        if (buffers == null)
+            return null;
+        int size = buffers[1].getInt();
+        byte[] data = new byte[size];
+        ByteBuffer dataBuffer = buffers[2];
+        dataBuffer.get(data);
+
+        return new Message(MessageType.valueOf(buffers[0].getShort()), size, data);
+    }
+
+    public static ByteBuffer[] channelToBuffers(SocketChannel sc) throws IOException {
+        if (!sc.isConnected())
+            return null;
+
+        ByteBuffer typeBuffer = ByteBuffer.allocateDirect(TYPE_BYTES_NUM);
+        ByteBuffer sizeBuffer = ByteBuffer.allocateDirect(SIZE_BYTES_NUM);
         ByteBuffer[] buffers = {typeBuffer, sizeBuffer};
 
         sc.read(buffers);
+
+        sizeBuffer.flip();
+        int size = sizeBuffer.getInt();
+        ByteBuffer dataBuffer = ByteBuffer.allocateDirect(size);
+        while (dataBuffer.position() < size)
+            sc.read(dataBuffer);
+
         typeBuffer.flip();
         sizeBuffer.flip();
+        dataBuffer.flip();
 
-        int size = sizeBuffer.getInt();
-        byte[] data = new byte[size];
-        ByteBuffer dataBuffer = ByteBuffer.wrap(data);
-        sc.read(dataBuffer);
+        return new ByteBuffer[]{typeBuffer, sizeBuffer, dataBuffer};
+    }
 
-        return new Message(MessageType.valueOf(typeBuffer.getShort()), size, data);
+    public Image toImage() {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(data)) {
+            return new Image(bis);
+        } catch (IOException ex) {
+            return null;
+        }
     }
 
     public static void main(String[] args) {

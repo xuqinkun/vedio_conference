@@ -46,7 +46,7 @@ public class CameraClient extends Application {
         vBox.getChildren().addAll(hBox, iv, iv2);
         root.getChildren().add(vBox);
 
-        primaryStage.setScene(new Scene(root, 600, 600));
+        primaryStage.setScene(new Scene(root, 600, 800));
         primaryStage.show();
 
         startSender(startBtn, cancelBtn, resetBtn, restartBtn, iv);
@@ -56,11 +56,11 @@ public class CameraClient extends Application {
 
     private void startReceiver(ImageView iv2) {
 
-        VideoReceiverService receiverService = new VideoReceiverService();
+        VideoReceiverService receiverService = VideoReceiverService.getInstance();
         receiverService.setRestartOnFailure(true);
         receiverService.setMaximumFailureCount(4);
         receiverService.setDelay(Duration.millis(0));
-        receiverService.setPeriod(Duration.millis(20));
+        receiverService.setPeriod(Duration.millis(1));
         receiverService.start();
 
         receiverService.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -79,7 +79,7 @@ public class CameraClient extends Application {
         senderService.setRestartOnFailure(true);
         senderService.setMaximumFailureCount(4);
         senderService.setDelay(Duration.millis(0));
-        senderService.setPeriod(Duration.millis(20));
+        senderService.setPeriod(Duration.millis(1));
 
         startBtn.setOnAction(event -> {
             senderService.start();
