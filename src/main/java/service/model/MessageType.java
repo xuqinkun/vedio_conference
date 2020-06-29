@@ -1,7 +1,8 @@
 package service.model;
 
 public enum MessageType {
-    TEXT((short)0), IMAGE((short)1), AUDIO((short)2), INVALID((short)(-1));
+    INVALID((short)(-1)), TEXT((short)0), IMAGE((short)1), AUDIO((short)2),
+    SENDER((short)3), RECEIVER((short)4);
     private short val;
 
     MessageType(short val) {
@@ -20,6 +21,10 @@ public enum MessageType {
                 return IMAGE;
             case 2:
                 return AUDIO;
+            case 3:
+                return SENDER;
+            case 4:
+                return RECEIVER;
             default:
                 return INVALID;
         }

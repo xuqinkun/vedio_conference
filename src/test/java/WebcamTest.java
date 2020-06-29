@@ -1,6 +1,6 @@
 import com.github.sarxos.webcam.Webcam;
 import org.junit.Test;
-import service.schedule.VideoSenderService;
+import util.ImageUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -19,7 +19,7 @@ public class WebcamTest {
         assertEquals(viewSize.getHeight(), height, 0);
         System.out.println(webcam.getImageBytes().limit());
         BufferedImage image = webcam.getImage();
-        byte[] data = VideoSenderService.imageToBytes(image);
+        byte[] data = ImageUtil.imageToBytes(image);
         System.out.println(data.length);
     }
 }

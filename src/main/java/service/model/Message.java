@@ -2,12 +2,11 @@ package service.model;
 
 import javafx.scene.image.Image;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class Message {
+public class Message implements Externalizable {
     public static final int TYPE_BYTES_NUM = 2;
     public static final int SIZE_BYTES_NUM = 4;
     private MessageType msgType;
@@ -15,6 +14,9 @@ public class Message {
     private int msgLen;
 
     private byte[] data;
+
+    public Message() {
+    }
 
     public Message(MessageType msgType, int msgLen, byte[] data) {
         this.msgType = msgType;
@@ -32,6 +34,18 @@ public class Message {
 
     public byte[] getData() {
         return data;
+    }
+
+    public void setMsgType(MessageType msgType) {
+        this.msgType = msgType;
+    }
+
+    public void setMsgLen(int msgLen) {
+        this.msgLen = msgLen;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
     }
 
     public ByteBuffer[] serialize() {
@@ -99,5 +113,24 @@ public class Message {
     public static void main(String[] args) {
         Message msg = new Message(MessageType.TEXT, 0, new byte[1]);
         System.out.println(msg.getMsgType() == MessageType.IMAGE);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        if (msgType != null)
+            out.writeShort(msgType.getVal());
+        out.writeInt(msgLen);
+        if (data != null)
+            out.write(data);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        msgType = MessageType.valueOf(in.readShort());
+        msgLen = in.readInt();
+        if (msgLen > 0) {
+            data = new byte[msgLen];
+            in.read(data);
+        }
     }
 }

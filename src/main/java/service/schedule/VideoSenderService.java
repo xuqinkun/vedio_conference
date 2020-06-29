@@ -4,68 +4,60 @@ import com.github.sarxos.webcam.Webcam;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
+import org.bytedeco.javacv.FrameRecorder;
 import service.model.Message;
-import service.network.Client;
+import service.network.MessageSender;
+import service.network.TcpClient;
+import util.ImageUtil;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static service.model.MessageType.IMAGE;
 
 public class VideoSenderService extends ScheduledService<Image> {
-    Webcam webcam;
-    DatagramSocket server;
-    private Client client;
+    private Webcam webcam;
+    private TcpClient client;
+    private boolean started;
+    private ExecutorService threadPool;
 
-    public VideoSenderService(Client client) {
+    public VideoSenderService(String output) throws FrameRecorder.Exception {
         webcam = Webcam.getDefault();
         webcam.setViewSize(new Dimension(320, 240));
-        initialize();
-        this.client = client;
+        started = false;
     }
 
-    private void initialize() {
-        try {
-            server = new DatagramSocket(10234);
-            server.connect(InetAddress.getByName("192.168.0.104"), 12345);
-        } catch (SocketException | UnknownHostException e) {
-            e.printStackTrace();
-        }
+    public VideoSenderService(int port) {
+        webcam = Webcam.getDefault();
+        webcam.setViewSize(new Dimension(320, 240));
+        started = false;
+        client = new MessageSender(port);
+        threadPool = Executors.newCachedThreadPool();
     }
 
     protected Task<Image> createTask() {
         return new Task<Image>() {
             @Override
             protected Image call() throws java.lang.Exception {
+                if (!started) {
+                    new Thread(client).start();
+                    System.out.println("Started MessageSender thread");
+                    started = true;
+                }
                 if (!webcam.isOpen()) {
+                    System.out.println("Open WebCam");
                     webcam.open();
                 }
-                BufferedImage image = webcam.getImage();
-                byte[] data = imageToBytes(image);
+                BufferedImage bufferedImage = webcam.getImage();
+                byte[] data = ImageUtil.imageToBytes(bufferedImage);
+                Image image = new Image(new ByteArrayInputStream(data));
                 client.addMessage(new Message(IMAGE, data.length, data));
-                return new Image(new ByteArrayInputStream(data));
+                return image;
             }
         };
-    }
-
-    public static byte[] imageToBytes(BufferedImage img) {
-        if (img == null) {
-            return null;
-        }
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            ImageIO.write(img, "png", bos);
-            return bos.toByteArray();
-        } catch (IOException ex) {
-            return null;
-        }
     }
 
 }

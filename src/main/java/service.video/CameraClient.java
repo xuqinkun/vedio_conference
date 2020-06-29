@@ -11,12 +11,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import service.network.Client;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
 import service.schedule.VideoReceiverService;
 import service.schedule.VideoSenderService;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class CameraClient extends Application {
 
@@ -25,7 +23,7 @@ public class CameraClient extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws FrameRecorder.Exception, FrameGrabber.Exception {
         primaryStage.setTitle("Sender");
         Pane root = new FlowPane();
         VBox vBox = new VBox(20);
@@ -54,13 +52,13 @@ public class CameraClient extends Application {
 
     }
 
-    private void startReceiver(ImageView iv2) {
-
-        VideoReceiverService receiverService = VideoReceiverService.getInstance();
+    private void startReceiver(ImageView iv2) throws FrameGrabber.Exception {
+//        VideoReceiverService receiverService = new VideoReceiverService("rtmp://localhost:1935/live/room");
+        VideoReceiverService receiverService = new VideoReceiverService(8888);
         receiverService.setRestartOnFailure(true);
         receiverService.setMaximumFailureCount(4);
         receiverService.setDelay(Duration.millis(0));
-        receiverService.setPeriod(Duration.millis(1));
+        receiverService.setPeriod(Duration.millis(10));
         receiverService.start();
 
         receiverService.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -70,20 +68,22 @@ public class CameraClient extends Application {
         });
     }
 
-    private void startSender(Button startBtn, Button cancelBtn, Button resetBtn, Button restartBtn, ImageView iv) {
-        Client client = new Client("localhost", 8888);
-        ExecutorService executor = Executors.newCachedThreadPool();
-        executor.submit(client);
-        VideoSenderService senderService = new VideoSenderService(client);
+    private void startSender(Button startBtn, Button cancelBtn, Button resetBtn, Button restartBtn, ImageView iv) throws FrameRecorder.Exception {
+//        Client client = new Client("localhost", 8888);
+//        ExecutorService executor = Executors.newCachedThreadPool();
+//        executor.submit(recorder);
+
+//        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room");
+        VideoSenderService senderService = new VideoSenderService(8888);
 
         senderService.setRestartOnFailure(true);
         senderService.setMaximumFailureCount(4);
         senderService.setDelay(Duration.millis(0));
-        senderService.setPeriod(Duration.millis(1));
+        senderService.setPeriod(Duration.millis(20));
 
         startBtn.setOnAction(event -> {
             senderService.start();
-            System.out.println("Start record");
+            System.out.println("Start sender service");
         });
         cancelBtn.setOnAction(event -> {
             senderService.cancel();

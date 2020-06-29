@@ -1,4 +1,4 @@
-package service.network;
+package util;
 
 import java.util.Arrays;
 

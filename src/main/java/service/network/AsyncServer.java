@@ -14,17 +14,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class Server implements Runnable {
+public class AsyncServer implements Runnable {
     private Selector selector;
     private ServerSocketChannel serverChannel;
     private volatile boolean stop;
     Map<String, SocketChannel> clientList;
 
-    public Server(int port) throws IOException {
+    public AsyncServer(int port) throws IOException {
         this("0.0.0.0", port);
     }
 
-    public Server(String host, int port) throws IOException {
+    public AsyncServer(String host, int port) throws IOException {
         selector = Selector.open();
         serverChannel = ServerSocketChannel.open();
         serverChannel.bind(new InetSocketAddress(host, port), 1024);
@@ -97,6 +97,6 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] args) throws IOException {
-        new Thread(new Server(8888)).start();
+        new Thread(new AsyncServer(8888)).start();
     }
 }

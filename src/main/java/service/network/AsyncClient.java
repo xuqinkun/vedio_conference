@@ -3,7 +3,6 @@ package service.network;
 import com.github.sarxos.webcam.Webcam;
 import service.model.Message;
 import service.model.MessageType;
-import service.schedule.VideoReceiverService;
 
 import java.awt.*;
 import java.io.IOException;
@@ -13,16 +12,14 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import static service.model.MessageType.IMAGE;
 import static service.model.MessageType.TEXT;
 
-public class Client implements Runnable {
+public class AsyncClient implements Runnable {
     private String host;
     private int port;
     private Selector selector;
@@ -33,7 +30,7 @@ public class Client implements Runnable {
     private long lastRead;
     private long lastWrite;
 
-    public Client(String host, int port) {
+    public AsyncClient(String host, int port) {
         this.host = host == null ? "127.0.0.1" : host;
         this.port = port;
         try {
@@ -131,7 +128,7 @@ public class Client implements Runnable {
                 System.out.println(new String(message.getData()));
             }
             else if (type == IMAGE) {
-                VideoReceiverService.getInstance().addImage(message.toImage());
+//                VideoReceiverService.getInstance().addImage(message.toImage());
                 System.out.println("Read image take:" +
                         (System.currentTimeMillis() - lastRead) + "ms");
                 lastRead = System.currentTimeMillis();
@@ -140,8 +137,8 @@ public class Client implements Runnable {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        Client client = new Client("localhost", 8888);
-        Thread thread = new Thread(client);
+        AsyncClient asyncClient = new AsyncClient("localhost", 8888);
+        Thread thread = new Thread(asyncClient);
         thread.start();
 
 
@@ -154,7 +151,7 @@ public class Client implements Runnable {
 
         System.out.println(data.length);
 
-        client.addMessage(new Message(IMAGE, data.length, data));
+        asyncClient.addMessage(new Message(IMAGE, data.length, data));
 
         thread.join();
 
