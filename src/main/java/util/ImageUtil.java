@@ -16,6 +16,8 @@ public class ImageUtil {
     private static Java2DFrameConverter converter2 = new Java2DFrameConverter();
 
     public static Image convert(Frame frame) {
+        if (frame.imageWidth<= 0 || frame.imageHeight <= 0)
+            return null;
         return converter.convert(frame);
     }
 

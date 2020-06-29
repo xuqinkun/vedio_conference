@@ -46,9 +46,9 @@ public class ImageGrabber implements Runnable {
                 Frame frame = grabber.grab();
                 if (frame != null) {
                     Image image = ImageUtil.convert(frame);
-                    imageQueue.put(image);
+                    if (image != null)
+                        imageQueue.put(image);
                 }
-                Thread.sleep(10);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -25,8 +25,8 @@ public class ImageRecorder implements Runnable {
         recorder.setVideoOption("tune","zerolatency");
         recorder.setFormat("flv");
         recorder.setFrameRate(30);
-        recorder.setOption("probesize", "34");
-        recorder.setOption("max_analyze_duration", "10");
+        recorder.setOption("probesize", "340000");  // Max bytes for reading video frame
+        recorder.setOption("max_analyze_duration", "10"); // Max duration for analyzing video frame
     }
 
     public void addImage(BufferedImage img) throws InterruptedException {
