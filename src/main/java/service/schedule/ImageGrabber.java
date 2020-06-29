@@ -49,7 +49,7 @@ public class ImageGrabber implements Runnable {
                     imageQueue.put(image);
                 }
                 Thread.sleep(10);
-            } catch (FrameGrabber.Exception | InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

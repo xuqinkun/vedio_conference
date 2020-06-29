@@ -14,8 +14,8 @@ public class VideoReceiverService extends ScheduledService<Image> {
     private TcpClient client;
     long lastReceive = System.currentTimeMillis();
 
-    public VideoReceiverService(String output) throws FrameGrabber.Exception {
-        this.grabber = new ImageGrabber(output);
+    public VideoReceiverService(String input) throws FrameGrabber.Exception {
+        this.grabber = new ImageGrabber(input);
         started = false;
     }
 
@@ -28,19 +28,22 @@ public class VideoReceiverService extends ScheduledService<Image> {
             @Override
             protected Image call() {
                 if (!started) {
-                    new Thread(client).start();
+//                    new Thread(client).start();
+                    new Thread(grabber).start();
                     started = true;
                 }
                 Message msg;
+                Image image = null;
                 try {
-                    msg = client.getNext();
+//                    msg = client.getNext();
+                    image = grabber.getNext();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     return null;
                 }
-                System.out.printf("Receive image: %dms \n", (System.currentTimeMillis() - lastReceive));
-                lastReceive = System.currentTimeMillis();
-                return msg.toImage();
+//                System.out.printf("Receive image: %dms \n", (System.currentTimeMillis() - lastReceive));
+//                lastReceive = System.currentTimeMillis();
+                return image;
             }
         };
     }

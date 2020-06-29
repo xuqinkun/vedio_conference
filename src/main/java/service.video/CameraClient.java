@@ -47,34 +47,21 @@ public class CameraClient extends Application {
         primaryStage.setScene(new Scene(root, 600, 800));
         primaryStage.show();
 
-        startSender(startBtn, cancelBtn, resetBtn, restartBtn, iv);
-        startReceiver(iv2);
-
-    }
-
-    private void startReceiver(ImageView iv2) throws FrameGrabber.Exception {
-//        VideoReceiverService receiverService = new VideoReceiverService("rtmp://localhost:1935/live/room");
-        VideoReceiverService receiverService = new VideoReceiverService(8888);
+        VideoReceiverService receiverService = new VideoReceiverService("rtmp://localhost:1935/live/room");
+//        VideoReceiverService receiverService = new VideoReceiverService(8888);
         receiverService.setRestartOnFailure(true);
         receiverService.setMaximumFailureCount(4);
         receiverService.setDelay(Duration.millis(0));
-        receiverService.setPeriod(Duration.millis(10));
-        receiverService.start();
+        receiverService.setPeriod(Duration.millis(20));
 
         receiverService.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 iv2.setImage(newValue);
             }
         });
-    }
 
-    private void startSender(Button startBtn, Button cancelBtn, Button resetBtn, Button restartBtn, ImageView iv) throws FrameRecorder.Exception {
-//        Client client = new Client("localhost", 8888);
-//        ExecutorService executor = Executors.newCachedThreadPool();
-//        executor.submit(recorder);
-
-//        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room");
-        VideoSenderService senderService = new VideoSenderService(8888);
+        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room");
+//        VideoSenderService senderService = new VideoSenderService(8888);
 
         senderService.setRestartOnFailure(true);
         senderService.setMaximumFailureCount(4);
@@ -84,6 +71,8 @@ public class CameraClient extends Application {
         startBtn.setOnAction(event -> {
             senderService.start();
             System.out.println("Start sender service");
+            receiverService.start();
+            System.out.println("Start receiverService");
         });
         cancelBtn.setOnAction(event -> {
             senderService.cancel();
@@ -103,5 +92,13 @@ public class CameraClient extends Application {
                 iv.setImage(newValue);
             }
         });
+    }
+
+    private void startSender(Button startBtn, Button cancelBtn, Button resetBtn, Button restartBtn, ImageView iv) throws FrameRecorder.Exception {
+//        Client client = new Client("localhost", 8888);
+//        ExecutorService executor = Executors.newCachedThreadPool();
+//        executor.submit(recorder);
+
+
     }
 }
