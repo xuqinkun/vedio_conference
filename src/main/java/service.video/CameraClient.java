@@ -47,7 +47,7 @@ public class CameraClient extends Application {
         primaryStage.setScene(new Scene(root, 600, 800));
         primaryStage.show();
 
-        VideoReceiverService receiverService = new VideoReceiverService("rtmp://localhost:1935/live/room");
+        VideoReceiverService receiverService = new VideoReceiverService("rtmp://localhost:1935/live/room1");
 //        VideoReceiverService receiverService = new VideoReceiverService(8888);
         receiverService.setRestartOnFailure(true);
         receiverService.setMaximumFailureCount(4);
@@ -60,7 +60,7 @@ public class CameraClient extends Application {
             }
         });
 
-        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room");
+        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room2");
 //        VideoSenderService senderService = new VideoSenderService(8888);
 
         senderService.setRestartOnFailure(true);
