@@ -62,9 +62,9 @@
                   </GridPane>
                </children>
             </VBox>
-            <VBox fx:id="chatLayout" maxWidth="300.0" minWidth="300.0" prefHeight="770.0" prefWidth="300.0" style="-fx-border-color: #dddddd;" visible="false">
+            <VBox fx:id="chatLayout" maxWidth="300.0" minWidth="300.0" prefHeight="770.0" prefWidth="300.0" style="-fx-border-color: #dddddd;">
                <children>
-                  <ListView prefHeight="636.0" prefWidth="266.0" />
+                  <VBox fx:id="chatMessageContainer" maxHeight="630.0" minHeight="630.0" prefHeight="630.0" prefWidth="298.0" VBox.vgrow="NEVER" />
                   <HBox prefHeight="35.0" prefWidth="266.0">
                      <children>
                         <Label prefHeight="34.0" prefWidth="58.0" text="Send to">
@@ -78,10 +78,10 @@
                            </padding></ChoiceBox>
                      </children>
                   </HBox>
-                  <TextArea prefHeight="78.0" prefWidth="272.0" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;" />
+                  <TextArea fx:id="chatInputArea" onKeyPressed="#keyPressed" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;" />
                   <HBox alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="266.0">
                      <children>
-                        <Label alignment="CENTER_RIGHT" text="Send" textFill="#1972f8">
+                        <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" text="Send" textFill="#999999">
                            <font>
                               <Font size="14.0" />
                            </font>

@@ -1,17 +1,22 @@
 package controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.RadioButton;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 public class MeetingRoomController implements Initializable {
@@ -33,6 +38,15 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private ChoiceBox<String> receiverChoiceBox;
 
+    @FXML
+    private TextArea chatInputArea;
+
+    @FXML
+    private Label sendMessageLabel;
+
+    @FXML
+    private VBox chatMessageContainer;
+
     private double lastX;
 
     private double lastY;
@@ -49,6 +63,13 @@ public class MeetingRoomController implements Initializable {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         receiverChoiceBox.getItems().add("All");
         receiverChoiceBox.getSelectionModel().selectFirst();
+        chatInputArea.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!StringUtils.isEmpty(newValue)) {
+                sendMessageLabel.setTextFill(Paint.valueOf("#1972F8"));
+            } else {
+                sendMessageLabel.setTextFill(Paint.valueOf("#999999"));
+            }
+        });
     }
 
     private void hideControl(Parent node) {
@@ -81,11 +102,49 @@ public class MeetingRoomController implements Initializable {
         lastY = event.getScreenY();
     }
 
-//    @FXML
-//    public void mouseClick(MouseEvent event) {
-//        offsetX = event.getScreenX();
-//        offsetY = event.getScreenY();
-//    }
+    @FXML
+    public void sendMessage(MouseEvent event) {
+        send();
+        sendMessageLabel.requestFocus();
+    }
+
+    @FXML
+    public void keyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            send();
+            sendMessageLabel.requestFocus();
+        }
+    }
+
+    private void send() {
+        String promptText = chatInputArea.getPromptText();
+        System.out.println(promptText);
+        String text = chatInputArea.getText();
+        if (!StringUtils.isEmpty(text.trim())) {
+            VBox vBox = new VBox();
+            vBox.setSpacing(5);
+            Label time = new Label(new Date().toString());
+            Label username = new Label("username");
+            Label msg = new Label(text);
+            double width = chatMessageContainer.getWidth();
+            decorate(time, width, 30);
+            decorate(username, width, 30);
+            username.setStyle("-fx-background-color: green;");
+            decorate(msg, width, 30);
+            vBox.getChildren().addAll(time, username, msg);
+            chatMessageContainer.getChildren().add(vBox);
+        }
+        chatInputArea.clear();
+//        chatInputArea.setPromptText(promptText);
+    }
+
+    private void decorate(Label label, double width, int height) {
+        label.setPadding(new Insets(5));
+        label.setPrefSize(width, height);
+        label.setMinSize(width, height);
+        label.setMaxSize(width, height);
+        label.setTextAlignment(TextAlignment.CENTER);
+    }
 
     @FXML
     public void mousePress(MouseEvent event) {
