@@ -29,8 +29,10 @@ public class JoinMeetingController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        meetingNumberInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
-        userNameInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
+        if (meetingNumberInput != null)
+            meetingNumberInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
+        if (userNameInput != null)
+            userNameInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
     }
 
     @FXML
@@ -45,7 +47,7 @@ public class JoinMeetingController implements Initializable {
         String meetingNumber = meetingNumberInput.getText();
         String userName = userNameInput.getText();
         if (StringUtils.isEmpty(meetingNumber) || StringUtils.isEmpty(userName))
-        return true;
+            return true;
         else return false;
     }
 
