@@ -34,13 +34,13 @@ public class CameraClient extends Application {
         Button resetBtn = new Button("Reset");
         Button restartBtn = new Button("Restart");
 
-        ImageView iv = new ImageView(new Image("img/orange.png"));
-        ImageView iv2 = new ImageView(new Image("img/orange.png"));
+        ImageView iv = new ImageView(new Image("fxml/img/orange.png"));
+        ImageView iv2 = new ImageView(new Image("fxml/img/orange.png"));
 
         iv2.setFitWidth(200);
         iv2.setFitHeight(200);
 
-        hBox.getChildren().addAll(startBtn, cancelBtn, restartBtn, resetBtn);
+        hBox.getChildren().addAll(startBtn, cancelBtn);
         vBox.getChildren().addAll(hBox, iv, iv2);
         root.getChildren().add(vBox);
 
