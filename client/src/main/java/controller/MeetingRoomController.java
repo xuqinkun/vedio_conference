@@ -1,9 +1,12 @@
 package controller;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -47,6 +50,9 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private VBox chatMessageContainer;
 
+    @FXML
+    private ScrollBar chatBoxScrollBar;
+
     private double lastX;
 
     private double lastY;
@@ -54,6 +60,8 @@ public class MeetingRoomController implements Initializable {
     private double oldStageX;
 
     private double oldStageY;
+
+    private double chatBoxFillHeight;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -70,29 +78,42 @@ public class MeetingRoomController implements Initializable {
                 sendMessageLabel.setTextFill(Paint.valueOf("#999999"));
             }
         });
+
+        chatBoxScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
+            chatMessageContainer.setLayoutY(-newValue.doubleValue());
+        });
     }
 
-    private void hideControl(Parent node) {
+    private void hideControl(Pane node) {
         node.setVisible(false);
         node.setManaged(false);
+
+        int addWidth = 8;
+        Scene scene = rootLayout.getScene();
+        if (scene != null) {
+            Stage stage = (Stage) scene.getWindow();
+            stage.setWidth(rootLayout.getWidth() - chatLayout.getWidth() - addWidth);
+        }
     }
 
-    private void displayControl(Parent node) {
+    private void displayControl(Pane node) {
         node.setVisible(true);
         node.setManaged(true);
+        int addWidth = 8;
+
+        Scene scene = rootLayout.getScene();
+        if (scene != null) {
+            Stage stage = (Stage) scene.getWindow();
+            stage.setWidth(rootLayout.getWidth() + chatLayout.getPrefWidth() + addWidth);
+        }
     }
 
     @FXML
     public void openOrCloseChat() {
-        Stage stage = (Stage) rootLayout.getScene().getWindow();
-        int addWidth = 8;
         if (openChatBtn.isSelected()) {
-            double newSize = rootLayout.getWidth() + chatLayout.getPrefWidth();
-            stage.setWidth(newSize + addWidth);
             displayControl(chatLayout);
         } else {
             hideControl(chatLayout);
-            stage.setWidth(rootLayout.getWidth() - chatLayout.getWidth() - addWidth);
         }
     }
 
@@ -109,7 +130,7 @@ public class MeetingRoomController implements Initializable {
     }
 
     @FXML
-    public void keyPressed(KeyEvent event) {
+    public void keyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             send();
             sendMessageLabel.requestFocus();
@@ -118,32 +139,45 @@ public class MeetingRoomController implements Initializable {
 
     private void send() {
         String promptText = chatInputArea.getPromptText();
-        System.out.println(promptText);
         String text = chatInputArea.getText();
+        displayMessage(text);
+        chatInputArea.clear();
+        chatInputArea.setPromptText(promptText);
+    }
+
+    private void displayMessage(String text) {
         if (!StringUtils.isEmpty(text.trim())) {
             VBox vBox = new VBox();
             vBox.setSpacing(5);
-            Label time = new Label(new Date().toString());
-            Label username = new Label("username");
-            Label msg = new Label(text);
+
             double width = chatMessageContainer.getWidth();
-            decorate(time, width, 30);
-            decorate(username, width, 30);
-            username.setStyle("-fx-background-color: green;");
-            decorate(msg, width, 30);
+            int labelHeight = 30;
+            Label time = decorate(width, labelHeight, new Date().toString());
+            Label username = decorate(width, labelHeight, "username");
+            Label msg = decorate(width, labelHeight, text);
+            username.setStyle("-fx-text-fill: green;");
+
             vBox.getChildren().addAll(time, username, msg);
             chatMessageContainer.getChildren().add(vBox);
         }
-        chatInputArea.clear();
-//        chatInputArea.setPromptText(promptText);
     }
 
-    private void decorate(Label label, double width, int height) {
+    private Label decorate(double width, int height, String str) {
+        Label label = new Label(str);
         label.setPadding(new Insets(5));
         label.setPrefSize(width, height);
         label.setMinSize(width, height);
         label.setMaxSize(width, height);
         label.setTextAlignment(TextAlignment.CENTER);
+
+        /** ScrollBar*/
+        if (chatBoxFillHeight + height > chatMessageContainer.getPrefHeight()) {
+            chatMessageContainer.setLayoutY(chatMessageContainer.getLayoutY() - height);
+//            chatBoxScrollBar.setVisible(true);
+        } else {
+            chatBoxFillHeight += height;
+        }
+        return label;
     }
 
     @FXML

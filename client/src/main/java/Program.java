@@ -11,7 +11,7 @@ public class Program extends Application {
     @Override
     public void init() throws Exception {
         super.init();
-        new Thread(new MessageReceiver()).start();
+//        new Thread(new MessageReceiver()).start();
     }
 
     @Override

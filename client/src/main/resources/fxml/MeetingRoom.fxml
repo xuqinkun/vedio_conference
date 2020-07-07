@@ -22,7 +22,7 @@
       <Separator prefWidth="200.0" />
       <HBox maxWidth="1.7976931348623157E308" prefHeight="770.0" prefWidth="1273.0">
          <children>
-            <VBox maxWidth="750.0" minWidth="750.0" prefHeight="770.0" prefWidth="750.0">
+            <VBox alignment="TOP_CENTER" maxWidth="750.0" minWidth="750.0" prefHeight="770.0" prefWidth="750.0">
                <children>
                   <GridPane prefHeight="668.0" prefWidth="670.0">
                      <columnConstraints>
@@ -64,7 +64,12 @@
             </VBox>
             <VBox fx:id="chatLayout" maxWidth="300.0" minWidth="300.0" prefHeight="770.0" prefWidth="300.0" style="-fx-border-color: #dddddd;">
                <children>
-                  <VBox fx:id="chatMessageContainer" maxHeight="630.0" minHeight="630.0" prefHeight="630.0" prefWidth="298.0" VBox.vgrow="NEVER" />
+                  <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="630.0" prefWidth="200.0">
+                     <children>
+                        <VBox fx:id="chatMessageContainer" maxWidth="-Infinity" minHeight="630.0" minWidth="-Infinity" prefHeight="630.0" prefWidth="290.0" AnchorPane.leftAnchor="0.0" />
+                        <ScrollBar fx:id="chatBoxScrollBar" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
                   <HBox prefHeight="35.0" prefWidth="266.0">
                      <children>
                         <Label prefHeight="34.0" prefWidth="58.0" text="Send to">
@@ -78,10 +83,10 @@
                            </padding></ChoiceBox>
                      </children>
                   </HBox>
-                  <TextArea fx:id="chatInputArea" onKeyPressed="#keyPressed" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;" />
+                  <TextArea fx:id="chatInputArea" onKeyReleased="#keyReleased" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;" />
                   <HBox alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="266.0">
                      <children>
-                        <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" text="Send" textFill="#999999">
+                        <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" prefHeight="29.0" prefWidth="302.0" text="Send" textFill="#999999">
                            <font>
                               <Font size="14.0" />
                            </font>
