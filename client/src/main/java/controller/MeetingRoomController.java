@@ -1,22 +1,27 @@
 package controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
+import service.model.User;
+import service.schedule.ImagePushTask;
 
 import java.net.URL;
 import java.util.Date;
@@ -134,15 +139,21 @@ public class MeetingRoomController implements Initializable {
         if (event.getCode() == KeyCode.ENTER) {
             send();
             sendMessageLabel.requestFocus();
+            String src = "file:/F:/Projects/JavaWorkplace/video_conference/client/src/main/resources/fxml/img/orange.png";
+            User user = new User("xxxx", null, "xxx", src);
+            addUser(user);
+            if (!userListLayout.isVisible()) {
+                displayControl(userListLayout);
+            }
         }
     }
 
     private void send() {
-        String promptText = chatInputArea.getPromptText();
+//        String promptText = chatInputArea.getPromptText();
         String text = chatInputArea.getText();
         displayMessage(text);
         chatInputArea.clear();
-        chatInputArea.setPromptText(promptText);
+//        chatInputArea.setPromptText(promptText);
     }
 
     private void displayMessage(String text) {
@@ -195,4 +206,49 @@ public class MeetingRoomController implements Initializable {
         stage.setX(oldStageX + event.getScreenX() - lastX);
         stage.setY(oldStageY + event.getScreenY() - lastY);
     }
+
+    public void addUser(User user) {
+        Image image = new Image(user.getPortrait());
+        ImageView imageView = new ImageView(image);
+        imageView.setFitHeight(150);
+        imageView.setFitWidth(150);
+        HBox hBox = new HBox();
+        Label label = new Label(user.getUsername());
+        hBox.getChildren().addAll(label);
+        VBox vBox = new VBox();
+        vBox.setMaxSize(50, 50);
+        vBox.getChildren().addAll(imageView, hBox);
+        vBox.setStyle("-fx-border-color: red");
+
+        userListLayout.getChildren().add(vBox);
+    }
+
+    @FXML
+    private RadioButton videoSwitchBtn;
+
+    @FXML
+    private ImageView mainImageView;
+
+    private ImagePushTask task;
+
+    @FXML
+    public void videoSwitch(ActionEvent event) {
+        if (videoSwitchBtn.isSelected()) {
+            // Start record video
+            try {
+                if (task == null || task.isDone()) {
+                    task = new ImagePushTask("rtmp://localhost:1935/live/room", mainImageView);
+                }
+                new Thread(task).start();
+            } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Stop record video
+            if (task != null) {
+                task.stop();
+            }
+        }
+    }
+
 }

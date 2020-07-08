@@ -116,33 +116,24 @@ public class VideoSender extends Application {
                         recorder = new FFmpegFrameRecorder("rtmp://localhost:1935/live/room", 640, 480, 2);
 //                        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
                         recorder.setVideoOption("crf", "18");
-                        grabber.setVideoOption("crf", "18");
                         recorder.setVideoBitrate(2000000);
-                        grabber.setVideoBitrate(2000000);
                         recorder.setVideoOption("tune","zerolatency");
                         recorder.setFormat("flv");
                         recorder.setFrameRate(30);
                         recorder.setGopSize(60);
                         recorder.setAudioOption("crf", "0");
-                        grabber.setAudioOption("crf", "0");
                         // 最高质量
                         recorder.setAudioQuality(0);
                         // 音频比特率
                         recorder.setAudioBitrate(192000);
-                        grabber.setAudioBitrate(192000);
                         // 音频采样率
                         recorder.setSampleRate(44100);
-                        grabber.setSampleRate(44100);
                         // 双通道(立体声)
                         recorder.setAudioChannels(2);
-                        grabber.setAudioChannels(2);
                         // 音频编/解码器
                         recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-                        grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+
                         recorder.start();
-
-
-
                         grabber.start();
                     }
 //                    AudioFormat audioFormat = new AudioFormat(44100, 16, 2, true, true);

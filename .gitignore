@@ -26,3 +26,7 @@ hs_err_pid*
 /target/
 *.wav
 *.iml
+/client/target/
+*.lst
+*.ipr
+*.iws
