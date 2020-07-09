@@ -22,6 +22,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import service.model.User;
 import service.schedule.ImagePushTask;
+import service.schedule.LoadingTask;
 
 import java.net.URL;
 import java.util.Date;
@@ -83,10 +84,15 @@ public class MeetingRoomController implements Initializable {
                 sendMessageLabel.setTextFill(Paint.valueOf("#999999"));
             }
         });
-
         chatBoxScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
             chatMessageContainer.setLayoutY(-newValue.doubleValue());
         });
+        String src = "/fxml/img/orange.png";
+        User user = new User("xxxx", null, "xxx", src);
+        addUser(user);
+        if (!userListLayout.isVisible()) {
+            displayControl(userListLayout);
+        }
     }
 
     private void hideControl(Pane node) {
@@ -139,21 +145,13 @@ public class MeetingRoomController implements Initializable {
         if (event.getCode() == KeyCode.ENTER) {
             send();
             sendMessageLabel.requestFocus();
-            String src = "file:/F:/Projects/JavaWorkplace/video_conference/client/src/main/resources/fxml/img/orange.png";
-            User user = new User("xxxx", null, "xxx", src);
-            addUser(user);
-            if (!userListLayout.isVisible()) {
-                displayControl(userListLayout);
-            }
         }
     }
 
     private void send() {
-//        String promptText = chatInputArea.getPromptText();
         String text = chatInputArea.getText();
         displayMessage(text);
         chatInputArea.clear();
-//        chatInputArea.setPromptText(promptText);
     }
 
     private void displayMessage(String text) {
@@ -212,12 +210,15 @@ public class MeetingRoomController implements Initializable {
         ImageView imageView = new ImageView(image);
         imageView.setFitHeight(150);
         imageView.setFitWidth(150);
+
         HBox hBox = new HBox();
-        Label label = new Label(user.getUsername());
+        Label label = new Label(user.getName());
         hBox.getChildren().addAll(label);
+
         VBox vBox = new VBox();
         vBox.setMaxSize(50, 50);
         vBox.getChildren().addAll(imageView, hBox);
+
         vBox.setStyle("-fx-border-color: red");
 
         userListLayout.getChildren().add(vBox);
@@ -237,7 +238,9 @@ public class MeetingRoomController implements Initializable {
             // Start record video
             try {
                 if (task == null || task.isDone()) {
-                    task = new ImagePushTask("rtmp://localhost:1935/live/room", mainImageView);
+                    LoadingTask loadingTask = new LoadingTask(mainImageView);
+                    task = new ImagePushTask("rtmp://localhost:1935/live/room", mainImageView, loadingTask);
+                    new Thread(loadingTask).start();
                 }
                 new Thread(task).start();
             } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {

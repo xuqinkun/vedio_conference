@@ -1,4 +1,4 @@
-package service.model;
+package bean;
 
 public class User {
     private String name;

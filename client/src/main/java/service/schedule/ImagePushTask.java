@@ -19,7 +19,7 @@ public class ImagePushTask extends Task<Image> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImagePushTask.class);
 
-    public ImagePushTask(String outStream, ImageView iv) throws FrameGrabber.Exception, FrameRecorder.Exception {
+    public ImagePushTask(String outStream, ImageView iv, LoadingTask loadingTask) throws FrameGrabber.Exception, FrameRecorder.Exception {
 //        recorder = DeviceUtil.getRecorder(outStream);
 //        grabber = DeviceUtil.getGrabber(0);
 //        TaskStarter.submit(recorder);
@@ -27,18 +27,19 @@ public class ImagePushTask extends Task<Image> {
 //        recorder.start();
 //        grabber.start();
         this.outStream = outStream;
-
         this.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (iv != null) {
+            if (newValue != null) {
+                loadingTask.cancel();
+                iv.setRotate(0);
                 iv.setImage(newValue);
             } else {
+                iv.setVisible(false);
                 LOG.warn("Image is null");
             }
         });
 
         this.exceptionProperty().addListener((observable, oldValue, newValue) -> LOG.error(newValue.toString()));
     }
-
 
 
     @Override
@@ -48,8 +49,9 @@ public class ImagePushTask extends Task<Image> {
                 TaskHolder<FrameGrabber> grabberHolder = DeviceUtil.getGrabber(0);
                 TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
                 if (!grabberHolder.isStarted() || !recorderHolder.isStarted()) {
-                    LOG.warn("Grabber or recorder has not started yet!");
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                    updateValue(null);
+//                    LOG.warn("Grabber or recorder has not started yet!");
+                    Thread.sleep(30);
                     continue;
                 }
                 Frame frame = grabberHolder.getTask().grab();
