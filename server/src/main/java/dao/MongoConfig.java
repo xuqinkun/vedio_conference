@@ -16,6 +16,6 @@ public class MongoConfig {
 
     @Bean
     public MongoTemplate mongoTemplate() {
-        return new MongoTemplate(mongoClient(), "mydatabase");
+        return new MongoTemplate(mongoClient(), "video_conference");
     }
 }

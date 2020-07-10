@@ -19,7 +19,7 @@ public class Program extends Application {
         Parent root = FXMLLoader.load(
                 getClass().getResource("/fxml/Main.fxml"));
         primaryStage.setScene(new Scene(root));
-        primaryStage.initStyle(StageStyle.UNDECORATED);
+//        primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setResizable(true);
         primaryStage.show();
     }

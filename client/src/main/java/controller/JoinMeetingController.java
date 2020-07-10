@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import org.apache.commons.lang3.StringUtils;
+import util.InputChecker;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -44,17 +45,18 @@ public class JoinMeetingController implements Initializable {
     }
 
     private boolean validateInput() {
-        String meetingNumber = meetingNumberInput.getText();
         String userName = userNameInput.getText();
+        String meetingNumber = meetingNumberInput.getText();
         if (StringUtils.isEmpty(meetingNumber) || StringUtils.isEmpty(userName))
             return true;
         else return false;
     }
 
     public void inputCheck() {
-        if (validateInput())
-            joinMeetingBtn.setDisable(true);
-        else
+        if (InputChecker.validInput(userNameInput.getText()) &&
+                InputChecker.validInput(meetingNumberInput.getText()))
             joinMeetingBtn.setDisable(false);
+        else
+            joinMeetingBtn.setDisable(true);
     }
 }

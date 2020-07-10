@@ -1,6 +1,6 @@
 package dao;
 
-import bean.User;
+import common.bean.User;
 import com.mongodb.client.MongoClients;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,11 +16,10 @@ public class MongoApp {
     public static void main(String[] args) throws Exception {
 
         MongoOperations mongoOps = new MongoTemplate(MongoClients.create("mongodb://localhost:27017"), "video_conference");
-        mongoOps.insert(new User("Joe"));
+//        mongoOps.insert(new User("Joe"));
 
-        User user = mongoOps.findOne(new Query(where("name").is("Joe")), User.class);
-        log.info(user);
-
-//        mongoOps.dropCollection("user");
+        User user = mongoOps.findOne(new Query(where("name").is("aa")), User.class);
+//        log.info(user);
+        System.out.println(user);
     }
 }

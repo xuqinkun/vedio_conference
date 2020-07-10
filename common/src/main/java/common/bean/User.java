@@ -1,4 +1,4 @@
-package service.model;
+package common.bean;
 
 public class User {
     private String name;
@@ -21,6 +21,17 @@ public class User {
         this.password = password;
         this.email = email;
         this.portrait = src;
+    }
+
+    public User(String name, String password, String email) {
+        this.name = name;
+        this.password = password;
+        this.email = email;
+    }
+
+    public User(String name, String password) {
+        this.name = name;
+        this.password = password;
     }
 
     public String getPortrait() {

@@ -1,19 +1,22 @@
 package dao;
 
-import bean.User;
+import common.bean.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
+@Component
 public class UserDao {
-    @Autowired
-    private MongoConfig config;
+
+    private MongoTemplate mongoTemplate;
 
     @Autowired
-    MongoTemplate mongoTemplate;
-
+    public void setMongoTemplate(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
 
     public void insert(User user) {
         mongoTemplate.insert(user);
@@ -24,6 +27,5 @@ public class UserDao {
     }
 
     public static void main(String[] args) {
-
     }
 }

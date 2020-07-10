@@ -1,5 +1,6 @@
 package controller;
 
+import common.bean.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,7 +21,6 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
-import service.model.User;
 import service.schedule.ImagePushTask;
 import service.schedule.LoadingTask;
 
