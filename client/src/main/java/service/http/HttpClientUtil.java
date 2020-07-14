@@ -1,6 +1,7 @@
 package service.http;
 
 import common.bean.HttpResult;
+import common.bean.Meeting;
 import common.bean.User;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -8,14 +9,15 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Helper;
 import util.JsonUtil;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public class HttpClientUtil {
 
@@ -75,9 +77,14 @@ public class HttpClientUtil {
 
     public static void main(String[] args) {
         User user = new User("aa", "aa", "aa", "bb");
-        HttpResult<String> httpResult = getInstance().doPost(UrlMap.getLoginUrl(), user);
+        Meeting meeting = new Meeting();
+        meeting.setPassword("123");
+        meeting.setUuid(Helper.getUuid());
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("user", user);
+        data.put("meeting", meeting);
+
+        HttpResult<String> httpResult = getInstance().doPost(UrlMap.getJoinMeetingUrl(), data);
         System.out.println(httpResult);
-//        httpResult = getInstance().doPost(UrlMap.getLoginUrl(), JsonUtil.toJsonString(user));
-//        System.out.println(httpResult);
     }
 }

@@ -12,7 +12,7 @@ public class HttpResult<T> {
     public String toString() {
         return "HttpResult{" +
                 "result='" + result + '\'' +
-                ", message='" + message.toString() + '\'' +
+                ", message='" + message + '\'' +
                 '}';
     }
 

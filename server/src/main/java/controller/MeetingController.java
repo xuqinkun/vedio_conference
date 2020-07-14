@@ -6,10 +6,7 @@ import common.bean.ResultCode;
 import common.bean.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import service.MeetingService;
 import service.UserService;
 
@@ -64,9 +61,11 @@ public class MeetingController {
         return new HttpResult<>(ResultCode.OK, meetingUserMap.get(uuid));
     }
 
-    @PostMapping("/joinMeeting")
+    @PostMapping(value = "/joinMeeting", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    HttpResult<List<User>> getUserList(@RequestBody Meeting meeting, @RequestBody User user) {
+    HttpResult<List<User>> getUserList(@RequestBody JoinMeetingContext context) {
+        Meeting meeting = context.getMeeting();
+        User user = context.getUser();
         String uuid = meeting.getUuid();
         Meeting oldMeeting = meetingService.findMeeting(uuid);
         if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
