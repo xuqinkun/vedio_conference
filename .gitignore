@@ -28,6 +28,7 @@ hs_err_pid*
 *.iml
 /client/target/
 /server/target/
+/common/target/
 *.lst
 *.ipr
 *.iws

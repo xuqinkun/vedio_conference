@@ -2,6 +2,7 @@ package controller;
 
 import common.bean.HttpResult;
 import common.bean.Meeting;
+import common.bean.MessageType;
 import common.bean.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
+import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
 import service.schedule.ImagePushTask;
 import service.schedule.LoadingTask;
@@ -71,6 +73,14 @@ public class MeetingRoomController implements Initializable {
             log.warn(userList.toString());
             for (User user : userList)
                 addUser(user);
+            MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
+            new Thread(task).start();
+            task.valueProperty().addListener((observable, oldValue, msg) -> {
+                if (msg.getType() == MessageType.USER_ADD) {
+                    User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                    addUser(user);
+                }
+            });
         } else {
             log.warn("Can't find current meeting info!");
         }
@@ -124,6 +134,7 @@ public class MeetingRoomController implements Initializable {
         hBox.getChildren().addAll(label);
 
         VBox vBox = new VBox();
+        vBox.setId(user.getName());
         vBox.setMaxSize(200, 50);
         vBox.getChildren().addAll(imageView, hBox);
         vBox.setStyle("-fx-border-color: red");

@@ -1,17 +1,12 @@
 package controller;
 
-import common.bean.HttpResult;
-import common.bean.Meeting;
-import common.bean.ResultCode;
-import common.bean.User;
+import common.bean.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import service.KafkaService;
 import service.MeetingService;
 import service.UserService;
 import util.JsonUtil;
@@ -22,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static common.bean.MessageType.USER_ADD;
 import static common.bean.ResultCode.ERROR;
 
 @RestController
@@ -33,6 +29,8 @@ public class MeetingController {
 
     private UserService userService;
 
+    private KafkaService kafkaService;
+
     private Map<String, List<User>> meetingUserMap = new HashMap<>();
 
     @Autowired
@@ -41,8 +39,18 @@ public class MeetingController {
     }
 
     @Autowired
+    public void setKafkaService(KafkaService kafkaService) {
+        this.kafkaService = kafkaService;
+    }
+
+    @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/test")
+    public void test() {
+        kafkaService.sendMessage("test", new Message(USER_ADD, new User()));
     }
 
     @PostMapping("/createMeeting")
@@ -82,6 +90,7 @@ public class MeetingController {
             log.error(errMessage);
             return new HttpResult<>(ERROR, errMessage);
         }
+        kafkaService.sendMessage(uuid, new Message(USER_ADD, JsonUtil.toJsonString(user)));
         meetingUserMap.get(uuid).add(user);
         return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingUserMap.get(uuid)));
     }
