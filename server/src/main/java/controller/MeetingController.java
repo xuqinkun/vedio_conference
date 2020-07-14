@@ -8,9 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import service.MeetingService;
 import service.UserService;
+import util.JsonUtil;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -59,25 +63,26 @@ public class MeetingController {
 
     @PostMapping("/getUserList")
     public @ResponseBody
-    HttpResult<List<User>> getUserList(@RequestBody String uuid) {
+    HttpResult<String> getUserList(@RequestBody String uuid) {
         if (uuid == null || meetingUserMap.get(uuid) == null) {
-            return new HttpResult<>(ERROR, new ArrayList<>());
+            return new HttpResult<>(ERROR, "[]");
         }
-        return new HttpResult<>(ResultCode.OK, meetingUserMap.get(uuid));
+        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingUserMap.get(uuid)));
     }
 
     @PostMapping(value = "/joinMeeting", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    HttpResult<List<User>> getUserList(@RequestBody JoinMeetingContext context) {
+    HttpResult<String> getUserList(@RequestBody JoinMeetingContext context) {
         Meeting meeting = context.getMeeting();
         User user = context.getUser();
         String uuid = meeting.getUuid();
         Meeting oldMeeting = meetingService.findMeeting(uuid);
         if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
-            log.error("Can't find meeting[uuid={}] or meeting password is wrong", uuid);
-            return new HttpResult<>(ERROR, null);
+            String errMessage = String.format("Can't find meeting[uuid=%s] or meeting password is wrong\n", uuid);
+            log.error(errMessage);
+            return new HttpResult<>(ERROR, errMessage);
         }
         meetingUserMap.get(uuid).add(user);
-        return new HttpResult<>(ResultCode.OK, meetingUserMap.get(uuid));
+        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingUserMap.get(uuid)));
     }
 }

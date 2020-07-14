@@ -27,6 +27,7 @@ import service.http.UrlMap;
 import service.model.SessionManager;
 import service.schedule.ImagePushTask;
 import service.schedule.LoadingTask;
+import util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -64,9 +65,9 @@ public class MeetingRoomController implements Initializable {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
         if (currentMeeting != null) {
-            HttpResult<List<User>> result = HttpClientUtil.getInstance().
+            HttpResult<String> result = HttpClientUtil.getInstance().
                     doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
-            List<User> userList = result.getMessage();
+            List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
             log.warn(userList.toString());
             for (User user : userList)
                 addUser(user);
