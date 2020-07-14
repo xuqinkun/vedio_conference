@@ -28,13 +28,11 @@ public class Meeting {
     }
 
     public Meeting(String uuid, String password, String meetingType,
-                   Date createTime, Date startTime, boolean started, boolean ended) {
+                   String createTime, String startTime, boolean started, boolean ended) {
         this.uuid = uuid;
         this.password = password;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        this.createTime = Helper.dateFormat(createTime);
-        this.startTime = Helper.dateFormat(startTime);
+        this.createTime = createTime;
+        this.startTime = startTime;
         this.started = started;
         this.ended = ended;
         this.meetingType = meetingType;
@@ -60,24 +58,24 @@ public class Meeting {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = Helper.dateFormat(createTime);
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = Helper.dateFormat(startTime);
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
     public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = Helper.dateFormat(endTime);
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public boolean isStarted() {

@@ -40,11 +40,11 @@ public class MeetingController {
     public @ResponseBody
     HttpResult<String> createMeeting(@RequestBody Meeting meeting, HttpSession session) {
         if (meeting == null || StringUtils.isEmpty(meeting.getOwner())) {
-            return new HttpResult<String>(ERROR, "Invalid meeting");
+            return new HttpResult<>(ERROR, "Invalid meeting");
         }
         User user = userService.findOne(meeting.getOwner());
         if (user == null) {
-            return new HttpResult<String>(ERROR, "Invalid owner[" + meeting.getOwner() + "]");
+            return new HttpResult<>(ERROR, "Invalid owner[" + meeting.getOwner() + "]");
         }
         HttpResult<String> ret = meetingService.createMeeting(meeting);
         meetingUserMap.put(meeting.getUuid(), new ArrayList<>());

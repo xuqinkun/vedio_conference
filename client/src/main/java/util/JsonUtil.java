@@ -22,7 +22,8 @@ public class JsonUtil {
 //        System.out.println(json);
 //        System.out.println(jsonToObject(json, HttpResult.class));
         Date date = new Date();
-        Meeting meeting = new Meeting("uuid", "password", "meetingType", date, date, true, false);
+        String dateFormat = Helper.dateFormat(date);
+        Meeting meeting = new Meeting("uuid", "password", "meetingType", dateFormat, dateFormat, true, false);
         String json = toJsonString(meeting);
         System.out.println(json);
 

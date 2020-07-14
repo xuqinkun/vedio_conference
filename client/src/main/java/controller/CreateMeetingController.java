@@ -63,7 +63,8 @@ public class CreateMeetingController implements Initializable {
         Stage parentStage = (Stage)stage.getOwner();
         String password = meetingPassword.getText();
         Date date = new Date();
-        Meeting meeting = new Meeting(Helper.getUuid(), password, meetingType, date, date, true, false);
+        String time = Helper.dateFormat(date);
+        Meeting meeting = new Meeting(Helper.getUuid(), password, meetingType, time, time, true, false);
         String username = SessionManager.getInstance().getCurrentUser().getName();
         meeting.setOwner(username);
         HttpResult<String> response = HttpClientUtil.getInstance().doPost(UrlMap.getCreateMeetingUrl(), meeting);
