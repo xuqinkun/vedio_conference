@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="808.0" prefWidth="1283.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
+
+<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="805.0" prefWidth="989.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
    <children>
       <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="30.0">
          <children>
@@ -32,9 +37,9 @@
                         <RadioButton fx:id="videoSwitchBtn" mnemonicParsing="false" onAction="#videoSwitch" prefHeight="16.0" prefWidth="58.0" text="Video" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton mnemonicParsing="false" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                        <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                        <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                        <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                        <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                        <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                        <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                      </children>
                      <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -53,43 +58,7 @@
                   </GridPane>
                </children>
             </VBox>
-            <VBox fx:id="chatLayout" maxWidth="300.0" minWidth="300.0" prefHeight="770.0" prefWidth="300.0" style="-fx-border-color: #dddddd;">
-               <children>
-                  <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="630.0" prefWidth="200.0">
-                     <children>
-                        <VBox fx:id="chatMessageContainer" maxWidth="-Infinity" minHeight="630.0" minWidth="-Infinity" prefHeight="630.0" prefWidth="290.0" AnchorPane.leftAnchor="0.0" />
-                        <ScrollBar fx:id="chatBoxScrollBar" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-                  <HBox prefHeight="35.0" prefWidth="266.0">
-                     <children>
-                        <Label prefHeight="34.0" prefWidth="58.0" text="Send to">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                        <ChoiceBox fx:id="receiverChoiceBox" prefHeight="34.0" prefWidth="88.0" style="-fx-background-color: #ffffff;">
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding></ChoiceBox>
-                     </children>
-                  </HBox>
-                  <TextArea fx:id="chatInputArea" onKeyReleased="#keyReleased" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;" />
-                  <HBox alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="266.0">
-                     <children>
-                        <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" prefHeight="29.0" prefWidth="302.0" text="Send" textFill="#999999">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Label>
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
-            <VBox fx:id="userListLayout" prefHeight="770.0" prefWidth="240.0" visible="false" />
+            <VBox fx:id="userListLayout" prefHeight="770.0" prefWidth="272.0" />
          </children>
       </HBox>
    </children>

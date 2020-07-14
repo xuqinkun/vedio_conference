@@ -1,9 +1,9 @@
 package util;
 
 import com.google.gson.Gson;
-import common.bean.HttpResult;
+import common.bean.Meeting;
 
-import static common.bean.ResultCode.OK;
+import java.util.Date;
 
 public class JsonUtil {
     private static Gson gson = new Gson();
@@ -17,9 +17,16 @@ public class JsonUtil {
     }
 
     public static void main(String[] args) {
-        HttpResult ret = new HttpResult(OK, "ss");
-        String json = JsonUtil.toJsonString(ret);
+//        HttpResult ret = new HttpResult(OK, "ss");
+//        String json = JsonUtil.toJsonString(ret);
+//        System.out.println(json);
+//        System.out.println(jsonToObject(json, HttpResult.class));
+        Date date = new Date();
+        Meeting meeting = new Meeting("uuid", "password", "meetingType", date, date, true, false);
+        String json = toJsonString(meeting);
         System.out.println(json);
-        System.out.println(jsonToObject(json, HttpResult.class));
+
+//        System.out.println(toJsonString2("asda"));
+
     }
 }

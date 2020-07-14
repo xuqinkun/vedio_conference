@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<VBox fx:controller="controller.ChatRoomController" fx:id="chatLayout" maxWidth="387.0" minWidth="300.0" prefHeight="453.0" prefWidth="387.0" style="-fx-border-color: #dddddd;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="306.0" prefWidth="385.0">
+         <children>
+            <VBox fx:id="chatMessageContainer" maxWidth="-Infinity" minHeight="306.0" minWidth="-Infinity" prefHeight="306.0" prefWidth="370.0" spacing="5.0" AnchorPane.leftAnchor="0.0" />
+            <ScrollBar fx:id="chatBoxScrollBar" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+         </children>
+      </AnchorPane>
+      <HBox prefHeight="35.0" prefWidth="266.0">
+         <children>
+            <Label prefHeight="34.0" prefWidth="58.0" text="Send to">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <ChoiceBox fx:id="receiverChoiceBox" prefHeight="34.0" prefWidth="88.0" style="-fx-background-color: #ffffff;">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </ChoiceBox>
+         </children>
+         <padding>
+            <Insets left="5.0" />
+         </padding>
+      </HBox>
+      <TextArea fx:id="chatInputArea" onKeyReleased="#keyReleased" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;">
+         <VBox.margin>
+            <Insets left="5.0" right="5.0" />
+         </VBox.margin></TextArea>
+      <HBox alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="266.0">
+         <children>
+            <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" prefHeight="29.0" prefWidth="302.0" text="Send" textFill="#999999">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+      </HBox>
+   </children>
+</VBox>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="283.0" prefWidth="315.0" spacing="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateMeetingController">
+   <children>
+      <Label alignment="TOP_CENTER" text="Create Meeting" textAlignment="CENTER" textFill="#0059f2">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Label>
+      <VBox prefHeight="69.0" prefWidth="295.0" spacing="10.0">
+         <children>
+            <Label text="Meeting Password">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Label>
+            <TextField fx:id="meetingPassword" maxHeight="30.0" minWidth="30.0" prefHeight="30.0">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </TextField>
+         </children>
+      </VBox>
+      <VBox prefHeight="69.0" prefWidth="295.0" spacing="10.0">
+         <children>
+            <Label text="Meeting Type">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Label>
+            <HBox fx:id="meetingTypeBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="45.0">
+               <children>
+                  <RadioButton mnemonicParsing="false" selected="true" text="Personal" />
+                  <RadioButton mnemonicParsing="false" text="Business" />
+                  <RadioButton mnemonicParsing="false" text="Speech" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <Button fx:id="createBtn" alignment="CENTER" contentDisplay="TOP" lineSpacing="10.0" maxHeight="1.7976931348623157E308" maxWidth="400.0" mnemonicParsing="false" onAction="#createMeeting" prefHeight="35.0" style="-fx-background-color: #1972F8; -fx-background-radius: 2;" text="Create" textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="20.0" />
+         </VBox.margin>
+      </Button>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

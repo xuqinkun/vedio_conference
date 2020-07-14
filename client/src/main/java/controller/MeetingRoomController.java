@@ -1,31 +1,33 @@
 package controller;
 
+import common.bean.HttpResult;
 import common.bean.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
+import service.http.HttpClientUtil;
+import service.http.UrlMap;
+import service.model.SessionManager;
 import service.schedule.ImagePushTask;
 import service.schedule.LoadingTask;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MeetingRoomController implements Initializable {
@@ -36,28 +38,10 @@ public class MeetingRoomController implements Initializable {
     private Pane userListLayout;
 
     @FXML
-    private Pane chatLayout;
-
-    @FXML
     private Pane titleBar;
 
     @FXML
     private RadioButton openChatBtn;
-
-    @FXML
-    private ChoiceBox<String> receiverChoiceBox;
-
-    @FXML
-    private TextArea chatInputArea;
-
-    @FXML
-    private Label sendMessageLabel;
-
-    @FXML
-    private VBox chatMessageContainer;
-
-    @FXML
-    private ScrollBar chatBoxScrollBar;
 
     private double lastX;
 
@@ -67,64 +51,40 @@ public class MeetingRoomController implements Initializable {
 
     private double oldStageY;
 
-    private double chatBoxFillHeight;
+    private Stage chatStage;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        hideControl(userListLayout);
-        hideControl(chatLayout);
-        rootLayout.setPrefWidth(rootLayout.getPrefWidth() - userListLayout.getPrefWidth() - chatLayout.getPrefWidth());
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-        receiverChoiceBox.getItems().add("All");
-        receiverChoiceBox.getSelectionModel().selectFirst();
-        chatInputArea.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!StringUtils.isEmpty(newValue)) {
-                sendMessageLabel.setTextFill(Paint.valueOf("#1972F8"));
-            } else {
-                sendMessageLabel.setTextFill(Paint.valueOf("#999999"));
-            }
-        });
-        chatBoxScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
-            chatMessageContainer.setLayoutY(-newValue.doubleValue());
-        });
-        String src = "/fxml/img/orange.png";
-        User user = new User("xxxx", null, "xxx", src);
-        addUser(user);
-        if (!userListLayout.isVisible()) {
-            displayControl(userListLayout);
-        }
+        HttpResult<List<User>> result = HttpClientUtil.getInstance().
+                doPost(UrlMap.getUserListUrl(), SessionManager.getInstance().getCurrentMeeting().getUuid());
+        List<User> userList = result.getMessage();
+        for (User user : userList)
+            addUser(user);
     }
 
     private void hideControl(Pane node) {
         node.setVisible(false);
         node.setManaged(false);
 
-        int addWidth = 8;
-        Scene scene = rootLayout.getScene();
-        if (scene != null) {
-            Stage stage = (Stage) scene.getWindow();
-            stage.setWidth(rootLayout.getWidth() - chatLayout.getWidth() - addWidth);
-        }
     }
 
     private void displayControl(Pane node) {
         node.setVisible(true);
         node.setManaged(true);
-        int addWidth = 8;
-
-        Scene scene = rootLayout.getScene();
-        if (scene != null) {
-            Stage stage = (Stage) scene.getWindow();
-            stage.setWidth(rootLayout.getWidth() + chatLayout.getPrefWidth() + addWidth);
-        }
     }
 
     @FXML
-    public void openOrCloseChat() {
+    public void openOrCloseChat() throws IOException {
         if (openChatBtn.isSelected()) {
-            displayControl(chatLayout);
-        } else {
-            hideControl(chatLayout);
+            Parent root = FXMLLoader.load(
+                    getClass().getResource("/fxml/ChatRoom.fxml"));
+            chatStage = new Stage();
+            chatStage.setScene(new Scene(root));
+            chatStage.show();
+        } else if (chatStage != null) {
+            chatStage.close();
+            chatStage = null;
         }
     }
 
@@ -132,61 +92,6 @@ public class MeetingRoomController implements Initializable {
     public void mouseDragEnter(MouseEvent event) {
         lastX = event.getScreenX();
         lastY = event.getScreenY();
-    }
-
-    @FXML
-    public void sendMessage(MouseEvent event) {
-        send();
-        sendMessageLabel.requestFocus();
-    }
-
-    @FXML
-    public void keyReleased(KeyEvent event) {
-        if (event.getCode() == KeyCode.ENTER) {
-            send();
-            sendMessageLabel.requestFocus();
-        }
-    }
-
-    private void send() {
-        String text = chatInputArea.getText();
-        displayMessage(text);
-        chatInputArea.clear();
-    }
-
-    private void displayMessage(String text) {
-        if (!StringUtils.isEmpty(text.trim())) {
-            VBox vBox = new VBox();
-            vBox.setSpacing(5);
-
-            double width = chatMessageContainer.getWidth();
-            int labelHeight = 30;
-            Label time = decorate(width, labelHeight, new Date().toString());
-            Label username = decorate(width, labelHeight, "username");
-            Label msg = decorate(width, labelHeight, text);
-            username.setStyle("-fx-text-fill: green;");
-
-            vBox.getChildren().addAll(time, username, msg);
-            chatMessageContainer.getChildren().add(vBox);
-        }
-    }
-
-    private Label decorate(double width, int height, String str) {
-        Label label = new Label(str);
-        label.setPadding(new Insets(5));
-        label.setPrefSize(width, height);
-        label.setMinSize(width, height);
-        label.setMaxSize(width, height);
-        label.setTextAlignment(TextAlignment.CENTER);
-
-        /** ScrollBar*/
-        if (chatBoxFillHeight + height > chatMessageContainer.getPrefHeight()) {
-            chatMessageContainer.setLayoutY(chatMessageContainer.getLayoutY() - height);
-//            chatBoxScrollBar.setVisible(true);
-        } else {
-            chatBoxFillHeight += height;
-        }
-        return label;
     }
 
     @FXML
@@ -206,19 +111,19 @@ public class MeetingRoomController implements Initializable {
     }
 
     public void addUser(User user) {
-        Image image = new Image(user.getPortrait());
+        String portrait = user.getPortrait() == null ? "/fxml/img/orange.png" : user.getPortrait();
+        Image image = new Image(portrait);
         ImageView imageView = new ImageView(image);
-        imageView.setFitHeight(150);
-        imageView.setFitWidth(150);
+        imageView.setFitHeight(60);
+        imageView.setFitWidth(60);
 
         HBox hBox = new HBox();
         Label label = new Label(user.getName());
         hBox.getChildren().addAll(label);
 
         VBox vBox = new VBox();
-        vBox.setMaxSize(50, 50);
+        vBox.setMaxSize(200, 50);
         vBox.getChildren().addAll(imageView, hBox);
-
         vBox.setStyle("-fx-border-color: red");
 
         userListLayout.getChildren().add(vBox);
@@ -235,7 +140,6 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void videoSwitch(ActionEvent event) {
         if (videoSwitchBtn.isSelected()) {
-            // Start record video
             try {
                 if (task == null || task.isDone()) {
                     LoadingTask loadingTask = new LoadingTask(mainImageView);
@@ -247,7 +151,6 @@ public class MeetingRoomController implements Initializable {
                 e.printStackTrace();
             }
         } else {
-            // Stop record video
             if (task != null) {
                 task.stop();
             }

@@ -35,9 +35,16 @@ public class HttpClientUtil {
         return HttpClientBuilder.create().build();
     }
 
-    public HttpResult doPost(String url, Object data) {
+    public <T> HttpResult<T> doPost(String url, Object data) {
+        if (data instanceof String) {
+            return post(url, data.toString());
+        } else {
+            return post(url, JsonUtil.toJsonString(data));
+        }
+    }
+    private <T> HttpResult<T> post(String url, String data) {
         HttpPost post = new HttpPost(url);
-        post.setEntity(new StringEntity(JsonUtil.toJsonString(data), "UTF-8"));
+        post.setEntity(new StringEntity(data, "UTF-8"));
         post.setHeader("Content-Type", "application/json;charset=utf8");
         if (COOKIE != null) {
             post.setHeader("cookie", COOKIE);
@@ -54,7 +61,7 @@ public class HttpClientUtil {
             }
             String ret = EntityUtils.toString(response.getEntity());
             log.debug(ret);
-            return JsonUtil.jsonToObject(ret, HttpResult.class);
+            return (HttpResult<T>)JsonUtil.jsonToObject(ret, HttpResult.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -63,14 +70,14 @@ public class HttpClientUtil {
 
     private void refreshCookie(Header header) {
         COOKIE = header.getValue();
-        log.warn("Refresh cookie:{}", COOKIE);
+        log.debug("Refresh cookie:{}", COOKIE);
     }
 
     public static void main(String[] args) {
-        User user = new User("sb", "aa", "aa", "bb");
-        HttpResult httpResult = getInstance().doPost(UrlMap.getLoginUrl(), JsonUtil.toJsonString(user));
+        User user = new User("aa", "aa", "aa", "bb");
+        HttpResult<String> httpResult = getInstance().doPost(UrlMap.getLoginUrl(), user);
         System.out.println(httpResult);
-        httpResult = getInstance().doPost(UrlMap.getLoginUrl(), JsonUtil.toJsonString(user));
-        System.out.println(httpResult);
+//        httpResult = getInstance().doPost(UrlMap.getLoginUrl(), JsonUtil.toJsonString(user));
+//        System.out.println(httpResult);
     }
 }

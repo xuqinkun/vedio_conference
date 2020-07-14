@@ -40,18 +40,18 @@ public class UserController {
 
     @PostMapping("/login")
     public @ResponseBody
-    ResponseEntity<HttpResult> login(@RequestBody User user, HttpSession session) {
+    ResponseEntity<HttpResult<String>> login(@RequestBody User user, HttpSession session) {
         log.debug("login:[{}]", user.getName());
         try {
             if (user.getName() == null) {
                 log.warn("User name is null!");
-                return new ResponseEntity<>(new HttpResult(ERROR, "User name is null"), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new HttpResult<>(ERROR, "User name is null"), HttpStatus.UNAUTHORIZED);
             }
             if (session.getAttribute(user.getName()) != null) {
                 log.debug("User[{}] has login before!", user.getName());
-                return new ResponseEntity<>(new HttpResult(OK, user.getName() + " has login before!"), HttpStatus.OK);
+                return new ResponseEntity<>(new HttpResult<>(OK, user.getName() + " has login before!"), HttpStatus.OK);
             }
-            HttpResult result = userService.login(user);
+            HttpResult<String> result = userService.login(user);
             if (result.getResult() == OK) {
                 session.setAttribute(user.getName(), user);
                 return new ResponseEntity<>(result, HttpStatus.OK);
@@ -61,22 +61,22 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
             log.warn("{}", e.toString());
-            return new ResponseEntity<>(new HttpResult(ERROR, e.getMessage()), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new HttpResult<>(ERROR, e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
     }
 
     @PostMapping("/register")
     public @ResponseBody
-    ResponseEntity<HttpResult> register(@RequestBody User user) {
+    ResponseEntity<HttpResult<String>> register(@RequestBody User user) {
         log.debug("login:[{}]", user.getName());
         if (user.getName() == null) {
             log.warn("User name is null!");
-            return new ResponseEntity<>(new HttpResult(ERROR, "User name is null"), HttpStatus.OK);
+            return new ResponseEntity<>(new HttpResult<>(ERROR, "User name is null"), HttpStatus.OK);
         }
-        HttpResult res = new HttpResult();
+        HttpResult<String> res = new HttpResult<>();
         try {
             if (userService.findOne(user.getName()) != null) {
-                HttpResult result = new HttpResult(ERROR, String.format("Username[%s] is registered!", user.getName()));
+                HttpResult<String> result = new HttpResult<>(ERROR, String.format("Username[%s] is registered!", user.getName()));
                 return new ResponseEntity<>(result, HttpStatus.OK);
             }
             userService.register(user);

@@ -3,8 +3,6 @@ package controller;
 import common.bean.HttpResult;
 import common.bean.ResultCode;
 import common.bean.User;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,7 +14,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -32,7 +29,6 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
 import util.InputChecker;
-import util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -149,7 +145,7 @@ public class MainController implements Initializable {
     public void login(ActionEvent event) {
         if (loginCheck()) {
             User user = new User(loginUserName.getText(), loginPassword.getText());
-            HttpResult result = HttpClientUtil.getInstance().doPost(UrlMap.getLoginUrl(), user);
+            HttpResult<String> result = HttpClientUtil.getInstance().doPost(UrlMap.getLoginUrl(), user);
             log.warn(result.toString());
             if (result.getResult() == ResultCode.OK) {
                 try {
@@ -218,7 +214,7 @@ public class MainController implements Initializable {
         String email = registerEmail.getText();
         registerBtn.setDisable(true);
         User user = new User(username, password, email);
-        HttpResult result = HttpClientUtil.getInstance().doPost(UrlMap.getRegisterUrl(), user);
+        HttpResult<String> result = HttpClientUtil.getInstance().doPost(UrlMap.getRegisterUrl(), user);
         log.warn(result.toString());
         if (result.getResult() != ResultCode.OK) {
             registerBtn.setDisable(false);

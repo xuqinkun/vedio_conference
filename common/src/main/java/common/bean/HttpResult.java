@@ -1,9 +1,9 @@
 package common.bean;
 
-public class HttpResult {
+public class HttpResult<T> {
     private ResultCode result;
 
-    private String message;
+    private T message;
 
     public HttpResult() {
     }
@@ -12,11 +12,11 @@ public class HttpResult {
     public String toString() {
         return "HttpResult{" +
                 "result='" + result + '\'' +
-                ", message='" + message + '\'' +
+                ", message='" + message.toString() + '\'' +
                 '}';
     }
 
-    public HttpResult(ResultCode result, String message) {
+    public HttpResult(ResultCode result, T message) {
         this.result = result;
         this.message = message;
     }
@@ -29,11 +29,11 @@ public class HttpResult {
         this.result = result;
     }
 
-    public String getMessage() {
+    public T getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(T message) {
         this.message = message;
     }
 }
