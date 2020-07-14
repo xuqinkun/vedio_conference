@@ -9,11 +9,14 @@ public class User {
 
     private String portrait;
 
+    private boolean registered = true;
+
     public User() {
     }
 
-    public User(String name) {
+    public User(String name, boolean registered) {
         this.name = name;
+        this.registered = registered;
     }
 
     public User(String name, String password, String email, String src) {
@@ -60,6 +63,18 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
+    }
+
+    public void setPortrait(String portrait) {
+        this.portrait = portrait;
     }
 
     @Override

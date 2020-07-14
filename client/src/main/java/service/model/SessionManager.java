@@ -28,8 +28,13 @@ public class SessionManager {
     }
 
     public User getCurrentUser() {
+        if (currentUser == null) {
+            currentUser = createDefault();
+        }
         return currentUser;
     }
 
-
+    private User createDefault() {
+        return new User("user_" + System.currentTimeMillis(), false);
+    }
 }
