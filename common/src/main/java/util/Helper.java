@@ -20,7 +20,8 @@ public class Helper {
     }
 
     public static String getUuid() {
-        return UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString();
+        return uuid.substring(uuid.lastIndexOf("-") + 1);
     }
 
     public static String dateFormat(Date date) {

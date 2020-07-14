@@ -36,7 +36,7 @@
                         <RadioButton mnemonicParsing="false" text="Audio" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton fx:id="videoSwitchBtn" mnemonicParsing="false" onAction="#videoSwitch" prefHeight="16.0" prefWidth="58.0" text="Video" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
-                        <RadioButton mnemonicParsing="false" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                        <RadioButton fx:id="inviteBtn" mnemonicParsing="false" onAction="#invite" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                         <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                         <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                         <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />

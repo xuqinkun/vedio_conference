@@ -2,7 +2,10 @@ package controller;
 
 import common.bean.HttpResult;
 import common.bean.User;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,6 +20,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import service.http.HttpClientUtil;
@@ -56,11 +60,11 @@ public class MeetingRoomController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-        HttpResult<List<User>> result = HttpClientUtil.getInstance().
-                doPost(UrlMap.getUserListUrl(), SessionManager.getInstance().getCurrentMeeting().getUuid());
-        List<User> userList = result.getMessage();
-        for (User user : userList)
-            addUser(user);
+//        HttpResult<List<User>> result = HttpClientUtil.getInstance().
+//                doPost(UrlMap.getUserListUrl(), SessionManager.getInstance().getCurrentMeeting().getUuid());
+//        List<User> userList = result.getMessage();
+//        for (User user : userList)
+//            addUser(user);
     }
 
     private void hideControl(Pane node) {
@@ -155,6 +159,31 @@ public class MeetingRoomController implements Initializable {
                 task.stop();
             }
         }
+    }
+
+    private Stage invitationStage;
+
+    @FXML
+    private RadioButton inviteBtn;
+
+    @FXML
+    public void invite(ActionEvent event) throws IOException {
+        if (invitationStage == null) {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Invitation.fxml"));
+            invitationStage = new Stage();
+            invitationStage.setResizable(false);
+            invitationStage.setScene(new Scene(root));
+            invitationStage.show();
+        } else if (invitationStage.isShowing()){
+            invitationStage.hide();
+        } else {
+            invitationStage.show();
+        }
+        invitationStage.setOnCloseRequest(event1 -> {
+            Label infoLabel = (Label) invitationStage.getScene().getRoot().getChildrenUnmodifiable().get(2);
+            infoLabel.setText("");
+            inviteBtn.setSelected(false);
+        });
     }
 
 }

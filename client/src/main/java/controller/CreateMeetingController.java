@@ -64,10 +64,9 @@ public class CreateMeetingController implements Initializable {
         String password = meetingPassword.getText();
         Date date = new Date();
         Meeting meeting = new Meeting(Helper.getUuid(), password, meetingType, date, date, true, false);
-//        String username = SessionManager.getInstance().getCurrentUser().getName();
-        meeting.setOwner("aa");
+        String username = SessionManager.getInstance().getCurrentUser().getName();
+        meeting.setOwner(username);
         HttpResult<String> response = HttpClientUtil.getInstance().doPost(UrlMap.getCreateMeetingUrl(), meeting);
-//        HttpResult<String> response = new HttpResult<>(ResultCode.OK, "");
         if (response.getResult() == ResultCode.OK) {
             log.warn("Create meeting[{}] succeed", meeting);
             SessionManager.getInstance().setCurrentMeeting(meeting);
