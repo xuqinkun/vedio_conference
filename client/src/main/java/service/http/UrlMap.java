@@ -9,9 +9,10 @@ import java.net.URL;
 import java.util.Properties;
 
 public class UrlMap {
-    private static String baseUrl;
 
     private static final Logger log = LoggerFactory.getLogger(UrlMap.class);
+
+    private static String baseUrl;
 
     public static final String DEFAULT_HOST = "localhost";
 
@@ -55,7 +56,7 @@ public class UrlMap {
         return baseUrl + "getUserList";
     }
 
-    public static void main(String[] args) {
-        System.out.println(getLoginUrl());
+    public static String getJoinMeetingUrl() {
+        return baseUrl + "joinMeeting";
     }
 }

@@ -75,7 +75,7 @@ public class MainController implements Initializable {
     @FXML
     private Button registerBtn;
 
-    private Stage stage;
+    private Stage joinStage;
 
     private Parent root;
 
@@ -97,23 +97,25 @@ public class MainController implements Initializable {
     @FXML
     public void joinMeeting(ActionEvent event) {
         try {
-            if (stage == null) {
+            if (joinStage == null) {
                 root = FXMLLoader.load(
                         getClass().getResource("/fxml/JoinMeeting.fxml"));
-                stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.setTitle("Join Meeting");
-                stage.setResizable(false);
+                joinStage = new Stage();
+                joinStage.setScene(new Scene(root));
+                joinStage.setTitle("Join Meeting");
+                joinStage.setResizable(false);
 //                stage.initStyle(StageStyle.UNDECORATED);
-                stage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
-                stage.setY(mainLayout.getScene().getWindow().getY());
-                stage.show();
+                joinStage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
+                joinStage.setY(mainLayout.getScene().getWindow().getY());
+                Stage mainStage = (Stage) mainLayout.getScene().getWindow();
+                joinStage.initOwner(mainStage);
+                joinStage.show();
             }
-            else if (stage.isShowing()) {
-                stage.hide();
+            else if (joinStage.isShowing()) {
+                joinStage.hide();
             }
             else {
-                stage.show();
+                joinStage.show();
             }
         } catch (IOException e) {
             e.printStackTrace();

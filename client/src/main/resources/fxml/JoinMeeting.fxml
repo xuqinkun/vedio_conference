@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-max-width: 350; -fx-min-width: 350; -fx-max-height: 600; -fx-min-height: 600; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.JoinMeetingController">
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0">
             <children>
                 <VBox prefHeight="200.0" prefWidth="100.0">
                     <children>
-                        <Label text="Meeting Number">
+                        <Label text="Meeting ID">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -21,7 +23,7 @@
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
                         </Label>
-                        <TextField fx:id="meetingNumberInput" maxHeight="30.0" maxWidth="300.0" minHeight="30.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" promptText="Please input meeting number">
+                        <TextField fx:id="meetingIDInput" maxHeight="30.0" maxWidth="300.0" minHeight="30.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" promptText="Please input meeting ID">
                             <VBox.margin>
                                 <Insets left="25.0" right="25.0" />
                             </VBox.margin>
@@ -33,7 +35,7 @@
                 </VBox>
                 <VBox prefHeight="200.0" prefWidth="100.0">
                     <children>
-                        <Label text="Your Name">
+                        <Label text="Meeting Password">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -44,13 +46,33 @@
                                 <Insets left="25.0" top="25.0" />
                             </VBox.margin>
                         </Label>
-                        <TextField fx:id="userNameInput" maxHeight="30.0" maxWidth="300.0" minHeight="30.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" promptText="Please input your name">
+                        <TextField fx:id="meetingPasswordInput" maxHeight="30.0" maxWidth="300.0" minHeight="30.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" promptText="Please input meeting password">
                             <VBox.margin>
                                 <Insets left="25.0" right="25.0" />
                             </VBox.margin>
                         </TextField>
                     </children>
                 </VBox>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <Label text="Your Name">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                     <VBox.margin>
+                        <Insets left="25.0" top="25.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextField fx:id="userNameInput" maxHeight="30.0" maxWidth="300.0" minHeight="30.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" promptText="Please input your name">
+                     <VBox.margin>
+                        <Insets left="25.0" right="25.0" />
+                     </VBox.margin>
+                  </TextField>
+               </children>
+            </VBox>
                 <VBox prefHeight="200.0" prefWidth="100.0">
                     <children>
                         <Label text="Settings">
