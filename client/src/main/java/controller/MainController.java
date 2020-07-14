@@ -105,11 +105,17 @@ public class MainController implements Initializable {
                 stage.setScene(new Scene(root));
                 stage.setTitle("Join Meeting");
                 stage.setResizable(false);
-                stage.initStyle(StageStyle.UNDECORATED);
+//                stage.initStyle(StageStyle.UNDECORATED);
+                stage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
+                stage.setY(mainLayout.getScene().getWindow().getY());
+                stage.show();
             }
-            stage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
-            stage.setY(mainLayout.getScene().getWindow().getY());
-            stage.show();
+            else if (stage.isShowing()) {
+                stage.hide();
+            }
+            else {
+                stage.show();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -146,6 +152,10 @@ public class MainController implements Initializable {
         if (loginCheck()) {
             User user = new User(loginUserName.getText(), loginPassword.getText());
             HttpResult<String> result = HttpClientUtil.getInstance().doPost(UrlMap.getLoginUrl(), user);
+            if (result == null) {
+                log.error("Send post failed! Server is down!");
+                return;
+            }
             log.warn(result.toString());
             if (result.getResult() == ResultCode.OK) {
                 try {

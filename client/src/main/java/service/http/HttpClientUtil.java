@@ -63,7 +63,7 @@ public class HttpClientUtil {
             log.debug(ret);
             return (HttpResult<T>)JsonUtil.jsonToObject(ret, HttpResult.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }

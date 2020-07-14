@@ -52,4 +52,25 @@ public class ProfileController implements Initializable {
             e.printStackTrace();
         }
     }
+    private Stage joinMeetingStage;
+
+    @FXML
+    public void joinMeeting(MouseEvent event) throws IOException {
+        if (joinMeetingStage == null) {
+            Stage profileStage = (Stage) usernameLabel.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/JoinMeetings.xml"));
+            joinMeetingStage = new Stage();
+            joinMeetingStage.setResizable(false);
+            joinMeetingStage.setScene(new Scene(root));
+            joinMeetingStage.setX(profileStage.getScene().getWindow().getX() + profileStage.getWidth() + 10);
+            joinMeetingStage.setY(profileStage.getScene().getWindow().getY());
+            joinMeetingStage.show();
+        }
+        else if (joinMeetingStage.isShowing()) {
+            joinMeetingStage.hide();
+        }
+        else {
+            joinMeetingStage.show();
+        }
+    }
 }
