@@ -64,6 +64,7 @@ public class ProfileController implements Initializable {
             joinMeetingStage.setScene(new Scene(root));
             joinMeetingStage.setX(profileStage.getScene().getWindow().getX() + profileStage.getWidth() + 10);
             joinMeetingStage.setY(profileStage.getScene().getWindow().getY());
+            joinMeetingStage.initOwner(profileStage);
             joinMeetingStage.show();
         }
         else if (joinMeetingStage.isShowing()) {
