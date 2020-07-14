@@ -66,9 +66,10 @@ public class MeetingController {
 
     @PostMapping("/joinMeeting")
     public @ResponseBody
-    HttpResult<List<User>> getUserList(@RequestBody String uuid, @RequestBody User user) {
-        Meeting meeting = meetingService.findMeeting(uuid);
-        if (meeting == null) {
+    HttpResult<List<User>> getUserList(@RequestBody Meeting meeting, @RequestBody User user) {
+        String uuid = meeting.getUuid();
+        Meeting oldMeeting = meetingService.findMeeting(uuid);
+        if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
             return new HttpResult<>(ERROR, null);
         }
         meetingUserMap.get(uuid).add(user);

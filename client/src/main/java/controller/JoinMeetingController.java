@@ -57,8 +57,11 @@ public class JoinMeetingController implements Initializable {
             meetingIDInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
         if (userNameInput != null)
             userNameInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
+        if (meetingPasswordInput != null)
+            meetingPasswordInput.textProperty().addListener((observable, oldValue, newValue) -> inputCheck());
         User user = SessionManager.getInstance().getCurrentUser();
-        userNameInput.setText(user.getName());
+        String username = user == null ? "test" : user.getName();
+        userNameInput.setText(username);
     }
 
     @FXML

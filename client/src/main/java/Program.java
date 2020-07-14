@@ -16,7 +16,7 @@ public class Program extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Meeting");
         Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/main.fxml"));
+                getClass().getResource("/fxml/JoinMeeting.fxml"));
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(true);
         primaryStage.show();
