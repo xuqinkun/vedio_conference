@@ -4,6 +4,8 @@ import common.bean.HttpResult;
 import common.bean.Meeting;
 import common.bean.ResultCode;
 import common.bean.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,9 @@ import static common.bean.ResultCode.ERROR;
 
 @RestController
 public class MeetingController {
+
+    private static final Logger log = LoggerFactory.getLogger(MeetingController.class);
+
     private MeetingService meetingService;
 
     private UserService userService;
@@ -69,6 +74,7 @@ public class MeetingController {
         String uuid = meeting.getUuid();
         Meeting oldMeeting = meetingService.findMeeting(uuid);
         if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
+            log.error("Can't find meeting[uuid={}] or meeting password is wrong", uuid);
             return new HttpResult<>(ERROR, null);
         }
         meetingUserMap.get(uuid).add(user);

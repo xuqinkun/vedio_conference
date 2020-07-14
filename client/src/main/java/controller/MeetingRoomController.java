@@ -1,11 +1,9 @@
 package controller;
 
 import common.bean.HttpResult;
+import common.bean.Meeting;
 import common.bean.User;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -20,9 +18,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
@@ -35,6 +34,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class MeetingRoomController implements Initializable {
+
+    private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
+
     @FXML
     private Pane rootLayout;
 
@@ -60,22 +62,17 @@ public class MeetingRoomController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-//        HttpResult<List<User>> result = HttpClientUtil.getInstance().
-//                doPost(UrlMap.getUserListUrl(), SessionManager.getInstance().getCurrentMeeting().getUuid());
-//        List<User> userList = result.getMessage();
-//        for (User user : userList)
-//            addUser(user);
-    }
-
-    private void hideControl(Pane node) {
-        node.setVisible(false);
-        node.setManaged(false);
-
-    }
-
-    private void displayControl(Pane node) {
-        node.setVisible(true);
-        node.setManaged(true);
+        Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
+        if (currentMeeting != null) {
+            HttpResult<List<User>> result = HttpClientUtil.getInstance().
+                    doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
+            List<User> userList = result.getMessage();
+            log.warn(userList.toString());
+            for (User user : userList)
+                addUser(user);
+        } else {
+            log.warn("Can't find current meeting info!");
+        }
     }
 
     @FXML
@@ -185,5 +182,4 @@ public class MeetingRoomController implements Initializable {
             inviteBtn.setSelected(false);
         });
     }
-
 }

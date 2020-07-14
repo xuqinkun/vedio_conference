@@ -77,6 +77,7 @@ public class JoinMeetingController implements Initializable {
             Meeting meeting = new Meeting();
             meeting.setUuid(meetingID);
             meeting.setPassword(meetingPassword);
+            SessionManager.getInstance().setCurrentMeeting(meeting);
             Map<String, Object> data = new HashMap<>();
             data.put("user", user);
             data.put("meeting", meeting);
