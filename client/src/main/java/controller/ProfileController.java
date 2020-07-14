@@ -58,7 +58,7 @@ public class ProfileController implements Initializable {
     public void joinMeeting(MouseEvent event) throws IOException {
         if (joinMeetingStage == null) {
             Stage profileStage = (Stage) usernameLabel.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/JoinMeetings.xml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/JoinMeeting.fxml"));
             joinMeetingStage = new Stage();
             joinMeetingStage.setResizable(false);
             joinMeetingStage.setScene(new Scene(root));

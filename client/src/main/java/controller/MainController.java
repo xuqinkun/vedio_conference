@@ -21,7 +21,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +99,7 @@ public class MainController implements Initializable {
         try {
             if (stage == null) {
                 root = FXMLLoader.load(
-                        getClass().getResource("/fxml/JoinMeetings.fxml"));
+                        getClass().getResource("/fxml/JoinMeeting.fxml"));
                 stage = new Stage();
                 stage.setScene(new Scene(root));
                 stage.setTitle("Join Meeting");
