@@ -45,8 +45,10 @@ public class ImagePushTask extends Task<Image> {
                 TaskHolder<FrameGrabber> grabberHolder = DeviceUtil.getGrabber(Config.getCaptureDevice());
                 TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
                 if (!grabberHolder.isStarted() || !recorderHolder.isStarted()) {
+                    LOG.warn("Grabber and recorder is starting. Please wait...");
                     grabberHolder.getTask().start();
                     recorderHolder.getTask().start();
+                    LOG.warn("Grabber and recorder started");
                     grabberHolder.setStarted(true);
                     recorderHolder.setStarted(true);
                 }

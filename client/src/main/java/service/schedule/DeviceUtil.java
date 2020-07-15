@@ -48,6 +48,8 @@ public class DeviceUtil {
 //            grabber.setSampleRate(44100);
 //            grabber.setAudioChannels(2);
 //            grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+            grabber.setOption("probesize", "34");  // Max bytes for reading video frame
+            grabber.setOption("max_analyze_duration", "10"); // Max duration for analyzing video frame
             TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber);
             grabberMapByDevice.put(deviceNumber, taskHolder);
         }
