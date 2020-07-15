@@ -27,9 +27,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
-import service.schedule.ImagePullTask;
-import service.schedule.ImagePushTask;
-import service.schedule.ImageLoadingTask;
+import service.schedule.*;
 import util.Config;
 import util.JsonUtil;
 
@@ -94,6 +92,31 @@ public class MeetingRoomController implements Initializable {
         } else {
             log.warn("Can't find current meeting info!");
         }
+
+        initialCamera();
+    }
+
+    private void initialCamera() {
+        new Thread(() -> {
+            TaskHolder<FrameGrabber> grabberHolder;
+            try {
+                grabberHolder = DeviceUtil.getGrabber(Config.getCaptureDevice());
+                String outStream = getNginxOutputStream(SessionManager.getInstance().getCurrentUser().getName());
+                TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
+                if (!grabberHolder.isStarted() || !recorderHolder.isStarted()) {
+                    if (!grabberHolder.isSubmitted()) {
+                        log.warn("Submit grabber task. Please wait...");
+                        grabberHolder.submit();
+                    }
+                    if (!recorderHolder.isSubmitted()) {
+                        log.warn("Submit recorder task. Please wait...");
+                        recorderHolder.submit();
+                    }
+                }
+            } catch (FrameGrabber.Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @FXML
@@ -188,7 +211,7 @@ public class MeetingRoomController implements Initializable {
         }
     }
 
-    private String getNginxOutputStream(String username) {
+    public String getNginxOutputStream(String username) {
         Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
         return Config.getNginxOutputStream(meeting.getUuid(), username);
     }

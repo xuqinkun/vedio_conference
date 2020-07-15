@@ -21,12 +21,12 @@ public class TaskStarter {
         try {
             Method startMethod = task.getClass().getMethod("start");
             if (startMethod != null) {
-                LOG.info("Start task[{}]", task.getClass());
+                LOG.warn("Start task[{}]", task.getClass().getSimpleName());
                 new Thread(() -> {
                     try {
                         startMethod.invoke(task);
                         holder.setStarted(true);
-                        LOG.info("Task started");
+                        LOG.warn("Task[{}] started", task.getClass().getSimpleName());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
