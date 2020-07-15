@@ -92,6 +92,9 @@ public class MeetingController {
         }
         kafkaService.sendMessage(uuid, new Message(USER_ADD, JsonUtil.toJsonString(user)));
         meetingUserMap.get(uuid).add(user);
-        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingUserMap.get(uuid)));
+//        Map<String, String> resp = new HashMap<>();
+//        resp.put("meeting", JsonUtil.toJsonString(oldMeeting));
+//        resp.put("users", JsonUtil.toJsonString(meetingUserMap.get(uuid)));
+        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
     }
 }

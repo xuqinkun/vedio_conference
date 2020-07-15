@@ -22,6 +22,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
 import util.InputChecker;
+import util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -67,8 +68,8 @@ public class JoinMeetingController implements Initializable {
     @FXML
     public void joinMeeting(ActionEvent event) {
         if (validateInput()) {
-            boolean openAudio = audioCheckBox.isSelected();
-            boolean openCamera = cameraCheckBox.isSelected();
+//            boolean openAudio = audioCheckBox.isSelected();
+//            boolean openCamera = cameraCheckBox.isSelected();
             String userName = userNameInput.getText();
             String meetingID = meetingIDInput.getText();
             String meetingPassword = meetingPasswordInput.getText();
@@ -77,13 +78,14 @@ public class JoinMeetingController implements Initializable {
             Meeting meeting = new Meeting();
             meeting.setUuid(meetingID);
             meeting.setPassword(meetingPassword);
-            SessionManager.getInstance().setCurrentMeeting(meeting);
             Map<String, Object> data = new HashMap<>();
             data.put("user", user);
             data.put("meeting", meeting);
             HttpResult<String> response = HttpClientUtil.getInstance().doPost(UrlMap.getJoinMeetingUrl(), data);
             if (response.getResult() == ResultCode.OK) {
                 try {
+                    Meeting oldMeeting = JsonUtil.jsonToObject(response.getMessage(), Meeting.class);
+                    SessionManager.getInstance().setCurrentMeeting(oldMeeting);
                     displayMeetingRoom();
                 } catch (IOException e) {
                     log.error(e.getMessage());
