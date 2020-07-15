@@ -202,6 +202,9 @@ public class MeetingRoomController implements Initializable {
                 task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
                 executor.schedule(imageLoadingTask, 0, TimeUnit.MILLISECONDS);
             }
+            if (task.isStopped()) {
+                task.reset();
+            }
             executor.schedule(task, 0, TimeUnit.MILLISECONDS);
             new Thread(task).start();
         } else {

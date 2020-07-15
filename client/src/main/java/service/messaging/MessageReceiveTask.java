@@ -10,6 +10,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import util.Config;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -28,13 +29,13 @@ public class MessageReceiveTask extends Task<Message> {
 
     public ConsumerFactory<String, Message> getConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.104:9092");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "receivers");
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Config.getKafkaServer());
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, Config.getKafkaConsumerGroupID());
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         JsonDeserializer<Message> jsonDeserializer = new JsonDeserializer<>();
-        jsonDeserializer.addTrustedPackages("service.messaging", "common.bean");
+        jsonDeserializer.addTrustedPackages(Config.getKafkaTrustedPackages());
         return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), jsonDeserializer);
     }
 

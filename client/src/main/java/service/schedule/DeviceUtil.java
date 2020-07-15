@@ -1,10 +1,9 @@
 package service.schedule;
 
-import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacv.*;
-import org.springframework.scheduling.support.TaskUtils;
-import util.Helper;
-import util.ImageUtil;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,11 +42,6 @@ public class DeviceUtil {
             grabber.setImageHeight(IMAGE_HEIGHT);
             grabber.setVideoOption("crf", "18");
             grabber.setVideoBitrate(2000000);
-//            grabber.setAudioOption("crf", "0");
-//            grabber.setAudioBitrate(192000);
-//            grabber.setSampleRate(44100);
-//            grabber.setAudioChannels(2);
-//            grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
             grabber.setOption("probesize", "32");  // Max bytes for reading video frame
             grabber.setOption("max_analyze_duration", "10"); // Max duration for analyzing video frame
             TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber);

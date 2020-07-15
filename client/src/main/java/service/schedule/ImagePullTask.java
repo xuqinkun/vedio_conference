@@ -5,7 +5,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ImageUtil;
@@ -48,5 +47,12 @@ public class ImagePullTask extends Task<Image> {
             updateValue(ImageUtil.convert(frame));
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "ImagePullTask{" +
+                "inStream='" + inStream + '\'' +
+                '}';
     }
 }

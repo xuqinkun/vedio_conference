@@ -7,6 +7,7 @@ import service.http.UrlMap;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class Config {
@@ -14,24 +15,25 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private static final String DEFAULT_HOST = "localhost";
-
     private static final String HOST_KEY = "server.host";
-
     private static final String PORT_KEY = "server.port";
-
     private static final String DEFAULT_SERVER_PORT = "8080";
-
     private static final String NGINX_HOST_KEY = "nginx.host";
-
     private static final String NGINX_PORT_KEY = "nginx.port";
-
     private static final String DEFAULT_NGINX_HOST = "localhost";
-
     private static final String DEFAULT_NGINX_PORT = "1935";
     public static final String PORTRAIT_KEY = "portrait";
     public static final String DEFAULT_PORTRAIT_SRC = "/fxml/img/orange.png";
     public static final String CAPTURE_DEVICE_KEY = "capture.device";
     public static final String DEFAULT_CAPTURE_DEVICE = "0";
+    public static final String KAFKA_SERVER_HOST_KEY = "kafka.server.host";
+    public static final String DEFAULT_KAFKA_SERVER_HOST = "localhost";
+    public static final String KAFKA_SERVER_PORT_KEY = "kafka.server.port";
+    public static final String DEFAULT_KAFKA_SERVER_PORT = "9092";
+    public static final String KAFKA_CONSUMER_GROUP_ID_KEY = "kafka.consumer.groupID";
+    public static final String DEFAULT_KAFKA_CONSUMER_GROUP_ID = "consumers";
+    public static final String TRUSTED_PACKAGES_KEY = "trusted.packages";
+    public static final String DEFAULT_TRUSTED_PACKAGES = "*";
 
     private static Properties properties;
 
@@ -82,7 +84,29 @@ public class Config {
         return String.format("%s/%s-%s", Config.getNginxUrlPrefix(), meetingUUID, username);
     }
 
+    public static String getKafkaServerHost() {
+        return properties.getProperty(KAFKA_SERVER_HOST_KEY, DEFAULT_KAFKA_SERVER_HOST);
+    }
+
+    public static String getKafkaServerPort() {
+        return properties.getProperty(KAFKA_SERVER_PORT_KEY, DEFAULT_KAFKA_SERVER_PORT);
+    }
+
+    public static String getKafkaConsumerGroupID() {
+        return properties.getProperty(KAFKA_CONSUMER_GROUP_ID_KEY, DEFAULT_KAFKA_CONSUMER_GROUP_ID);
+    }
+
+    public static String getKafkaServer() {
+        return String.format("%s:%s", getKafkaServerHost(), getKafkaServerPort());
+    }
+
+    public static String[] getKafkaTrustedPackages() {
+        String packages = properties.getProperty(TRUSTED_PACKAGES_KEY, DEFAULT_TRUSTED_PACKAGES);
+        return packages.split(",");
+    }
+
     public static void main(String[] args) {
-        System.out.println(getCaptureDevice());
+        System.out.println(getKafkaConsumerGroupID());
+//        System.out.println(Arrays.toString(getKafkaTrustedPackages()));
     }
 }

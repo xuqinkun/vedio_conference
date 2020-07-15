@@ -17,20 +17,21 @@ public class TaskStarter {
             return;
         }
         T task = holder.getTask();
-        LOG.warn("Submit task: {}", task);
         try {
             Method startMethod = task.getClass().getMethod("start");
             if (startMethod != null) {
-                LOG.warn("Start task[{}]", task.getClass().getSimpleName());
-                new Thread(() -> {
+                Thread thread = new Thread(() -> {
                     try {
+                        LOG.warn("Start task[{}]...", task);
                         startMethod.invoke(task);
                         holder.setStarted(true);
-                        LOG.warn("Task[{}] started", task.getClass().getSimpleName());
+                        LOG.warn("Task[{}] started", task);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
-                }).start();
+                });
+                thread.setPriority(Thread.MAX_PRIORITY);
+                thread.start();
             }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();

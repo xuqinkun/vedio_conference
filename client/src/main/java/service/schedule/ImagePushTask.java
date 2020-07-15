@@ -75,4 +75,19 @@ public class ImagePushTask extends Task<Image> {
     public void stop() {
         this.stopped = true;
     }
+
+    public void reset() {
+        this.stopped = false;
+    }
+
+    @Override
+    public String toString() {
+        return "ImagePushTask{" +
+                "outStream='" + outStream + '\'' +
+                '}';
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
 }
