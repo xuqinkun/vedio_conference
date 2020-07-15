@@ -61,7 +61,6 @@ public class DeviceUtil {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
             TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber);
             grabberMapByStream.put(inStream, taskHolder);
-            TaskStarter.submit(taskHolder);
         }
         return grabberMapByStream.get(inStream);
     }

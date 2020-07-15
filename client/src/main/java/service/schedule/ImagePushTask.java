@@ -45,12 +45,16 @@ public class ImagePushTask extends Task<Image> {
                 TaskHolder<FrameGrabber> grabberHolder = DeviceUtil.getGrabber(Config.getCaptureDevice());
                 TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
                 if (!grabberHolder.isStarted() || !recorderHolder.isStarted()) {
-                    LOG.warn("Grabber and recorder is starting. Please wait...");
-                    grabberHolder.getTask().start();
-                    recorderHolder.getTask().start();
-                    LOG.warn("Grabber and recorder started");
-                    grabberHolder.setStarted(true);
-                    recorderHolder.setStarted(true);
+                    if (!grabberHolder.isSubmitted()) {
+                        LOG.warn("Submit grabber task. Please wait...");
+                        grabberHolder.submit();
+                    }
+                    if (!recorderHolder.isSubmitted()) {
+                        LOG.warn("Submit recorder task. Please wait...");
+                        recorderHolder.submit();
+                    }
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                    continue;
                 }
                 Frame frame = grabberHolder.getTask().grab();
                 // Update local video

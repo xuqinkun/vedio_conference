@@ -34,9 +34,14 @@ public class ImagePullTask extends Task<Image> {
             if (grabber == null) {
                 TaskHolder<FrameGrabber> grabberHolder = DeviceUtil.getGrabber(inStream);
                 if (!grabberHolder.isStarted()) {
+                    if (!grabberHolder.isSubmitted()) {
+                        LOG.warn("Submit grabber task! Please wait...");
+                        grabberHolder.submit();
+                    }
                     Thread.sleep(1000);
                     continue;
                 }
+                LOG.warn("Grabber started!");
                 grabber = grabberHolder.getTask();
             }
             Frame frame = this.grabber.grab();

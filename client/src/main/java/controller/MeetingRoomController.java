@@ -37,6 +37,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MeetingRoomController implements Initializable {
 
@@ -150,7 +153,7 @@ public class MeetingRoomController implements Initializable {
 
         log.warn("User[{}] add to list", user);
 
-        if (user != SessionManager.getInstance().getCurrentUser()) {
+        if (!user.equals(SessionManager.getInstance().getCurrentUser())) {
             ImagePullTask task = new ImagePullTask(getNginxOutputStream(user.getName()), imageView);
             new Thread(task).start();
         }
@@ -166,6 +169,7 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void videoSwitch(ActionEvent event) {
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
         if (videoSwitchBtn.isSelected()) {
             if (task == null || task.isDone()) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
@@ -173,8 +177,9 @@ public class MeetingRoomController implements Initializable {
                 String outputStream = getNginxOutputStream(user.getName());
                 log.warn("OutputStream={}", outputStream);
                 task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
-                new Thread(imageLoadingTask).start();
+                executor.schedule(imageLoadingTask, 0, TimeUnit.MILLISECONDS);
             }
+            executor.schedule(task, 0, TimeUnit.MILLISECONDS);
             new Thread(task).start();
         } else {
             if (task != null) {
