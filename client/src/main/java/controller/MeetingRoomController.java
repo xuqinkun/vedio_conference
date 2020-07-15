@@ -27,8 +27,10 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
+import service.schedule.ImagePullTask;
 import service.schedule.ImagePushTask;
-import service.schedule.LoadingTask;
+import service.schedule.ImageLoadingTask;
+import util.Config;
 import util.JsonUtil;
 
 import java.io.IOException;
@@ -67,12 +69,17 @@ public class MeetingRoomController implements Initializable {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
         if (currentMeeting != null) {
-            HttpResult<String> result = HttpClientUtil.getInstance().
-                    doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
-            List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
-            log.warn(userList.toString());
-            for (User user : userList)
-                addUser(user);
+            User currentUser = SessionManager.getInstance().getCurrentUser();
+            if (currentMeeting.getOwner().equals(currentUser.getName())) { // Is meeting owner
+                addUser(currentUser);
+            } else { // None meeting owner
+                HttpResult<String> result = HttpClientUtil.getInstance().
+                        doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
+                List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
+                log.warn(userList.toString());
+                for (User user : userList)
+                    addUser(user);
+            }
             MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
             new Thread(task).start();
             task.valueProperty().addListener((observable, oldValue, msg) -> {
@@ -123,7 +130,7 @@ public class MeetingRoomController implements Initializable {
     }
 
     public void addUser(User user) {
-        String portrait = user.getPortrait() == null ? "/fxml/img/orange.png" : user.getPortrait();
+        String portrait = user.getPortrait() == null ? Config.getDefaultPortrait() : user.getPortrait();
         Image image = new Image(portrait);
         ImageView imageView = new ImageView(image);
         imageView.setFitHeight(60);
@@ -140,6 +147,13 @@ public class MeetingRoomController implements Initializable {
         vBox.setStyle("-fx-border-color: red");
 
         userListLayout.getChildren().add(vBox);
+
+        log.warn("User[{}] add to list", user);
+
+        if (user != SessionManager.getInstance().getCurrentUser()) {
+            ImagePullTask task = new ImagePullTask(getNginxOutputStream(user.getName()), imageView);
+            new Thread(task).start();
+        }
     }
 
     @FXML
@@ -153,21 +167,25 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void videoSwitch(ActionEvent event) {
         if (videoSwitchBtn.isSelected()) {
-            try {
-                if (task == null || task.isDone()) {
-                    LoadingTask loadingTask = new LoadingTask(mainImageView);
-                    task = new ImagePushTask("rtmp://localhost:1935/live/room", mainImageView, loadingTask);
-                    new Thread(loadingTask).start();
-                }
-                new Thread(task).start();
-            } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
-                e.printStackTrace();
+            if (task == null || task.isDone()) {
+                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
+                User user = SessionManager.getInstance().getCurrentUser();
+                String outputStream = getNginxOutputStream(user.getName());
+                log.warn("OutputStream={}", outputStream);
+                task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
+                new Thread(imageLoadingTask).start();
             }
+            new Thread(task).start();
         } else {
             if (task != null) {
                 task.stop();
             }
         }
+    }
+
+    private String getNginxOutputStream(String username) {
+        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
+        return Config.getNginxOutputStream(meeting.getUuid(), username);
     }
 
     private Stage invitationStage;
@@ -183,7 +201,7 @@ public class MeetingRoomController implements Initializable {
             invitationStage.setResizable(false);
             invitationStage.setScene(new Scene(root));
             invitationStage.show();
-        } else if (invitationStage.isShowing()){
+        } else if (invitationStage.isShowing()) {
             invitationStage.hide();
         } else {
             invitationStage.show();

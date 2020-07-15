@@ -4,10 +4,10 @@ import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class LoadingTask extends Task<Image> {
+public class ImageLoadingTask extends Task<Image> {
     ImageView view;
 
-    public LoadingTask(ImageView view) {
+    public ImageLoadingTask(ImageView view) {
         this.view = view;
         view.setImage(new Image("/fxml/img/loading.png"));
     }
