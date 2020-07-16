@@ -2,6 +2,7 @@ package util;
 
 import com.github.sarxos.webcam.Webcam;
 import controller.JoinMeetingController;
+import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
@@ -60,17 +61,26 @@ public class DeviceUtil {
 
     public static TaskHolder<FrameRecorder> getRecorder(String outStream) {
         if (recorderMap.get(outStream) == null) {
-            FrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight(), 0);
-            recorder.setVideoOption("crf", "18");
+            FrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+            // Related to clarity 18 is good, 28 is bad.
+            recorder.setVideoOption("crf", "28");
 //            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
-            recorder.setGopSize(5);
+            // H264 causes high latency
+//            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+            recorder.setGopSize(2);
             recorder.setVideoBitrate(2000000);
             recorder.setVideoOption("tune", "zerolatency");
             recorder.setFormat("flv");
             recorder.setFrameRate(Config.getRecorderFrameRate());
             recorder.setVideoOption("preset", "ultrafast");
-            recorder.setOption("probesize", "1024");  // Max bytes for reading video frame
+            recorder.setOption("probesize", "10240");  // Max bytes for reading video frame
             recorder.setOption("max_analyze_duration", "5"); // Max duration for analyzing video frame
+
+//            recorder.setSampleRate(44100);
+//            recorder.setAudioChannels(2);
+//            recorder.setAudioOption("crf","0");
+//            recorder.setAudioBitrate(192000);
+//            recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
             TaskHolder<FrameRecorder> taskHolder = new TaskHolder<>(recorder);
             recorderMap.put(outStream, taskHolder);
         }
@@ -82,10 +92,6 @@ public class DeviceUtil {
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
-            grabber.setVideoOption("crf", "18");
-            grabber.setVideoBitrate(2000000);
-            grabber.setOption("probesize", "32");  // Max bytes for reading video frame
-            grabber.setOption("max_analyze_duration", "10"); // Max duration for analyzing video frame
             TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber);
             grabberMapByDevice.put(deviceNumber, taskHolder);
         }

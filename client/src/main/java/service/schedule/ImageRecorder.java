@@ -37,7 +37,7 @@ public class ImageRecorder implements Runnable {
         recorder.setFormat("flv");
         recorder.setFrameRate(30);
         recorder.setVideoOption("preset", "ultrafast");
-        recorder.setOption("probesize", "102400");  // Max bytes for reading video frame
+        recorder.setOption("probesize", "1024");  // Max bytes for reading video frame
         recorder.setOption("max_analyze_duration", "5"); // Max duration for analyzing video frame
         recorder.start();
         LOG.warn("Recorder stared");

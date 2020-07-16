@@ -18,7 +18,7 @@ public class ImageRecorderTask implements Runnable {
     public ImageRecorderTask(String output) {
         recorderHolder = DeviceUtil.getRecorder(output);
         recorder = recorderHolder.getTask();
-        DeviceUtil.initRecorder(output);
+//        DeviceUtil.initRecorder(output);
     }
 
     @Override

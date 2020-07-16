@@ -17,7 +17,7 @@ public class ImageContainer {
     private BlockingQueue<BufferedImage> imageQueue;
 
     private ImageContainer() {
-        imageQueue = new LinkedBlockingQueue<>(1000);
+        imageQueue = new LinkedBlockingQueue<>();
     }
 
     public static ImageContainer getInstance() {

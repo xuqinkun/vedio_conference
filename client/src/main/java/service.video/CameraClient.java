@@ -69,6 +69,7 @@ public class CameraClient extends Application {
 //        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
 //        exec.scheduleAtFixedRate(task, 0, 20, TimeUnit.MILLISECONDS);
         ImageRecorderTask recorder = new ImageRecorderTask(outputStream);
+        DeviceUtil.initRecorder(outputStream);
 //        ImageRecorder recorder = new ImageRecorder(outputStream);
         Thread thread = new Thread(recorder);
         thread.setPriority(Thread.MAX_PRIORITY);

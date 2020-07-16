@@ -19,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class MeetingRoomController implements Initializable {
 
@@ -68,7 +68,7 @@ public class MeetingRoomController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
-        SessionManager.getInstance().setCurrentUser(new User("aa", "a"));
+//        SessionManager.getInstance().setCurrentUser(new User("aa", "a"));
         if (currentMeeting != null) {
             initUserList(currentMeeting);
             listenUserListChange(currentMeeting);
@@ -183,30 +183,56 @@ public class MeetingRoomController implements Initializable {
 
     private ImagePushTask task;
 
+    private VideoSenderService service;
+
     @FXML
     public void videoSwitch(ActionEvent event) {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         if (videoSwitchBtn.isSelected()) {
-            if (task == null || task.isDone()) {
+            if (service == null) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
+                new Thread(imageLoadingTask).start();
                 User user = SessionManager.getInstance().getCurrentUser();
                 String outputStream = getNginxOutputStream(user.getName());
                 log.warn("OutputStream={}", outputStream);
-                task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
                 ImageRecorderTask recorderTask = new ImageRecorderTask(outputStream);
-//                executor.scheduleAtFixedRate(recorderTask, 0,
-//                        1000 / Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
-                executor.schedule(imageLoadingTask, 0, TimeUnit.MILLISECONDS);
-//                executor.schedule(recorderTask, 0, TimeUnit.MILLISECONDS);
+                service = new VideoSenderService();
+                service.setDelay(Duration.millis(0));
+                service.setPeriod(Duration.millis(20));
+                service.start();
                 Thread thread = new Thread(recorderTask);
                 thread.setPriority(Thread.MAX_PRIORITY);
                 thread.start();
+                service.valueProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        mainImageView.setImage(newValue);
+                        if (!imageLoadingTask.isCancelled()) {
+                            mainImageView.setRotate(0);
+                            imageLoadingTask.cancel();
+                        }
+                    }
+                });
             }
-            if (task.isStopped()) {
-                task.reset();
-            }
-            executor.schedule(task, 0, TimeUnit.MILLISECONDS);
-            new Thread(task).start();
+//            if (task == null || task.isDone()) {
+//                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
+//                User user = SessionManager.getInstance().getCurrentUser();
+//                String outputStream = getNginxOutputStream(user.getName());
+//                log.warn("OutputStream={}", outputStream);
+////                task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
+//                ImageRecorderTask recorderTask = new ImageRecorderTask(outputStream);
+////                executor.scheduleAtFixedRate(recorderTask, 0,
+////                        1000 / Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+//                executor.schedule(imageLoadingTask, 0, TimeUnit.MILLISECONDS);
+////                executor.schedule(recorderTask, 0, TimeUnit.MILLISECONDS);
+//                Thread thread = new Thread(recorderTask);
+//                thread.setPriority(Thread.MAX_PRIORITY);
+//                thread.start();
+//            }
+//            if (task.isStopped()) {
+//                task.reset();
+//            }
+//            executor.schedule(task, 0, TimeUnit.MILLISECONDS);
+//            new Thread(task).start();
         } else {
             if (task != null) {
                 task.stop();
@@ -215,9 +241,9 @@ public class MeetingRoomController implements Initializable {
     }
 
     public String getNginxOutputStream(String username) {
-        return "rtmp://localhost:1935/live/room";
-//        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
-//        return Config.getNginxOutputStream(meeting.getUuid(), username);
+//        return "rtmp://localhost:1935/live/room";
+        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
+        return Config.getNginxOutputStream(meeting.getUuid(), username);
     }
 
     private Stage invitationStage;
