@@ -6,11 +6,13 @@ public class TaskHolder<T> {
     private T task;
     private volatile AtomicBoolean started;
     private volatile AtomicBoolean submitted;
+    private final String taskName;
 
-    public TaskHolder(T task) {
+    public TaskHolder(T task, String taskName) {
         this.task = task;
         started = new AtomicBoolean(false);
         submitted = new AtomicBoolean(false);
+        this.taskName = taskName;
     }
 
     public T getTask() {
@@ -34,5 +36,10 @@ public class TaskHolder<T> {
 
     public void setStarted() {
         this.started.getAndSet(true);
+    }
+
+    @Override
+    public String toString() {
+        return taskName;
     }
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.TaskHolder;
 
+import javax.sound.sampled.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +25,11 @@ public class DeviceManager {
 
     private static TaskHolder<Webcam> webcamHolder;
 
-    private static TaskHolder<FFmpegFrameRecorder> videoRecorderHolder;
+    private volatile static TaskHolder<FFmpegFrameRecorder> videoRecorderHolder;
 
-    private static TaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
+    private volatile static TaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
+
+    private volatile static TaskHolder<TargetDataLine> targetDataLineHolder;
 
     public static void initWebCam() {
         TaskHolder<Webcam> webcamHolder = getWebcam();
@@ -58,12 +61,30 @@ public class DeviceManager {
     }
 
     public static void initGrabber(String inStream) {
-        try {
-            getGrabber(inStream);
-        } catch (FrameGrabber.Exception e) {
-            log.error("Init grabber failed ");
-            log.error(e.getCause().toString());
+        getGrabber(inStream);
+    }
+
+    public static void initAudioTarget() {
+        getTargetDataLineHolder();
+    }
+
+    public synchronized static TaskHolder<TargetDataLine> getTargetDataLineHolder() {
+        if (targetDataLineHolder == null) {
+            AudioFormat audioFormat = new AudioFormat(Config.getAudioSampleRate(), Config.getAudioSampleSize(),
+                    Config.getAudioChannels(), true, false);
+            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
+            try {
+                TargetDataLine targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+                targetDataLine.open();
+                targetDataLine.start();
+                targetDataLineHolder = new TaskHolder<>(targetDataLine, "TargetDataLine");
+                targetDataLineHolder.setStarted();
+            } catch (LineUnavailableException e) {
+                log.error("Start audio device failed.Cause:{}", e.getCause().toString());
+                return null;
+            }
         }
+        return targetDataLineHolder;
     }
 
     public synchronized static TaskHolder<FFmpegFrameRecorder> getVideoRecorder(String outStream) {
@@ -87,7 +108,7 @@ public class DeviceManager {
             // Max duration for analyzing video frame
             recorder.setOption("max_analyze_duration", "1");
 
-            videoRecorderHolder = new TaskHolder<>(recorder);
+            videoRecorderHolder = new TaskHolder<>(recorder, String.format("Video Recorder[%s]", outStream));
             videoRecorderHolder.submit();
         }
         return videoRecorderHolder;
@@ -109,7 +130,7 @@ public class DeviceManager {
             recorder.setOption("probesize", "1024");
             // Max duration for analyzing video frame
             recorder.setOption("max_analyze_duration", "1");
-            audioRecorderHolder = new TaskHolder<>(recorder);
+            audioRecorderHolder = new TaskHolder<>(recorder, String.format("Audio Recorder[%s]", outStream));
             audioRecorderHolder.submit();
         }
         return audioRecorderHolder;
@@ -120,7 +141,7 @@ public class DeviceManager {
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
-            TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber);
+            TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber, "Frame Grabber");
             grabberMapByDevice.put(deviceNumber, taskHolder);
         }
         return grabberMapByDevice.get(deviceNumber);
@@ -130,15 +151,15 @@ public class DeviceManager {
         if (webcamHolder == null) {
             Webcam webcam = Webcam.getDefault();
             webcam.setViewSize(new Dimension(Config.getCaptureImageWidth(), Config.getCaptureImageHeight()));
-            webcamHolder = new TaskHolder<>(webcam);
+            webcamHolder = new TaskHolder<>(webcam, "WebCam");
         }
         return webcamHolder;
     }
 
-    public static TaskHolder<FrameGrabber> getGrabber(String inStream) throws FrameGrabber.Exception {
+    public static TaskHolder<FrameGrabber> getGrabber(String inStream) {
         if (grabberMapByStream.get(inStream) == null) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
-            TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber);
+            TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber, String.format("Frame Grabber[%s]", inStream));
             grabberMapByStream.put(inStream, taskHolder);
         }
         return grabberMapByStream.get(inStream);

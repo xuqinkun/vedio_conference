@@ -22,10 +22,10 @@ public class TaskStarter {
             if (startMethod != null) {
                 Thread thread = new Thread(() -> {
                     try {
-                        LOG.warn("Start task[{}]...", task);
+                        LOG.warn("Start task[{}]...", holder);
                         startMethod.invoke(task);
                         holder.setStarted();
-                        LOG.warn("Task[{}] started", task);
+                        LOG.warn("Task[{}] started", holder);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
@@ -40,7 +40,7 @@ public class TaskStarter {
 
     public static void main(String[] args) throws FrameGrabber.Exception, InterruptedException {
         FrameGrabber grabber = FrameGrabber.createDefault(0);
-        TaskHolder<FrameGrabber> holder = new TaskHolder<>(grabber);
+        TaskHolder<FrameGrabber> holder = new TaskHolder<>(grabber, "");
         submit(holder);
         while (!holder.isStarted()) {
             Thread.sleep(100);

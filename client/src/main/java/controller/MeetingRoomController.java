@@ -64,17 +64,21 @@ public class MeetingRoomController implements Initializable {
 
     private Stage chatStage;
 
+    SessionManager sessionManager = SessionManager.getInstance();
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-        SessionManager.getInstance().setCurrentUser(new User("aa", "a"));
-        Meeting meeting = new Meeting();
-        meeting.setUuid("test");
-        SessionManager.getInstance().setCurrentMeeting(meeting);
-        Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
+        if (sessionManager.getCurrentUser() == null) { // For test
+            sessionManager.setCurrentUser(new User("aa", "a"));
+            Meeting meeting = new Meeting();
+            meeting.setUuid("test");
+            sessionManager.setCurrentMeeting(meeting);
+        }
+        Meeting currentMeeting = sessionManager.getCurrentMeeting();
         if (currentMeeting != null) {
-//            initUserList(currentMeeting);
-//            listenUserListChange(currentMeeting);
+            initUserList(currentMeeting);
+            listenUserListChange(currentMeeting);
         } else {
             log.warn("Can't find current meeting info!");
         }
@@ -93,7 +97,7 @@ public class MeetingRoomController implements Initializable {
     }
 
     private void initUserList(Meeting currentMeeting) {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
+        User currentUser = sessionManager.getCurrentUser();
         if (currentMeeting.getOwner().equals(currentUser.getName())) { // Is meeting owner
             addUser(currentUser);
         } else { // None meeting owner
@@ -110,9 +114,10 @@ public class MeetingRoomController implements Initializable {
         new Thread(() -> {
             log.warn("Initializing devices...");
             DeviceManager.initWebCam();
-            String username = SessionManager.getInstance().getCurrentUser().getName();
+            String username = sessionManager.getCurrentUser().getName();
             DeviceManager.initVideoRecorder(getVideoOutputStream(username));
             DeviceManager.initAudioRecorder(getAudioOutputStream(username));
+            DeviceManager.initAudioTarget();
         }).start();
     }
 
@@ -173,8 +178,8 @@ public class MeetingRoomController implements Initializable {
 
         log.warn("User[{}] add to list", user);
 
-        if (!user.equals(SessionManager.getInstance().getCurrentUser())) {
-            ImagePullTask task = new ImagePullTask(getVideoOutputStream(user.getName()), imageView);
+        if (!user.equals(sessionManager.getCurrentUser())) {
+            VideoPullTask task = new VideoPullTask(getVideoOutputStream(user.getName()), imageView);
             new Thread(task).start();
         }
     }
@@ -196,7 +201,7 @@ public class MeetingRoomController implements Initializable {
         if (videoSwitchBtn.isSelected()) {
             if (videoPushTask == null) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
-                User user = SessionManager.getInstance().getCurrentUser();
+                User user = sessionManager.getCurrentUser();
                 String outputStream = getVideoOutputStream(user.getName());
                 videoGrabTask = new VideoGrabTask(outputStream, mainImageView, imageLoadingTask);
                 videoPushTask = new VideoPushTask(outputStream);
@@ -215,19 +220,19 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void audioSwitch(ActionEvent event) throws LineUnavailableException {
-        User user = SessionManager.getInstance().getCurrentUser();
-        String outputStream = getVideoOutputStream(user.getName());
-        AudioPushTask audioPushTask = new AudioPushTask(outputStream, Config.getAudioSampleRate(), Config.getAudioSampleSize(), Config.getAudioChannels());
+        User user = sessionManager.getCurrentUser();
+        String outputStream = getAudioOutputStream(user.getName());
+        AudioPushTask audioPushTask = new AudioPushTask(outputStream);
         exec.scheduleAtFixedRate(audioPushTask, 1000 / Config.getRecorderFrameRate(), Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
     }
 
     public String getVideoOutputStream(String username) {
-        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
+        Meeting meeting = sessionManager.getCurrentMeeting();
         return Config.getNginxOutputStream(meeting.getUuid(), username) + "-video";
     }
 
     public String getAudioOutputStream(String username) {
-        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
+        Meeting meeting = sessionManager.getCurrentMeeting();
         return Config.getNginxOutputStream(meeting.getUuid(), username) + "-audio";
     }
 

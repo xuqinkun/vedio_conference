@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import util.DeviceManager;
 import util.ImageUtil;
 
-public class ImagePullTask extends Task<Image> {
+public class VideoPullTask extends Task<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(VideoGrabTask.class);
 
     private boolean stopped;
@@ -19,7 +19,7 @@ public class ImagePullTask extends Task<Image> {
 
     private FrameGrabber grabber;
 
-    public ImagePullTask(String inStream, ImageView iv) {
+    public VideoPullTask(String inStream, ImageView iv) {
         this.inStream = inStream;
         this.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
