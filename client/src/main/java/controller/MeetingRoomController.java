@@ -19,7 +19,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -28,7 +27,7 @@ import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
 import service.schedule.*;
 import util.Config;
-import util.DeviceUtil;
+import util.DeviceManager;
 import util.JsonUtil;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -79,7 +78,7 @@ public class MeetingRoomController implements Initializable {
         } else {
             log.warn("Can't find current meeting info!");
         }
-        initialCamera();
+        initializeDevice();
     }
 
     private void listenUserListChange(Meeting currentMeeting) {
@@ -107,11 +106,13 @@ public class MeetingRoomController implements Initializable {
         }
     }
 
-    private void initialCamera() {
+    private void initializeDevice() {
         new Thread(() -> {
-            DeviceUtil.initWebCam(Config.getCaptureDevice());
-//            String outStream = getNginxOutputStream(SessionManager.getInstance().getCurrentUser().getName());
-//            DeviceUtil.initRecorder(outStream);
+            log.warn("Initializing devices...");
+            DeviceManager.initWebCam();
+            String username = SessionManager.getInstance().getCurrentUser().getName();
+            DeviceManager.initVideoRecorder(getVideoOutputStream(username));
+            DeviceManager.initAudioRecorder(getAudioOutputStream(username));
         }).start();
     }
 
@@ -173,7 +174,7 @@ public class MeetingRoomController implements Initializable {
         log.warn("User[{}] add to list", user);
 
         if (!user.equals(SessionManager.getInstance().getCurrentUser())) {
-            ImagePullTask task = new ImagePullTask(getNginxOutputStream(user.getName()), imageView);
+            ImagePullTask task = new ImagePullTask(getVideoOutputStream(user.getName()), imageView);
             new Thread(task).start();
         }
     }
@@ -184,76 +185,50 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private ImageView mainImageView;
 
-    private ImagePushTask task;
+    private VideoPushTask videoPushTask;
 
-    private VideoSenderService service;
-    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(2);
+    private VideoGrabTask videoGrabTask;
+
+    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
 
     @FXML
     public void videoSwitch(ActionEvent event) {
         if (videoSwitchBtn.isSelected()) {
-            if (service == null) {
-//                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
-//                new Thread(imageLoadingTask).start();
+            if (videoPushTask == null) {
+                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
                 User user = SessionManager.getInstance().getCurrentUser();
-                String outputStream = getNginxOutputStream(user.getName());
-                ImageRecorderTask recorderTask = new ImageRecorderTask(outputStream);
-                exec.scheduleAtFixedRate(recorderTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
-
-                service = new VideoSenderService();
-                service.setDelay(Duration.millis(0));
-                service.setPeriod(Duration.millis(20));
-                service.start();
-//                Thread thread = new Thread(recorderTask);
-//                thread.setPriority(Thread.MAX_PRIORITY);
-//                thread.start();
-                service.valueProperty().addListener((observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        mainImageView.setImage(newValue);
-//                        if (!imageLoadingTask.isCancelled()) {
-//                            mainImageView.setRotate(0);
-//                            imageLoadingTask.cancel();
-//                        }
-                    }
-                });
+                String outputStream = getVideoOutputStream(user.getName());
+                videoGrabTask = new VideoGrabTask(outputStream, mainImageView, imageLoadingTask);
+                videoPushTask = new VideoPushTask(outputStream);
+                exec.scheduleAtFixedRate(videoPushTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
             }
-//            if (task == null || task.isDone()) {
-//                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
-//                User user = SessionManager.getInstance().getCurrentUser();
-//                String outputStream = getNginxOutputStream(user.getName());
-//                log.warn("OutputStream={}", outputStream);
-////                task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
-//                ImageRecorderTask recorderTask = new ImageRecorderTask(outputStream);
-////                executor.scheduleAtFixedRate(recorderTask, 0,
-////                        1000 / Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
-//                executor.schedule(imageLoadingTask, 0, TimeUnit.MILLISECONDS);
-////                executor.schedule(recorderTask, 0, TimeUnit.MILLISECONDS);
-//                Thread thread = new Thread(recorderTask);
-//                thread.setPriority(Thread.MAX_PRIORITY);
-//                thread.start();
-//            }
-//            if (task.isStopped()) {
-//                task.reset();
-//            }
-//            executor.schedule(task, 0, TimeUnit.MILLISECONDS);
-//            new Thread(task).start();
+            else if (videoGrabTask.isStopped()) {
+                videoGrabTask.reset();
+            }
+            exec.schedule(videoGrabTask, 0, TimeUnit.MILLISECONDS);
         } else {
-            if (task != null) {
-                task.stop();
+            if (videoGrabTask != null) {
+                videoGrabTask.stop();
             }
         }
     }
 
     @FXML
     public void audioSwitch(ActionEvent event) throws LineUnavailableException {
-        AudioPushTask audioPushTask = new AudioPushTask(Config.getAudioSampleRate(), Config.getAudioSampleSize(), Config.getAudioChannels());
+        User user = SessionManager.getInstance().getCurrentUser();
+        String outputStream = getVideoOutputStream(user.getName());
+        AudioPushTask audioPushTask = new AudioPushTask(outputStream, Config.getAudioSampleRate(), Config.getAudioSampleSize(), Config.getAudioChannels());
         exec.scheduleAtFixedRate(audioPushTask, 1000 / Config.getRecorderFrameRate(), Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
     }
 
-    public String getNginxOutputStream(String username) {
-//        return "rtmp://localhost:1935/live/room";
+    public String getVideoOutputStream(String username) {
         Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
-        return Config.getNginxOutputStream(meeting.getUuid(), username);
+        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-video";
+    }
+
+    public String getAudioOutputStream(String username) {
+        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
+        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-audio";
     }
 
     private Stage invitationStage;

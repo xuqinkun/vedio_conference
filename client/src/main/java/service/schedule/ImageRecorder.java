@@ -1,6 +1,5 @@
 package service.schedule;
 
-import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameRecorder;
@@ -48,7 +47,7 @@ public class ImageRecorder implements Runnable {
         long videoTS;
         while (!stopped) {
             try {
-                Frame frame = ImageContainer.getInstance().getFrame();
+                Frame frame = VideoContainer.getInstance().getFrame();
                 if (start == 0)
                     start = System.currentTimeMillis();
                 videoTS = (System.currentTimeMillis() - start) * 1000;

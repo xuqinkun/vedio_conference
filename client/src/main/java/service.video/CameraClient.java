@@ -12,16 +12,10 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
-import service.schedule.ImagePushTask;
-import service.schedule.ImageRecorder;
-import service.schedule.ImageRecorderTask;
+import service.schedule.VideoGrabTask;
+import service.schedule.VideoPushTask;
 import service.schedule.VideoSenderService;
-import util.DeviceUtil;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import util.DeviceManager;
 
 public class CameraClient extends Application {
 
@@ -68,23 +62,23 @@ public class CameraClient extends Application {
 //        new Thread(task).start();
 //        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
 //        exec.scheduleAtFixedRate(task, 0, 20, TimeUnit.MILLISECONDS);
-        ImageRecorderTask recorder = new ImageRecorderTask(outputStream);
-        DeviceUtil.initRecorder(outputStream);
+        VideoPushTask recorder = new VideoPushTask(outputStream);
+        DeviceManager.initVideoRecorder(outputStream);
 //        ImageRecorder recorder = new ImageRecorder(outputStream);
         Thread thread = new Thread(recorder);
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.start();
     }
 
-    private ImagePushTask startImagePushTask(ImageView iv, String outputStream) {
-        ImagePushTask task = new ImagePushTask(outputStream, iv, null);
-        DeviceUtil.initWebCam(0);
+    private VideoGrabTask startImagePushTask(ImageView iv, String outputStream) {
+        VideoGrabTask task = new VideoGrabTask(outputStream, iv, null);
+        DeviceManager.initWebCam();
         return task;
     }
 
     private void startSenderService(ImageView iv, String outputStream) throws FrameRecorder.Exception {
         VideoSenderService senderService = new VideoSenderService();
-        DeviceUtil.initWebCam(0);
+        DeviceManager.initWebCam();
         senderService.setDelay(Duration.millis(0));
         senderService.setPeriod(Duration.millis(20));
         senderService.start();

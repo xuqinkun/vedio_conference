@@ -9,18 +9,18 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ImageContainer {
-    private static final Logger LOG = LoggerFactory.getLogger(ImageContainer.class);
+public class VideoContainer {
+    private static final Logger LOG = LoggerFactory.getLogger(VideoContainer.class);
 
-    private static final ImageContainer INSTANCE = new ImageContainer();
+    private static final VideoContainer INSTANCE = new VideoContainer();
 
     private BlockingQueue<BufferedImage> imageQueue;
 
-    private ImageContainer() {
+    private VideoContainer() {
         imageQueue = new LinkedBlockingQueue<>();
     }
 
-    public static ImageContainer getInstance() {
+    public static VideoContainer getInstance() {
         return INSTANCE;
     }
 

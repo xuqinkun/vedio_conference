@@ -6,18 +6,15 @@ import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.TaskHolder;
-import util.Config;
 
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
-public class DeviceUtil {
+public class DeviceManager {
 
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
 
@@ -25,12 +22,14 @@ public class DeviceUtil {
 
     private static Map<String, TaskHolder<FrameGrabber>> grabberMapByStream = new HashMap<>();
 
-    private static Map<String, TaskHolder<FFmpegFrameRecorder>> recorderMap = new HashMap<>();
+    private static TaskHolder<Webcam> webcamHolder;
 
-    private static Map<Integer, TaskHolder<Webcam>> webcamMap = new HashMap<>();
+    private static TaskHolder<FFmpegFrameRecorder> videoRecorderHolder;
 
-    public static void initWebCam(int deviceNum) {
-        TaskHolder<Webcam> webcamHolder = getWebcam(deviceNum);
+    private static TaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
+
+    public static void initWebCam() {
+        TaskHolder<Webcam> webcamHolder = getWebcam();
         if (!webcamHolder.isStarted()) {
             Webcam webcam = webcamHolder.getTask();
             if (!webcam.isOpen()) {
@@ -42,11 +41,19 @@ public class DeviceUtil {
         }
     }
 
-    public static void initRecorder(String outStream) {
-        TaskHolder<FFmpegFrameRecorder> recorderHolder = getRecorder(outStream);
-        if (!recorderHolder.isStarted() && !recorderHolder.isSubmitted()) {
+    public static void initVideoRecorder(String outStream) {
+        videoRecorderHolder = getVideoRecorder(outStream);
+        if (!videoRecorderHolder.isStarted() && !videoRecorderHolder.isSubmitted()) {
             log.warn("Submit recorder startup task. Please wait...");
-            recorderHolder.submit();
+            videoRecorderHolder.submit();
+        }
+    }
+
+    public static void initAudioRecorder(String outStream) {
+        audioRecorderHolder = getAudioRecorder(outStream);
+        if (!audioRecorderHolder.isStarted() && !audioRecorderHolder.isSubmitted()) {
+            log.warn("Submit recorder startup task. Please wait...");
+            audioRecorderHolder.submit();
         }
     }
 
@@ -59,8 +66,9 @@ public class DeviceUtil {
         }
     }
 
-    public static TaskHolder<FFmpegFrameRecorder> getRecorder(String outStream) {
-        if (recorderMap.get(outStream) == null) {
+    public synchronized static TaskHolder<FFmpegFrameRecorder> getVideoRecorder(String outStream) {
+        if (videoRecorderHolder == null) {
+            log.warn("Create video recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
             recorder.setInterleaved(true);
             // Related to clarity 18 is good, 28 is bad.
@@ -79,15 +87,32 @@ public class DeviceUtil {
             // Max duration for analyzing video frame
             recorder.setOption("max_analyze_duration", "1");
 
+            videoRecorderHolder = new TaskHolder<>(recorder);
+            videoRecorderHolder.submit();
+        }
+        return videoRecorderHolder;
+    }
+
+    public synchronized static TaskHolder<FFmpegFrameRecorder> getAudioRecorder(String outStream) {
+        if (audioRecorderHolder == null) {
+            log.warn("Create audio recorder [out={}]", outStream);
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getAudioChannels());
+            recorder.setInterleaved(true);
+            recorder.setGopSize(2);
+            recorder.setFormat("flv");
+            recorder.setFrameRate(Config.getRecorderFrameRate());
             recorder.setSampleRate(Config.getAudioSampleRate());
-            recorder.setAudioChannels(Config.getAudioChannels());
             recorder.setAudioOption("crf", "0");
             recorder.setAudioBitrate(Config.getAudioBitrate());
             recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-            TaskHolder<FFmpegFrameRecorder> taskHolder = new TaskHolder<>(recorder);
-            recorderMap.put(outStream, taskHolder);
+            // Max bytes for reading video frame
+            recorder.setOption("probesize", "1024");
+            // Max duration for analyzing video frame
+            recorder.setOption("max_analyze_duration", "1");
+            audioRecorderHolder = new TaskHolder<>(recorder);
+            audioRecorderHolder.submit();
         }
-        return recorderMap.get(outStream);
+        return audioRecorderHolder;
     }
 
     public static TaskHolder<FrameGrabber> getGrabber(int deviceNumber) throws FrameGrabber.Exception {
@@ -101,13 +126,13 @@ public class DeviceUtil {
         return grabberMapByDevice.get(deviceNumber);
     }
 
-    public static TaskHolder<Webcam> getWebcam(int deviceNumber) {
-        if (webcamMap.get(deviceNumber) == null) {
+    public static TaskHolder<Webcam> getWebcam() {
+        if (webcamHolder == null) {
             Webcam webcam = Webcam.getDefault();
             webcam.setViewSize(new Dimension(Config.getCaptureImageWidth(), Config.getCaptureImageHeight()));
-            webcamMap.put(deviceNumber, new TaskHolder<>(webcam));
+            webcamHolder = new TaskHolder<>(webcam);
         }
-        return webcamMap.get(deviceNumber);
+        return webcamHolder;
     }
 
     public static TaskHolder<FrameGrabber> getGrabber(String inStream) throws FrameGrabber.Exception {

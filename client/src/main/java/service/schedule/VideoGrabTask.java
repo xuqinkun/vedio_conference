@@ -6,15 +6,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.Config;
-import util.DeviceUtil;
+import util.DeviceManager;
 import util.ImageUtil;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
-public class ImagePushTask extends Task<Image> {
-    private static final Logger LOG = LoggerFactory.getLogger(ImagePushTask.class);
+public class VideoGrabTask extends Task<Image> {
+    private static final Logger LOG = LoggerFactory.getLogger(VideoGrabTask.class);
 
     private boolean stopped;
 
@@ -26,13 +25,13 @@ public class ImagePushTask extends Task<Image> {
     long start = 0;
     long counter = System.currentTimeMillis();
 
-    public ImagePushTask(String outStream, ImageView iv) {
+    public VideoGrabTask(String outStream, ImageView iv) {
         this(outStream, iv, null);
     }
 
-    public ImagePushTask(String outStream, ImageView iv, ImageLoadingTask imageLoadingTask) {
+    public VideoGrabTask(String outStream, ImageView iv, ImageLoadingTask imageLoadingTask) {
         this.outStream = outStream;
-        webcamHolder = DeviceUtil.getWebcam(Config.getCaptureDevice());
+        webcamHolder = DeviceManager.getWebcam();
         this.webcam = webcamHolder.getTask();
         initListener(iv, imageLoadingTask);
     }
@@ -45,7 +44,6 @@ public class ImagePushTask extends Task<Image> {
                 iv.setRotate(0);
                 iv.setImage(newValue);
             } else {
-//                iv.setVisible(false);
                 LOG.warn("Image is null");
             }
         });
@@ -61,7 +59,7 @@ public class ImagePushTask extends Task<Image> {
                     continue;
                 }
                 BufferedImage image = webcam.getImage();
-                ImageContainer.getInstance().addImage(image);
+                VideoContainer.getInstance().addImage(image);
                 updateValue(ImageUtil.bufferedImage2JavafxImage(image));
                 if (start == 0) {
                     start = System.currentTimeMillis();

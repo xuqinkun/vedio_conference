@@ -7,11 +7,11 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.DeviceUtil;
+import util.DeviceManager;
 import util.ImageUtil;
 
 public class ImagePullTask extends Task<Image> {
-    private static final Logger LOG = LoggerFactory.getLogger(ImagePushTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VideoGrabTask.class);
 
     private boolean stopped;
 
@@ -32,7 +32,7 @@ public class ImagePullTask extends Task<Image> {
     protected Image call() throws Exception {
         while (!stopped) {
             if (grabber == null) {
-                TaskHolder<FrameGrabber> grabberHolder = DeviceUtil.getGrabber(inStream);
+                TaskHolder<FrameGrabber> grabberHolder = DeviceManager.getGrabber(inStream);
                 if (!grabberHolder.isStarted()) {
                     if (!grabberHolder.isSubmitted()) {
                         LOG.warn("Submit grabber task! Please wait...");
