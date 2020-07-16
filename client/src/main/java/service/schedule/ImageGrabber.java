@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class ImageGrabber implements Runnable {
     private FrameGrabber grabber;
     private boolean stopped;
-    private BlockingQueue<Image> imageQueue;
 
     public ImageGrabber(String input) throws FrameGrabber.Exception {
         System.out.println("input:" + input);
@@ -24,31 +23,15 @@ public class ImageGrabber implements Runnable {
             grabber = new FFmpegFrameGrabber(input);
         }
         stopped = false;
-        imageQueue = new LinkedBlockingQueue<>(10);
-    }
-
-    public Image getNext() throws InterruptedException {
-        return imageQueue.poll(10, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void run() {
-        try {
-            System.out.println("ImageGrabber: Boot grabber");
-            grabber.start();
-            System.out.println("ImageGrabber: Start grab image");
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
         while (!stopped) {
             try {
                 Frame frame = grabber.grab();
-                if (frame != null) {
-                    Image image = ImageUtil.convert(frame);
-                    if (image != null)
-                        imageQueue.put(image);
-                }
+                Image image = ImageUtil.convert(frame);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

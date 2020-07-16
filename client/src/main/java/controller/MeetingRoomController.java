@@ -19,8 +19,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -29,6 +27,7 @@ import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
 import service.schedule.*;
 import util.Config;
+import util.DeviceUtil;
 import util.JsonUtil;
 
 import java.io.IOException;
@@ -186,7 +185,7 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void videoSwitch(ActionEvent event) {
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         if (videoSwitchBtn.isSelected()) {
             if (task == null || task.isDone()) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
@@ -194,7 +193,14 @@ public class MeetingRoomController implements Initializable {
                 String outputStream = getNginxOutputStream(user.getName());
                 log.warn("OutputStream={}", outputStream);
                 task = new ImagePushTask(outputStream, mainImageView, imageLoadingTask);
+                ImageRecorderTask recorderTask = new ImageRecorderTask(outputStream);
+//                executor.scheduleAtFixedRate(recorderTask, 0,
+//                        1000 / Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
                 executor.schedule(imageLoadingTask, 0, TimeUnit.MILLISECONDS);
+//                executor.schedule(recorderTask, 0, TimeUnit.MILLISECONDS);
+                Thread thread = new Thread(recorderTask);
+                thread.setPriority(Thread.MAX_PRIORITY);
+                thread.start();
             }
             if (task.isStopped()) {
                 task.reset();

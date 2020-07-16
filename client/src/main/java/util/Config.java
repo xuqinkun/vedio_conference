@@ -34,6 +34,10 @@ public class Config {
     public static final String DEFAULT_KAFKA_CONSUMER_GROUP_ID = "consumers";
     public static final String TRUSTED_PACKAGES_KEY = "trusted.packages";
     public static final String DEFAULT_TRUSTED_PACKAGES = "*";
+    public static final String RECORDER_FRAMERATE_KEY = "recorder.framerate";
+    public static final String DEFAULT_RECORDER_FRAMERATE = "30";
+    public static final String CAPTURE_WIDTH_KEY = "capture.width";
+    public static final String CAPTURE_HEIGHT_KEY = "capture.height";
 
     private static Properties properties;
 
@@ -105,8 +109,23 @@ public class Config {
         return packages.split(",");
     }
 
+    public static int getRecorderFrameRate() {
+        String frameRate = properties.getProperty(RECORDER_FRAMERATE_KEY, DEFAULT_RECORDER_FRAMERATE);
+        return Integer.parseInt(frameRate);
+    }
+
+    public static int getCaptureImageWidth() {
+        String width = properties.getProperty(CAPTURE_WIDTH_KEY, "640");
+        return Integer.parseInt(width);
+    }
+
+    public static int getCaptureImageHeight() {
+        String width = properties.getProperty(CAPTURE_HEIGHT_KEY, "480");
+        return Integer.parseInt(width);
+    }
+
     public static void main(String[] args) {
-        System.out.println(getKafkaConsumerGroupID());
+        System.out.println(getRecorderFrameRate());
 //        System.out.println(Arrays.toString(getKafkaTrustedPackages()));
     }
 }

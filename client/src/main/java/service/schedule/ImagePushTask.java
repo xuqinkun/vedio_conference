@@ -4,10 +4,10 @@ import com.github.sarxos.webcam.Webcam;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.bytedeco.javacv.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.Config;
+import util.DeviceUtil;
 import util.ImageUtil;
 
 import java.awt.image.BufferedImage;
@@ -20,12 +20,24 @@ public class ImagePushTask extends Task<Image> {
 
     private String outStream;
 
+    private Webcam webcam;
+
+    private TaskHolder<Webcam> webcamHolder;
+    long start = 0;
+    long counter = System.currentTimeMillis();
+
     public ImagePushTask(String outStream, ImageView iv) {
         this(outStream, iv, null);
     }
 
     public ImagePushTask(String outStream, ImageView iv, ImageLoadingTask imageLoadingTask) {
         this.outStream = outStream;
+        webcamHolder = DeviceUtil.getWebcam(Config.getCaptureDevice());
+        this.webcam = webcamHolder.getTask();
+        initListener(iv, imageLoadingTask);
+    }
+
+    private void initListener(ImageView iv, ImageLoadingTask imageLoadingTask) {
         this.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 if (imageLoadingTask != null)
@@ -33,7 +45,7 @@ public class ImagePushTask extends Task<Image> {
                 iv.setRotate(0);
                 iv.setImage(newValue);
             } else {
-                iv.setVisible(false);
+//                iv.setVisible(false);
                 LOG.warn("Image is null");
             }
         });
@@ -42,45 +54,20 @@ public class ImagePushTask extends Task<Image> {
 
     @Override
     protected Image call() throws Exception {
-        long start = 0;
-        long videoTS;
-        long counter = System.currentTimeMillis();
         while (!stopped) {
             try {
-                TaskHolder<Webcam> webcamHolder = DeviceUtil.getWebcam(Config.getCaptureDevice());
-                Webcam webcam = webcamHolder.getTask();
-                TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
-                if (!webcamHolder.isStarted() || !recorderHolder.isStarted()) {
-                    if (!webcam.isOpen()) {
-                        LOG.warn("Open WebCam. Please wait...");
-                        webcam.open();
-                        webcamHolder.setStarted(true);
-                    }
-                    if (!recorderHolder.isSubmitted()) {
-                        LOG.warn("Submit recorder task. Please wait...");
-                        recorderHolder.submit();
-                    }
+                if (!webcamHolder.isStarted()) {
                     Thread.sleep(TimeUnit.SECONDS.toMillis(1));
                     continue;
                 }
                 BufferedImage image = webcam.getImage();
-                // Update local video
-                Frame frame = ImageUtil.convert(image);
-                updateValue(ImageUtil.convert(frame));
-                // Push video to Stream-Server
-                FrameRecorder recorder = recorderHolder.getTask();
+                ImageContainer.getInstance().addImage(image);
+                updateValue(ImageUtil.bufferedImage2JavafxImage(image));
                 if (start == 0) {
                     start = System.currentTimeMillis();
                 }
                 LOG.debug("{}ms", (System.currentTimeMillis() - counter));
                 counter = System.currentTimeMillis();
-                videoTS = (System.currentTimeMillis() - start) * 1000;
-                if (recorder.getTimestamp() < videoTS) {
-                    recorder.setTimestamp(videoTS);
-                }
-
-                recorder.record(frame);
-//                Thread.sleep(24);
             } catch (Exception e) {
                 e.printStackTrace();
                 Thread.sleep(TimeUnit.SECONDS.toMillis(1));

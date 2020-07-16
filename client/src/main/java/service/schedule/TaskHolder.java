@@ -4,12 +4,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TaskHolder<T> {
     private T task;
-    private volatile boolean started;
+    private volatile AtomicBoolean started;
     private volatile AtomicBoolean submitted;
 
     public TaskHolder(T task) {
         this.task = task;
-        started = false;
+        started = new AtomicBoolean(false);
         submitted = new AtomicBoolean(false);
     }
 
@@ -17,8 +17,8 @@ public class TaskHolder<T> {
         return task;
     }
 
-    public boolean isStarted() {
-        return started;
+    public synchronized boolean isStarted() {
+        return started.get();
     }
 
     public synchronized void submit() {
@@ -28,11 +28,11 @@ public class TaskHolder<T> {
         }
     }
 
-    public boolean isSubmitted() {
+    public synchronized boolean isSubmitted() {
         return submitted.get();
     }
 
-    public void setStarted(boolean started) {
-        this.started = started;
+    public void setStarted() {
+        this.started.getAndSet(true);
     }
 }

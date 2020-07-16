@@ -1,69 +1,62 @@
 package service.schedule;
 
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameRecorder;
-import util.ImageUtil;
-
-import java.awt.image.BufferedImage;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.Config;
 
 public class ImageRecorder implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(ImageRecorder.class);
     private FrameRecorder recorder;
     private boolean stopped;
-    private BlockingQueue<BufferedImage> imageQueue;
     private long start;
 
     public ImageRecorder(String output) throws FrameRecorder.Exception {
-        System.out.println("Output:" + output);
-        recorder = FrameRecorder.createDefault(output, 640, 480);
+        LOG.warn("Output:" + output);
+        recorder = new FFmpegFrameRecorder(output, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+//        recorder.setInterleaved(true);
+        // 加上音频延迟显著升高
+//        recorder.setAudioChannels(1);
+//        recorder.setAudioOption("crf", "0");
+//        recorder.setAudioQuality(0);
+//        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+//        recorder.setOption("fflags", "nobuffer");
+//        recorder.setSampleRate(44100);
+//        recorder = FrameRecorder.createDefault(output, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+//        recorder = new FFmpegFrameRecorder(output, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
         stopped = false;
-        imageQueue = new LinkedBlockingQueue<>();
         recorder.setVideoOption("crf", "18");
-        recorder.setGopSize(60);
+        // 该编码格式会增加延迟
+//        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+        recorder.setGopSize(5);
         recorder.setVideoBitrate(2000000);
         recorder.setVideoOption("tune", "zerolatency");
         recorder.setFormat("flv");
         recorder.setFrameRate(30);
         recorder.setVideoOption("preset", "ultrafast");
-        recorder.setOption("probesize", "1024");  // Max bytes for reading video frame
+        recorder.setOption("probesize", "102400");  // Max bytes for reading video frame
         recorder.setOption("max_analyze_duration", "5"); // Max duration for analyzing video frame
-    }
-
-    public void addImage(BufferedImage img) throws InterruptedException {
-        imageQueue.put(img);
+        recorder.start();
+        LOG.warn("Recorder stared");
     }
 
     @Override
     public void run() {
-        try {
-            System.out.println("Start recorder...1");
-            recorder.start();
-            System.out.println("Recorder started 1");
-        } catch (FrameRecorder.Exception e) {
-            e.printStackTrace();
-            System.err.println("Start recorder failed");
-            System.exit(1);
-        }
         long videoTS;
-        long counter = System.currentTimeMillis();
         while (!stopped) {
             try {
-                BufferedImage image = imageQueue.poll(10, TimeUnit.MILLISECONDS);
-                if (image != null) {
-                    if (start == 0)
-                        start = System.currentTimeMillis();
-                    videoTS = (System.currentTimeMillis() - start) * 1000;
-                    if (recorder.getTimestamp() < videoTS) {
-                        recorder.setTimestamp(videoTS);
-                    }
-                    Frame frame = ImageUtil.convert(image);
-                    recorder.record(frame);
-                    System.out.println(System.currentTimeMillis() - counter);
-                    counter = System.currentTimeMillis();
+                Frame frame = ImageContainer.getInstance().getFrame();
+                if (start == 0)
+                    start = System.currentTimeMillis();
+                videoTS = (System.currentTimeMillis() - start) * 1000;
+                if (recorder.getTimestamp() < videoTS) {
+                    recorder.setTimestamp(videoTS);
                 }
-            } catch (InterruptedException | FrameRecorder.Exception e) {
+                recorder.record(frame);
+            } catch (FrameRecorder.Exception e) {
                 e.printStackTrace();
             }
         }

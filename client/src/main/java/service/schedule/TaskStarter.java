@@ -24,7 +24,7 @@ public class TaskStarter {
                     try {
                         LOG.warn("Start task[{}]...", task);
                         startMethod.invoke(task);
-                        holder.setStarted(true);
+                        holder.setStarted();
                         LOG.warn("Task[{}] started", task);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();

@@ -7,6 +7,8 @@ import javafx.scene.image.Image;
 import org.bytedeco.javacv.FrameRecorder;
 import service.network.MessageSender;
 import service.network.TcpClient;
+import util.Config;
+import util.DeviceUtil;
 import util.ImageUtil;
 
 import java.awt.*;
@@ -17,47 +19,33 @@ import java.util.concurrent.Executors;
 
 public class VideoSenderService extends ScheduledService<Image> {
     private Webcam webcam;
-    private TcpClient client;
-    private boolean started;
-    private ExecutorService threadPool;
-    private ImageRecorder recorder;
+    private ImageRecorderTask recorderTask;
 
-    public VideoSenderService(String output) throws FrameRecorder.Exception {
-        webcam = Webcam.getDefault();
-        webcam.setViewSize(new Dimension(320, 240));
-        started = false;
-        recorder = new ImageRecorder(output);
+    private TaskHolder<Webcam> webcamHolder;
+
+    public VideoSenderService() {
+        webcamHolder = DeviceUtil.getWebcam(Config.getCaptureDevice());
+        this.webcam = webcamHolder.getTask();
     }
 
-    public VideoSenderService(int port) {
-        webcam = Webcam.getDefault();
-        webcam.setViewSize(new Dimension(320, 240));
-        started = false;
-        client = new MessageSender(port);
-        threadPool = Executors.newCachedThreadPool();
+    private void initRecorder(String output) {
+        recorderTask = new ImageRecorderTask(output);
+        Thread thread = new Thread(recorderTask);
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
+        DeviceUtil.initRecorder(output);
     }
 
     protected Task<Image> createTask() {
         return new Task<Image>() {
             @Override
-            protected Image call() throws java.lang.Exception {
-                if (!started) {
-//                    new Thread(client).start();
-                    Thread thread = new Thread(recorder);
-                    thread.setPriority(Thread.MAX_PRIORITY);
-                    thread.start();
-                    started = true;
+            protected Image call() {
+                if (webcamHolder.isStarted() && webcam.isOpen()) {
+                    BufferedImage bufferedImage = webcam.getImage();
+                    ImageContainer.getInstance().addImage(bufferedImage);
+                    return ImageUtil.bufferedImage2JavafxImage(bufferedImage);
                 }
-                if (!webcam.isOpen()) {
-                    System.out.println("Open WebCam");
-                    webcam.open();
-                }
-                BufferedImage bufferedImage = webcam.getImage();
-                byte[] data = ImageUtil.imageToBytes(bufferedImage);
-                Image image = new Image(new ByteArrayInputStream(data));
-//                client.addMessage(new Message(IMAGE, data.length, data));
-                recorder.addImage(bufferedImage);
-                return image;
+                return null;
             }
         };
     }
