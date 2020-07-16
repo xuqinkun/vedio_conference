@@ -1,5 +1,6 @@
 package service.schedule;
 
+import com.github.sarxos.webcam.Webcam;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import util.Config;
 import util.ImageUtil;
 
+import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
 public class ImagePushTask extends Task<Image> {
@@ -40,14 +42,19 @@ public class ImagePushTask extends Task<Image> {
 
     @Override
     protected Image call() throws Exception {
+        long start = 0;
+        long videoTS;
+        long counter = System.currentTimeMillis();
         while (!stopped) {
             try {
-                TaskHolder<FrameGrabber> grabberHolder = DeviceUtil.getGrabber(Config.getCaptureDevice());
+                TaskHolder<Webcam> webcamHolder = DeviceUtil.getWebcam(Config.getCaptureDevice());
+                Webcam webcam = webcamHolder.getTask();
                 TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
-                if (!grabberHolder.isStarted() || !recorderHolder.isStarted()) {
-                    if (!grabberHolder.isSubmitted()) {
-                        LOG.warn("Submit grabber task. Please wait...");
-                        grabberHolder.submit();
+                if (!webcamHolder.isStarted() || !recorderHolder.isStarted()) {
+                    if (!webcam.isOpen()) {
+                        LOG.warn("Open WebCam. Please wait...");
+                        webcam.open();
+                        webcamHolder.setStarted(true);
                     }
                     if (!recorderHolder.isSubmitted()) {
                         LOG.warn("Submit recorder task. Please wait...");
@@ -56,14 +63,24 @@ public class ImagePushTask extends Task<Image> {
                     Thread.sleep(TimeUnit.SECONDS.toMillis(1));
                     continue;
                 }
-                Frame frame = grabberHolder.getTask().grab();
+                BufferedImage image = webcam.getImage();
                 // Update local video
+                Frame frame = ImageUtil.convert(image);
                 updateValue(ImageUtil.convert(frame));
                 // Push video to Stream-Server
-                recorderHolder.getTask().record(frame);
+                FrameRecorder recorder = recorderHolder.getTask();
+                if (start == 0) {
+                    start = System.currentTimeMillis();
+                }
+                LOG.debug("{}ms", (System.currentTimeMillis() - counter));
+                counter = System.currentTimeMillis();
+                videoTS = (System.currentTimeMillis() - start) * 1000;
+                if (recorder.getTimestamp() < videoTS) {
+                    recorder.setTimestamp(videoTS);
+                }
 
-                LOG.info("Grab a frame");
-                Thread.sleep(20);
+                recorder.record(frame);
+//                Thread.sleep(24);
             } catch (Exception e) {
                 e.printStackTrace();
                 Thread.sleep(TimeUnit.SECONDS.toMillis(1));

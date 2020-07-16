@@ -7,6 +7,7 @@ import org.bytedeco.javacv.JavaFXFrameConverter;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -27,6 +28,11 @@ public class ImageUtil {
 
     public static Frame convert(BufferedImage image) {
         return converter2.convert(image);
+    }
+
+    public static Image bufferedImage2JavafxImage(BufferedImage bufferedImage) {
+        byte[] data = ImageUtil.imageToBytes(bufferedImage);
+        return new Image(new ByteArrayInputStream(data));
     }
 
     public static byte[] imageToBytes(BufferedImage img) {

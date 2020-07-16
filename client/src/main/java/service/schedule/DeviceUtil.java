@@ -1,34 +1,77 @@
 package service.schedule;
 
+import com.github.sarxos.webcam.Webcam;
+import controller.JoinMeetingController;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.Config;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class DeviceUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
+
     public static final int IMAGE_WIDTH = 640;
     public static final int IMAGE_HEIGHT = 480;
+
     private static Map<Integer, TaskHolder<FrameGrabber>> grabberMapByDevice = new HashMap<>();
 
     private static Map<String, TaskHolder<FrameGrabber>> grabberMapByStream = new HashMap<>();
 
     private static Map<String, TaskHolder<FrameRecorder>> recorderMap = new HashMap<>();
 
+    private static Map<Integer, TaskHolder<Webcam>> webcamMap = new HashMap<>();
+
+    public static void initWebCam(int deviceNum) {
+        TaskHolder<Webcam> webcamHolder = getWebcam(deviceNum);
+        if (!webcamHolder.isStarted()) {
+            Webcam webcam = webcamHolder.getTask();
+            if (!webcam.isOpen()) {
+                log.warn("Open WebCam. Please wait...");
+                webcam.open();
+                webcamHolder.setStarted(true);
+                log.warn("WebCam started");
+            }
+        }
+    }
+
+    public static void initRecorder(String outStream) {
+        TaskHolder<FrameRecorder> recorderHolder = getRecorder(outStream);
+        if (!recorderHolder.isStarted() && !recorderHolder.isSubmitted()) {
+            log.warn("Submit recorder task. Please wait...");
+            recorderHolder.submit();
+        }
+    }
+
+    public static void initGrabber(String inStream) {
+        try {
+            getGrabber(inStream);
+        } catch (FrameGrabber.Exception e) {
+            log.error("Init grabber failed ");
+            log.error(e.getCause().toString());
+        }
+    }
+
     public static TaskHolder<FrameRecorder> getRecorder(String outStream) {
         if (recorderMap.get(outStream) == null) {
             FrameRecorder recorder = new FFmpegFrameRecorder(outStream, IMAGE_WIDTH, IMAGE_HEIGHT, 2);
-            recorder.setVideoOption("crf", "18");
-            recorder.setGopSize(60);
+            recorder.setVideoOption("crf", "30");
+            recorder.setGopSize(5);
             recorder.setVideoBitrate(2000000);
             recorder.setVideoOption("tune", "zerolatency");
             recorder.setFormat("flv");
             recorder.setFrameRate(30);
             recorder.setVideoOption("preset", "ultrafast");
-            recorder.setOption("probesize", "34");  // Max bytes for reading video frame
-            recorder.setOption("max_analyze_duration", "10"); // Max duration for analyzing video frame
+            recorder.setOption("probesize", "1024");  // Max bytes for reading video frame
+            recorder.setOption("max_analyze_duration", "5"); // Max duration for analyzing video frame
             TaskHolder<FrameRecorder> taskHolder = new TaskHolder<>(recorder);
             recorderMap.put(outStream, taskHolder);
         }
@@ -48,6 +91,15 @@ public class DeviceUtil {
             grabberMapByDevice.put(deviceNumber, taskHolder);
         }
         return grabberMapByDevice.get(deviceNumber);
+    }
+
+    public static TaskHolder<Webcam> getWebcam(int deviceNumber) {
+        if (webcamMap.get(deviceNumber) == null) {
+            Webcam webcam = Webcam.getDefault();
+            webcam.setViewSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
+            webcamMap.put(deviceNumber, new TaskHolder<>(webcam));
+        }
+        return webcamMap.get(deviceNumber);
     }
 
     public static TaskHolder<FrameGrabber> getGrabber(String inStream) throws FrameGrabber.Exception {

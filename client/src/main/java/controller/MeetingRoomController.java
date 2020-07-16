@@ -69,26 +69,10 @@ public class MeetingRoomController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
+        SessionManager.getInstance().setCurrentUser(new User("aa", "a"));
         if (currentMeeting != null) {
-            User currentUser = SessionManager.getInstance().getCurrentUser();
-            if (currentMeeting.getOwner().equals(currentUser.getName())) { // Is meeting owner
-                addUser(currentUser);
-            } else { // None meeting owner
-                HttpResult<String> result = HttpClientUtil.getInstance().
-                        doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
-                List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
-                log.warn(userList.toString());
-                for (User user : userList)
-                    addUser(user);
-            }
-            MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
-            new Thread(task).start();
-            task.valueProperty().addListener((observable, oldValue, msg) -> {
-                if (msg.getType() == MessageType.USER_ADD) {
-                    User user = JsonUtil.jsonToObject(msg.getData(), User.class);
-                    addUser(user);
-                }
-            });
+            initUserList(currentMeeting);
+            listenUserListChange(currentMeeting);
         } else {
             log.warn("Can't find current meeting info!");
         }
@@ -96,26 +80,36 @@ public class MeetingRoomController implements Initializable {
         initialCamera();
     }
 
+    private void listenUserListChange(Meeting currentMeeting) {
+        MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
+        new Thread(task).start();
+        task.valueProperty().addListener((observable, oldValue, msg) -> {
+            if (msg.getType() == MessageType.USER_ADD) {
+                User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                addUser(user);
+            }
+        });
+    }
+
+    private void initUserList(Meeting currentMeeting) {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentMeeting.getOwner().equals(currentUser.getName())) { // Is meeting owner
+            addUser(currentUser);
+        } else { // None meeting owner
+            HttpResult<String> result = HttpClientUtil.getInstance().
+                    doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
+            List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
+            log.warn(userList.toString());
+            for (User user : userList)
+                addUser(user);
+        }
+    }
+
     private void initialCamera() {
         new Thread(() -> {
-            TaskHolder<FrameGrabber> grabberHolder;
-            try {
-                grabberHolder = DeviceUtil.getGrabber(Config.getCaptureDevice());
-                String outStream = getNginxOutputStream(SessionManager.getInstance().getCurrentUser().getName());
-                TaskHolder<FrameRecorder> recorderHolder = DeviceUtil.getRecorder(outStream);
-                if (!grabberHolder.isStarted() || !recorderHolder.isStarted()) {
-                    if (!grabberHolder.isSubmitted()) {
-                        log.warn("Submit grabber task. Please wait...");
-                        grabberHolder.submit();
-                    }
-                    if (!recorderHolder.isSubmitted()) {
-                        log.warn("Submit recorder task. Please wait...");
-                        recorderHolder.submit();
-                    }
-                }
-            } catch (FrameGrabber.Exception e) {
-                e.printStackTrace();
-            }
+            DeviceUtil.initWebCam(Config.getCaptureDevice());
+            String outStream = getNginxOutputStream(SessionManager.getInstance().getCurrentUser().getName());
+            DeviceUtil.initRecorder(outStream);
         }).start();
     }
 
@@ -215,8 +209,9 @@ public class MeetingRoomController implements Initializable {
     }
 
     public String getNginxOutputStream(String username) {
-        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
-        return Config.getNginxOutputStream(meeting.getUuid(), username);
+        return "rtmp://localhost:1935/live/room";
+//        Meeting meeting = SessionManager.getInstance().getCurrentMeeting();
+//        return Config.getNginxOutputStream(meeting.getUuid(), username);
     }
 
     private Stage invitationStage;

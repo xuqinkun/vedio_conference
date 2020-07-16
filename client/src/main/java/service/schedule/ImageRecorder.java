@@ -13,6 +13,7 @@ public class ImageRecorder implements Runnable {
     private FrameRecorder recorder;
     private boolean stopped;
     private BlockingQueue<BufferedImage> imageQueue;
+    private long start;
 
     public ImageRecorder(String output) throws FrameRecorder.Exception {
         System.out.println("Output:" + output);
@@ -22,12 +23,12 @@ public class ImageRecorder implements Runnable {
         recorder.setVideoOption("crf", "18");
         recorder.setGopSize(60);
         recorder.setVideoBitrate(2000000);
-        recorder.setVideoOption("tune","zerolatency");
+        recorder.setVideoOption("tune", "zerolatency");
         recorder.setFormat("flv");
         recorder.setFrameRate(30);
         recorder.setVideoOption("preset", "ultrafast");
-        recorder.setOption("probesize", "34");  // Max bytes for reading video frame
-        recorder.setOption("max_analyze_duration", "10"); // Max duration for analyzing video frame
+        recorder.setOption("probesize", "1024");  // Max bytes for reading video frame
+        recorder.setOption("max_analyze_duration", "5"); // Max duration for analyzing video frame
     }
 
     public void addImage(BufferedImage img) throws InterruptedException {
@@ -45,12 +46,22 @@ public class ImageRecorder implements Runnable {
             System.err.println("Start recorder failed");
             System.exit(1);
         }
+        long videoTS;
+        long counter = System.currentTimeMillis();
         while (!stopped) {
             try {
                 BufferedImage image = imageQueue.poll(10, TimeUnit.MILLISECONDS);
                 if (image != null) {
+                    if (start == 0)
+                        start = System.currentTimeMillis();
+                    videoTS = (System.currentTimeMillis() - start) * 1000;
+                    if (recorder.getTimestamp() < videoTS) {
+                        recorder.setTimestamp(videoTS);
+                    }
                     Frame frame = ImageUtil.convert(image);
                     recorder.record(frame);
+                    System.out.println(System.currentTimeMillis() - counter);
+                    counter = System.currentTimeMillis();
                 }
             } catch (InterruptedException | FrameRecorder.Exception e) {
                 e.printStackTrace();

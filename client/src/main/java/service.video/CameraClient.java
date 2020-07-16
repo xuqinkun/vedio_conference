@@ -60,7 +60,7 @@ public class CameraClient extends Application {
             }
         });
 
-        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room2");
+        VideoSenderService senderService = new VideoSenderService("rtmp://localhost:1935/live/room");
 //        VideoSenderService senderService = new VideoSenderService(8888);
 
         senderService.setRestartOnFailure(true);
@@ -94,11 +94,4 @@ public class CameraClient extends Application {
         });
     }
 
-    private void startSender(Button startBtn, Button cancelBtn, Button resetBtn, Button restartBtn, ImageView iv) throws FrameRecorder.Exception {
-//        Client client = new Client("localhost", 8888);
-//        ExecutorService executor = Executors.newCachedThreadPool();
-//        executor.submit(recorder);
-
-
-    }
 }

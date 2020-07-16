@@ -1,13 +1,16 @@
 package service.schedule;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class TaskHolder<T> {
     private T task;
     private volatile boolean started;
-    private boolean submitted;
+    private volatile AtomicBoolean submitted;
 
     public TaskHolder(T task) {
         this.task = task;
         started = false;
+        submitted = new AtomicBoolean(false);
     }
 
     public T getTask() {
@@ -18,13 +21,15 @@ public class TaskHolder<T> {
         return started;
     }
 
-    public void submit() {
-        TaskStarter.submit(this);
-        submitted = true;
+    public synchronized void submit() {
+        if (!submitted.get()) {
+            TaskStarter.submit(this);
+            submitted.getAndSet(true);
+        }
     }
 
     public boolean isSubmitted() {
-        return submitted;
+        return submitted.get();
     }
 
     public void setStarted(boolean started) {

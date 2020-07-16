@@ -1,11 +1,10 @@
 package javacv;
 
 import javafx.application.Application;
-import javafx.concurrent.ScheduledService;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,18 +13,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 
-import javax.sound.sampled.*;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.SourceDataLine;
 
 public class VideoReceiver extends Application {
 
@@ -40,123 +35,69 @@ public class VideoReceiver extends Application {
         VBox vBox = new VBox(20);
         HBox hBox = new HBox(20);
 
-        Button startBtn = new Button("开始");
-        Button cancelBtn = new Button("取消");
-        Button resetBtn = new Button("重置");
-        Button restartBtn = new Button("重启");
         ProgressBar progressBar = new ProgressBar(0);
         progressBar.setPrefWidth(200);
 
-        Label l1 = new Label("state");
-        Label l2 = new Label("value");
-        Label l3 = new Label("title");
-        Label l4 = new Label("message");
-
         ImageView iv = new ImageView(new Image("fxml/img/orange.png"));
-
-        hBox.getChildren().addAll(startBtn, cancelBtn, restartBtn, resetBtn, progressBar, l1, l2, l3, l4);
-
         vBox.getChildren().addAll(hBox, iv);
         root.getChildren().add(vBox);
-
-
         primaryStage.setScene(new Scene(root, 600, 600));
         primaryStage.show();
 
         String input = "rtmp://localhost:1935/live/room";
-        MyScheduledService scheduledService = new MyScheduledService(root, input);
-        //等待5s开始、
-        //任务失败后重启
-        scheduledService.setRestartOnFailure(true);
-        // 任务失败4次后不重启
-        scheduledService.setMaximumFailureCount(4);
-        //任务启动策略
-//        scheduledService.setBackoffStrategy();
-        //延迟0毫秒
-        scheduledService.setDelay(Duration.millis(0));
-        //间隔1000毫秒执行一次
-        scheduledService.setPeriod(Duration.millis(20));
-
-        startBtn.setOnAction(event -> {
-            scheduledService.start();
-            System.out.println("开始");
-        });
-        cancelBtn.setOnAction(event -> {
-            scheduledService.cancel();
-            System.out.println("取消");
-        });
-        resetBtn.setOnAction(event -> {
-            scheduledService.reset();
-            System.out.println("重置");
-        });
-        restartBtn.setOnAction(event -> {
-            scheduledService.restart();
-            System.out.println("重启");
-        });
-
-        scheduledService.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                iv.setImage(newValue);
-            }
-        });
+        ReceiverTask task = new ReceiverTask(iv, input);
+        new Thread(task).start();
     }
 
 
-    static class MyScheduledService extends ScheduledService<Image> {
-
-        Pane bp;
+    static class ReceiverTask extends Task<Image> {
+        ImageView view;
         FFmpegFrameGrabber grabber;
-        boolean isRunning;
+        boolean stopped;
         JavaFXFrameConverter converter;
-        SourceDataLine mSourceLine;
+        long last;
 
-        public MyScheduledService(Pane bp, String input) {
-            this.bp = bp;
+        public ReceiverTask(ImageView view, String input) {
+            this.view = view;
             converter = new JavaFXFrameConverter();
             grabber = new FFmpegFrameGrabber(input);
-            AudioFormat audioFormat = new AudioFormat(44100.0F, 16, 2, true, false);
-            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
             try {
-                mSourceLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
-                mSourceLine.open(audioFormat);
-                mSourceLine.start();
-
-
+                grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+                grabber.setVideoOption("crf", "18");
+                grabber.setVideoBitrate(2000000);
+                // 该参数用于降低延迟
+                // ultrafast(终极快)提供最少的压缩（低编码器CPU）和最大的视频流大小；
+                grabber.setVideoOption("tune", "zerolatency");
+                // 提供输出流封装格式(rtmp协议只支持flv封装格式)
                 grabber.setFormat("flv");
-                grabber.setSampleRate(44100);
-                grabber.setFrameRate(24);
-                grabber.setAudioChannels(2);
-                grabber.setAudioOption("crf", "0");
-                grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-
+                // 视频帧率(保证视频质量的情况下最低25，低于25会出现闪屏
+                grabber.setFrameRate(30);
+                // 关键帧间隔，一般与帧率相同或者是视频帧率的两倍
+//                        recorder.setVideoQuality(0);
+                grabber.setVideoOption("preset", "ultrafast");
                 grabber.start();
-            } catch (LineUnavailableException | FrameGrabber.Exception e) {
+            } catch (FrameGrabber.Exception e) {
                 e.printStackTrace();
             }
+            valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    view.setImage(newValue);
+                }
+            });
         }
 
-        protected Task<Image> createTask() {
-            return new Task<Image>() {
-                @Override
-                protected Image call() throws Exception {
-                    Frame frame = grabber.grab();
-                    Buffer[] samples = frame.samples;
-                    if (samples != null && samples.length > 0) {
-                        ShortBuffer buffer = (ShortBuffer) samples[0];
-                        short[] shorts = new short[buffer.limit()];
-                        buffer.get(shorts);
-                        byte[] data = new byte[shorts.length * 2];
-                        ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(shorts);
-                        mSourceLine.write(data, 0, data.length);
-                    }
-//                    if (buffer != null) {
-//                        byte[] data = new byte[buffer.limit()];
-//                        buffer.get(data);
-//                        mSourceLine.write(data, 0, data.length);
-//                    }
-                    return converter.convert(frame);
+        @Override
+        protected Image call() throws Exception {
+            last = System.currentTimeMillis();
+            while (!stopped) {
+                Frame frame = grabber.grab();
+                if (frame.imageWidth > 0 && frame.imageHeight > 0) {
+                    updateValue(converter.convert(frame));
+                    System.out.println(System.currentTimeMillis() - last);
+                    last = System.currentTimeMillis();
                 }
-            };
+            }
+            return null;
         }
     }
 }
