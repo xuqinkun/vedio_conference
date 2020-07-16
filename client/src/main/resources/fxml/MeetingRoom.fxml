@@ -33,7 +33,7 @@
                   </BorderPane>
                   <GridPane alignment="CENTER" prefHeight="82.0" prefWidth="688.0">
                      <children>
-                        <RadioButton mnemonicParsing="false" text="Audio" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+                        <RadioButton mnemonicParsing="false" onAction="#audioSwitch" text="Audio" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton fx:id="videoSwitchBtn" mnemonicParsing="false" onAction="#videoSwitch" prefHeight="16.0" prefWidth="58.0" text="Video" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                         <RadioButton fx:id="inviteBtn" mnemonicParsing="false" onAction="#invite" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />

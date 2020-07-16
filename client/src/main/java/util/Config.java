@@ -124,8 +124,28 @@ public class Config {
         return Integer.parseInt(width);
     }
 
+    public static int getAudioSampleRate() {
+        String sampleRate = properties.getProperty("audio.samplerate", "44100");
+        return Integer.parseInt(sampleRate);
+    }
+
+    public static int getAudioSampleSize() {
+        String sampleRate = properties.getProperty("audio.samplesize", "16");
+        return Integer.parseInt(sampleRate);
+    }
+
+    public static int getAudioBitrate() {
+        String sampleRate = properties.getProperty("audio.bitrate", "192000");
+        return Integer.parseInt(sampleRate);
+    }
+
+    public static int getAudioChannels() {
+        String sampleRate = properties.getProperty("audio.channels", "2");
+        return Integer.parseInt(sampleRate);
+    }
+
     public static void main(String[] args) {
-        System.out.println(getRecorderFrameRate());
+        System.out.println(getAudioChannels());
 //        System.out.println(Arrays.toString(getKafkaTrustedPackages()));
     }
 }

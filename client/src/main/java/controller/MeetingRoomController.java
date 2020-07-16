@@ -31,12 +31,13 @@ import util.Config;
 import util.DeviceUtil;
 import util.JsonUtil;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class MeetingRoomController implements Initializable {
 
@@ -67,15 +68,17 @@ public class MeetingRoomController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
+        SessionManager.getInstance().setCurrentUser(new User("aa", "a"));
+        Meeting meeting = new Meeting();
+        meeting.setUuid("test");
+        SessionManager.getInstance().setCurrentMeeting(meeting);
         Meeting currentMeeting = SessionManager.getInstance().getCurrentMeeting();
-//        SessionManager.getInstance().setCurrentUser(new User("aa", "a"));
         if (currentMeeting != null) {
-            initUserList(currentMeeting);
-            listenUserListChange(currentMeeting);
+//            initUserList(currentMeeting);
+//            listenUserListChange(currentMeeting);
         } else {
             log.warn("Can't find current meeting info!");
         }
-
         initialCamera();
     }
 
@@ -107,8 +110,8 @@ public class MeetingRoomController implements Initializable {
     private void initialCamera() {
         new Thread(() -> {
             DeviceUtil.initWebCam(Config.getCaptureDevice());
-            String outStream = getNginxOutputStream(SessionManager.getInstance().getCurrentUser().getName());
-            DeviceUtil.initRecorder(outStream);
+//            String outStream = getNginxOutputStream(SessionManager.getInstance().getCurrentUser().getName());
+//            DeviceUtil.initRecorder(outStream);
         }).start();
     }
 
@@ -184,32 +187,33 @@ public class MeetingRoomController implements Initializable {
     private ImagePushTask task;
 
     private VideoSenderService service;
+    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(2);
 
     @FXML
     public void videoSwitch(ActionEvent event) {
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
         if (videoSwitchBtn.isSelected()) {
             if (service == null) {
-                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
-                new Thread(imageLoadingTask).start();
+//                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
+//                new Thread(imageLoadingTask).start();
                 User user = SessionManager.getInstance().getCurrentUser();
                 String outputStream = getNginxOutputStream(user.getName());
-                log.warn("OutputStream={}", outputStream);
                 ImageRecorderTask recorderTask = new ImageRecorderTask(outputStream);
+                exec.scheduleAtFixedRate(recorderTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+
                 service = new VideoSenderService();
                 service.setDelay(Duration.millis(0));
                 service.setPeriod(Duration.millis(20));
                 service.start();
-                Thread thread = new Thread(recorderTask);
-                thread.setPriority(Thread.MAX_PRIORITY);
-                thread.start();
+//                Thread thread = new Thread(recorderTask);
+//                thread.setPriority(Thread.MAX_PRIORITY);
+//                thread.start();
                 service.valueProperty().addListener((observable, oldValue, newValue) -> {
                     if (newValue != null) {
                         mainImageView.setImage(newValue);
-                        if (!imageLoadingTask.isCancelled()) {
-                            mainImageView.setRotate(0);
-                            imageLoadingTask.cancel();
-                        }
+//                        if (!imageLoadingTask.isCancelled()) {
+//                            mainImageView.setRotate(0);
+//                            imageLoadingTask.cancel();
+//                        }
                     }
                 });
             }
@@ -238,6 +242,12 @@ public class MeetingRoomController implements Initializable {
                 task.stop();
             }
         }
+    }
+
+    @FXML
+    public void audioSwitch(ActionEvent event) throws LineUnavailableException {
+        AudioPushTask audioPushTask = new AudioPushTask(Config.getAudioSampleRate(), Config.getAudioSampleSize(), Config.getAudioChannels());
+        exec.scheduleAtFixedRate(audioPushTask, 1000 / Config.getRecorderFrameRate(), Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
     }
 
     public String getNginxOutputStream(String username) {

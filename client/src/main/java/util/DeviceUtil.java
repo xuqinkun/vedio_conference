@@ -25,7 +25,7 @@ public class DeviceUtil {
 
     private static Map<String, TaskHolder<FrameGrabber>> grabberMapByStream = new HashMap<>();
 
-    private static Map<String, TaskHolder<FrameRecorder>> recorderMap = new HashMap<>();
+    private static Map<String, TaskHolder<FFmpegFrameRecorder>> recorderMap = new HashMap<>();
 
     private static Map<Integer, TaskHolder<Webcam>> webcamMap = new HashMap<>();
 
@@ -43,7 +43,7 @@ public class DeviceUtil {
     }
 
     public static void initRecorder(String outStream) {
-        TaskHolder<FrameRecorder> recorderHolder = getRecorder(outStream);
+        TaskHolder<FFmpegFrameRecorder> recorderHolder = getRecorder(outStream);
         if (!recorderHolder.isStarted() && !recorderHolder.isSubmitted()) {
             log.warn("Submit recorder startup task. Please wait...");
             recorderHolder.submit();
@@ -59,9 +59,10 @@ public class DeviceUtil {
         }
     }
 
-    public static TaskHolder<FrameRecorder> getRecorder(String outStream) {
+    public static TaskHolder<FFmpegFrameRecorder> getRecorder(String outStream) {
         if (recorderMap.get(outStream) == null) {
-            FrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+            recorder.setInterleaved(true);
             // Related to clarity 18 is good, 28 is bad.
             recorder.setVideoOption("crf", "28");
 //            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
@@ -73,15 +74,17 @@ public class DeviceUtil {
             recorder.setFormat("flv");
             recorder.setFrameRate(Config.getRecorderFrameRate());
             recorder.setVideoOption("preset", "ultrafast");
-            recorder.setOption("probesize", "10240");  // Max bytes for reading video frame
-            recorder.setOption("max_analyze_duration", "5"); // Max duration for analyzing video frame
+            // Max bytes for reading video frame
+            recorder.setOption("probesize", "1024");
+            // Max duration for analyzing video frame
+            recorder.setOption("max_analyze_duration", "1");
 
-//            recorder.setSampleRate(44100);
-//            recorder.setAudioChannels(2);
-//            recorder.setAudioOption("crf","0");
-//            recorder.setAudioBitrate(192000);
-//            recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
-            TaskHolder<FrameRecorder> taskHolder = new TaskHolder<>(recorder);
+            recorder.setSampleRate(Config.getAudioSampleRate());
+            recorder.setAudioChannels(Config.getAudioChannels());
+            recorder.setAudioOption("crf", "0");
+            recorder.setAudioBitrate(Config.getAudioBitrate());
+            recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+            TaskHolder<FFmpegFrameRecorder> taskHolder = new TaskHolder<>(recorder);
             recorderMap.put(outStream, taskHolder);
         }
         return recorderMap.get(outStream);

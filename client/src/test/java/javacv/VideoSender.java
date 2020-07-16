@@ -71,7 +71,7 @@ public class VideoSender extends Application {
         FrameGrabber grabber;
         boolean isRunning;
         JavaFXFrameConverter converter;
-        FrameRecorder recorder;
+        FFmpegFrameRecorder recorder;
         long startTime = 0;
 
         public VideoSenderService() throws FrameGrabber.Exception {
@@ -86,8 +86,13 @@ public class VideoSender extends Application {
                 protected Image call() throws Exception {
                     if (!isRunning) {
                         isRunning = true;
-                        recorder = FrameRecorder.createDefault("rtmp://localhost:1935/live/room", 640, 480);
+                        recorder = FFmpegFrameRecorder.createDefault("rtmp://localhost:1935/live/room", 640, 480);
 //                        recorder.setInterleaved(true);
+                        recorder.setAudioChannels(2);
+                        recorder.setAudioOption("crf", "0");
+                        recorder.setAudioQuality(0);
+                        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+
                         recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 //                        recorder.setVideoOption("crf", "18");
 //                        recorder.setVideoBitrate(2000000);

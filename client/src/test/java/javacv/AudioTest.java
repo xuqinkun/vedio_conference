@@ -25,6 +25,9 @@ public class AudioTest {
 //        grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         recorder.setFormat("flv");
         recorder.setSampleRate(44100);
+//        recorder.setOption("probesize", "1024");
+//        // Max duration for analyzing video frame
+//        recorder.setOption("max_analyze_duration", "1");
         recorder.setFrameRate(frameRate);
         recorder.setAudioChannels(2);
         recorder.setAudioOption("crf", "0");
@@ -33,19 +36,9 @@ public class AudioTest {
         recorder.start();
 
         Runnable crabAudio = recordMicroPhone(4, recorder, frameRate);//对应上面的方法体
-        ScheduledFuture tasker = exec.scheduleAtFixedRate(crabAudio, 1000 / frameRate, (long) 1000 / frameRate,
+        ScheduledFuture tasker = exec.scheduleAtFixedRate(crabAudio, 1000 / frameRate, frameRate,
                 TimeUnit.MILLISECONDS);
         Thread.sleep(5000 * 1000);
-//
-//        recorder.stop();
-//        recorder.release();
-//        recorder.close();
-//
-//        tasker.cancel(true);
-//        exec.shutdown();
-//        if (!exec.isShutdown()) {
-//            exec.shutdownNow();
-//        }
     }
 
     public static Runnable recordMicroPhone(int audioDevice, FFmpegFrameRecorder recorder, int frameRate) throws FrameRecorder.Exception, LineUnavailableException, FrameGrabber.Exception {
@@ -75,7 +68,7 @@ public class AudioTest {
             return null;
         }
 //        TargetDataLine targetDataLine = (TargetDataLine) mixer.getLine(dataLineInfo);
-        TargetDataLine targetDataLine = (TargetDataLine)line;
+        TargetDataLine targetDataLine = (TargetDataLine) line;
         try {
             targetDataLine.open(audioFormat);
         } catch (LineUnavailableException e1) {
@@ -97,51 +90,36 @@ public class AudioTest {
         int audioBufferSize = sampleRate * numChannels;
         byte[] audioBytes = new byte[audioBufferSize];
 
-        return new Runnable() {
-
-            @Override
-            public void run() {
-                // 非阻塞方式读取
-                int nBytesRead = targetDataLine.read(audioBytes, 0, targetDataLine.available());
-                // 因为我们设置的是16位音频格式,所以需要将byte[]转成short[]
-                int nSamplesRead = nBytesRead / 2;
-                short[] samples = new short[nSamplesRead];
-                /**
-                 * ByteBuffer.wrap(audioBytes)-将byte[]数组包装到缓冲区
-                 * ByteBuffer.order(ByteOrder)-按little-endian修改字节顺序，解码器定义的
-                 * ByteBuffer.asShortBuffer()-创建一个新的short[]缓冲区
-                 * ShortBuffer.get(samples)-将缓冲区里short数据传输到short[]
-                 */
-                ByteBuffer.wrap(audioBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(samples);
-                // 将short[]包装到ShortBuffer
-                ShortBuffer sBuff = ShortBuffer.wrap(samples, 0, nSamplesRead);
-                // 按通道录制shortBuffer
-                try {
-                    if (recorder.recordSamples(sampleRate, numChannels, sBuff)) {
+        return () -> {
+            // 非阻塞方式读取
+            int nBytesRead = targetDataLine.read(audioBytes, 0, targetDataLine.available());
+            // 因为我们设置的是16位音频格式,所以需要将byte[]转成short[]
+            int nSamplesRead = nBytesRead / 2;
+            short[] samples = new short[nSamplesRead];
+            /**
+             * ByteBuffer.wrap(audioBytes)-将byte[]数组包装到缓冲区
+             * ByteBuffer.order(ByteOrder)-按little-endian修改字节顺序，解码器定义的
+             * ByteBuffer.asShortBuffer()-创建一个新的short[]缓冲区
+             * ShortBuffer.get(samples)-将缓冲区里short数据传输到short[]
+             */
+            ByteBuffer.wrap(audioBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(samples);
+            // 将short[]包装到ShortBuffer
+            ShortBuffer sBuff = ShortBuffer.wrap(samples, 0, nSamplesRead);
+            // 按通道录制shortBuffer
+            try {
+                if (recorder.recordSamples(sampleRate, numChannels, sBuff)) {
 //                        recorder.flush();
-                    } else {
-                        System.out.println("Failed");
-                    }
-                } catch (FrameRecorder.Exception e) {
-                    e.printStackTrace();
+                } else {
+                    System.out.println("Failed");
                 }
+            } catch (FrameRecorder.Exception e) {
+                e.printStackTrace();
+            }
 //                try {
 //                    recorder.record(grabber.grab());
 //                } catch (FrameRecorder.Exception | FrameGrabber.Exception e) {
 //                    e.printStackTrace();
 //                }
-            }
-
-//            @Override
-//            protected void finalize() throws Throwable {
-//                System.out.println("finalize");
-//                recorder.flush();
-//                recorder.close();
-//                sBuff.clear();
-//                sBuff = null;
-//                targetDataLine.close();
-//                super.finalize();
-//            }
         };
     }
 
