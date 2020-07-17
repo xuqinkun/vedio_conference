@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import service.schedule.TaskHolder;
 import util.DeviceManager;
 
-public class VideoPushTask implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(VideoPushTask.class);
+public class VideoRecordTask implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(VideoRecordTask.class);
 
     private FFmpegFrameRecorder recorder;
     private long start;
     private TaskHolder<FFmpegFrameRecorder> recorderHolder;
 
-    public VideoPushTask(String output) {
+    public VideoRecordTask(String output) {
         LOG.warn(output);
         recorderHolder = DeviceManager.getVideoRecorder(output);
         recorder = recorderHolder.getTask();

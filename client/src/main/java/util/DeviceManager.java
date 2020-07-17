@@ -133,6 +133,8 @@ public class DeviceManager {
             recorder.setAudioOption("crf", "0");
             recorder.setAudioBitrate(Config.getAudioBitrate());
             recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+            // High quality, high latency
+//            recorder.setAudioQuality(0);
             // Max bytes for reading video frame
             recorder.setOption("probesize", "1024");
             // Max duration for analyzing video frame

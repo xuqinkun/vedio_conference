@@ -26,16 +26,14 @@ import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
 import service.schedule.*;
-import service.schedule.audio.AudioPushTask;
-import service.schedule.video.Grabber;
+import service.schedule.audio.AudioRecordService;
 import service.schedule.video.GrabberScheduledService;
-import service.schedule.video.VideoPullTask;
-import service.schedule.video.VideoPushTask;
+import service.schedule.video.VideoPullService;
+import service.schedule.video.VideoRecordTask;
 import util.Config;
 import util.DeviceManager;
 import util.JsonUtil;
 
-import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -67,11 +65,11 @@ public class MeetingRoomController implements Initializable {
     private RadioButton videoSwitchBtn;
     @FXML
     private ImageView mainImageView;
-    private VideoPushTask videoPushTask;
+    private VideoRecordTask videoRecordTask;
     private GrabberScheduledService grabberScheduledService;
     @FXML
     private RadioButton audioSwitchBtn;
-    private AudioPushTask audioPushTask;
+    private AudioRecordService audioRecordService;
     private Stage invitationStage;
     @FXML
     private RadioButton inviteBtn;
@@ -196,23 +194,22 @@ public class MeetingRoomController implements Initializable {
         log.warn("User[{}] add to list", user);
 
         if (!user.equals(sessionManager.getCurrentUser())) {
-            VideoPullTask task = new VideoPullTask(getVideoOutputStream(user.getName()), imageView);
-            new Thread(task).start();
+            VideoPullService pullService = new VideoPullService(getVideoOutputStream(user.getName()), imageView);
+
         }
     }
-
 
     @FXML
     public void videoSwitch(ActionEvent event) {
         if (videoSwitchBtn.isSelected()) {
             log.warn("Open video");
-            if (videoPushTask == null || grabberScheduledService == null) {
+            if (videoRecordTask == null || grabberScheduledService == null) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
                 User user = sessionManager.getCurrentUser();
                 String outputStream = getVideoOutputStream(user.getName());
                 grabberScheduledService = new GrabberScheduledService(mainImageView, imageLoadingTask);
-                videoPushTask = new VideoPushTask(outputStream);
-                exec.scheduleAtFixedRate(videoPushTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+                videoRecordTask = new VideoRecordTask(outputStream);
+                exec.scheduleAtFixedRate(videoRecordTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
                 grabberScheduledService.start();
             } else if (!grabberScheduledService.isRunning()) {
                 grabberScheduledService.restart();
@@ -230,16 +227,18 @@ public class MeetingRoomController implements Initializable {
     public void audioSwitch(ActionEvent event) {
         if (audioSwitchBtn.isSelected()) {
             log.warn("Audio open");
-            if (audioPushTask == null) {
+            if (audioRecordService == null) {
                 User user = sessionManager.getCurrentUser();
                 String outputStream = getAudioOutputStream(user.getName());
-                audioPushTask = new AudioPushTask(outputStream);
+                audioRecordService = new AudioRecordService(outputStream);
+                audioRecordService.start();
+            } else if (!audioRecordService.isRunning()) {
+                audioRecordService.restart();
             }
-            exec.scheduleAtFixedRate(audioPushTask, 1000 / Config.getRecorderFrameRate(),
-                    Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+
         } else {
             log.warn("Audio close");
-            exec.remove(audioPushTask);
+            audioRecordService.cancel();
         }
         event.consume();
     }
