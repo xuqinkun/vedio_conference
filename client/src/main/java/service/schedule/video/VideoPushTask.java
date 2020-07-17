@@ -1,10 +1,11 @@
-package service.schedule;
+package service.schedule.video;
 
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.schedule.TaskHolder;
 import util.DeviceManager;
 
 public class VideoPushTask implements Runnable {

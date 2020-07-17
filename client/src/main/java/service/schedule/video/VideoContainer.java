@@ -1,4 +1,4 @@
-package service.schedule;
+package service.schedule.video;
 
 import org.bytedeco.javacv.Frame;
 import org.slf4j.Logger;

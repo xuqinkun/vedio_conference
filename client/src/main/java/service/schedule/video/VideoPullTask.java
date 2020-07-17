@@ -1,4 +1,4 @@
-package service.schedule;
+package service.schedule.video;
 
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -7,6 +7,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.schedule.TaskHolder;
 import util.DeviceManager;
 import util.ImageUtil;
 
