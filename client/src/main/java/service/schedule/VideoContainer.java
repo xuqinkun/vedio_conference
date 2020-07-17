@@ -3,6 +3,7 @@ package service.schedule;
 import org.bytedeco.javacv.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Config;
 import util.ImageUtil;
 
 import java.awt.image.BufferedImage;
@@ -14,10 +15,16 @@ public class VideoContainer {
 
     private static final VideoContainer INSTANCE = new VideoContainer();
 
-    private BlockingQueue<BufferedImage> imageQueue;
+    private final BlockingQueue<BufferedImage> imageQueue;
+
+    private final BlockingQueue<Frame> frameQueue;
+
+    private final boolean useWebcam;
 
     private VideoContainer() {
         imageQueue = new LinkedBlockingQueue<>();
+        frameQueue = new LinkedBlockingQueue<>();
+        useWebcam = Config.useWebcam();
     }
 
     public static VideoContainer getInstance() {
@@ -32,13 +39,23 @@ public class VideoContainer {
         }
     }
 
+    public void addFrame(Frame frame) {
+        frameQueue.offer(frame);
+    }
+
     public Frame getFrame() {
+        Frame frame;
         try {
-            BufferedImage image = imageQueue.take();
-            return ImageUtil.convert(image);
+            if (useWebcam) {
+                BufferedImage image = imageQueue.take();
+                frame = ImageUtil.convert(image);
+            } else {
+                frame = frameQueue.take();
+            }
         } catch (InterruptedException e) {
             LOG.error(e.getCause().toString());
-            return null;
+            frame = null;
         }
+        return frame;
     }
 }

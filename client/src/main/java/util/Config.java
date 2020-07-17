@@ -143,8 +143,14 @@ public class Config {
         return Integer.parseInt(sampleRate);
     }
 
+    public static boolean useWebcam() {
+        String useWebcam = properties.getProperty("useWebcam", "true");
+        return Boolean.parseBoolean(useWebcam);
+    }
+
     public static void main(String[] args) {
-        System.out.println(getAudioChannels());
+//        System.out.println(useWebcam());
+        log.warn("{}", useWebcam());
 //        System.out.println(Arrays.toString(getKafkaTrustedPackages()));
     }
 }

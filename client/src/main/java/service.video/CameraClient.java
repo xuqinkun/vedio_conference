@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
-import service.schedule.VideoGrabTask;
+import service.schedule.FFmpegGrabberTask;
 import service.schedule.VideoPushTask;
 import service.schedule.VideoSenderService;
 import util.DeviceManager;
@@ -70,15 +70,15 @@ public class CameraClient extends Application {
         thread.start();
     }
 
-    private VideoGrabTask startImagePushTask(ImageView iv, String outputStream) {
-        VideoGrabTask task = new VideoGrabTask(outputStream, iv, null);
-        DeviceManager.initWebCam();
+    private FFmpegGrabberTask startImagePushTask(ImageView iv, String outputStream) {
+        FFmpegGrabberTask task = new FFmpegGrabberTask(outputStream, iv, null);
+        DeviceManager.initGrabber();
         return task;
     }
 
     private void startSenderService(ImageView iv, String outputStream) throws FrameRecorder.Exception {
         VideoSenderService senderService = new VideoSenderService();
-        DeviceManager.initWebCam();
+        DeviceManager.initGrabber();
         senderService.setDelay(Duration.millis(0));
         senderService.setPeriod(Duration.millis(20));
         senderService.start();

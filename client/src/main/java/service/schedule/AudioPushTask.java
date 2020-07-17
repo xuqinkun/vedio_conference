@@ -15,10 +15,8 @@ import java.nio.ShortBuffer;
 public class AudioPushTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(AudioPushTask.class);
     private int audioChannels;
-    private int audioBufferSize;
     private TargetDataLine targetDataLine;
     private byte[] audioBytes;
-    private long last;
     private FFmpegFrameRecorder audioRecorder;
     private TaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
     private TaskHolder<TargetDataLine> targetDataLineHolder;
@@ -27,9 +25,8 @@ public class AudioPushTask implements Runnable {
     public AudioPushTask(String outputStream) {
         this.sampleRate = Config.getAudioSampleRate();
         this.audioChannels = Config.getAudioChannels();
-        this.audioBufferSize = sampleRate * audioChannels;
+        int audioBufferSize = sampleRate * audioChannels;
         this.audioBytes = new byte[audioBufferSize];
-        last = System.currentTimeMillis();
         audioRecorderHolder = DeviceManager.getAudioRecorder(outputStream);
         audioRecorder = audioRecorderHolder.getTask();
         targetDataLineHolder = DeviceManager.getTargetDataLineHolder();
@@ -37,7 +34,6 @@ public class AudioPushTask implements Runnable {
             targetDataLine = targetDataLineHolder.getTask();
         }
     }
-
 
     @Override
     public void run() {
@@ -50,9 +46,8 @@ public class AudioPushTask implements Runnable {
             try {
                 audioRecorder.recordSamples(sampleRate, audioChannels, sBuff);
             } catch (FrameRecorder.Exception e) {
-                e.printStackTrace();
+                LOG.error(e.getCause().toString());
             }
-            last = System.currentTimeMillis();
         }
     }
 }

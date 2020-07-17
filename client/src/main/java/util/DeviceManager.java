@@ -19,30 +19,17 @@ public class DeviceManager {
 
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
 
-    private static Map<Integer, TaskHolder<FrameGrabber>> grabberMapByDevice = new HashMap<>();
-
     private static Map<String, TaskHolder<FrameGrabber>> grabberMapByStream = new HashMap<>();
 
     private static TaskHolder<Webcam> webcamHolder;
+
+    private volatile static TaskHolder<FrameGrabber> frameGrabberHolder;
 
     private volatile static TaskHolder<FFmpegFrameRecorder> videoRecorderHolder;
 
     private volatile static TaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
 
     private volatile static TaskHolder<TargetDataLine> targetDataLineHolder;
-
-    public static void initWebCam() {
-        TaskHolder<Webcam> webcamHolder = getWebcam();
-        if (!webcamHolder.isStarted()) {
-            Webcam webcam = webcamHolder.getTask();
-            if (!webcam.isOpen()) {
-                log.warn("Open WebCam. Please wait...");
-                webcam.open();
-                webcamHolder.setStarted();
-                log.warn("WebCam started");
-            }
-        }
-    }
 
     public static void initVideoRecorder(String outStream) {
         videoRecorderHolder = getVideoRecorder(outStream);
@@ -62,6 +49,26 @@ public class DeviceManager {
 
     public static void initGrabber(String inStream) {
         getGrabber(inStream);
+    }
+
+    public static void initGrabber() {
+        try {
+            if (Config.useWebcam()) {
+                TaskHolder<Webcam> webcamHolder = getWebcam();
+                if (!webcamHolder.isStarted()) {
+                    Webcam webcam = webcamHolder.getTask();
+                    if (!webcam.isOpen()) {
+                        log.warn("Open WebCam. Please wait...");
+                        webcam.open();
+                        webcamHolder.setStarted();
+                        log.warn("WebCam started");
+                    }
+                }
+            } else
+                getGrabber(Config.getCaptureDevice());
+        } catch (Exception e) {
+            log.error(e.getCause().toString());
+        }
     }
 
     public static void initAudioTarget() {
@@ -137,14 +144,14 @@ public class DeviceManager {
     }
 
     public static TaskHolder<FrameGrabber> getGrabber(int deviceNumber) throws FrameGrabber.Exception {
-        if (grabberMapByDevice.get(deviceNumber) == null) {
+        if (frameGrabberHolder == null) {
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
-            TaskHolder<FrameGrabber> taskHolder = new TaskHolder<>(grabber, "Frame Grabber");
-            grabberMapByDevice.put(deviceNumber, taskHolder);
+            frameGrabberHolder = new TaskHolder<>(grabber, String.format("Frame Grabber[%s]", deviceNumber));
+            frameGrabberHolder.submit();
         }
-        return grabberMapByDevice.get(deviceNumber);
+        return frameGrabberHolder;
     }
 
     public static TaskHolder<Webcam> getWebcam() {

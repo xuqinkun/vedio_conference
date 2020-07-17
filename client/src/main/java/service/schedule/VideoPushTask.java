@@ -29,9 +29,11 @@ public class VideoPushTask implements Runnable {
             if (recorder.getTimestamp() < videoTS) {
                 recorder.setTimestamp(videoTS);
             }
-            Frame frame = VideoContainer.getInstance().getFrame();
             try {
-                recorder.record(frame);
+                Frame frame = VideoContainer.getInstance().getFrame();
+                if (frame != null) {
+                    recorder.record(frame);
+                }
             } catch (FrameRecorder.Exception e) {
                 e.printStackTrace();
             }

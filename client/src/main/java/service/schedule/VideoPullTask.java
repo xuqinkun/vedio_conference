@@ -11,7 +11,7 @@ import util.DeviceManager;
 import util.ImageUtil;
 
 public class VideoPullTask extends Task<Image> {
-    private static final Logger LOG = LoggerFactory.getLogger(VideoGrabTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FFmpegGrabberTask.class);
 
     private boolean stopped;
 

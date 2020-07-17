@@ -64,7 +64,9 @@ public class MeetingRoomController implements Initializable {
 
     private Stage chatStage;
 
-    SessionManager sessionManager = SessionManager.getInstance();
+    private SessionManager sessionManager = SessionManager.getInstance();
+
+    private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -111,14 +113,20 @@ public class MeetingRoomController implements Initializable {
     }
 
     private void initializeDevice() {
-        new Thread(() -> {
-            log.warn("Initializing devices...");
-            DeviceManager.initWebCam();
-            String username = sessionManager.getCurrentUser().getName();
+        log.warn("Initializing devices...");
+        String username = sessionManager.getCurrentUser().getName();
+        // Initialize video recorder
+        exec.schedule(() -> {
             DeviceManager.initVideoRecorder(getVideoOutputStream(username));
+        }, 0, TimeUnit.MILLISECONDS);
+        // Initialize audio recorder
+        exec.schedule(() -> {
             DeviceManager.initAudioRecorder(getAudioOutputStream(username));
-            DeviceManager.initAudioTarget();
-        }).start();
+        }, 0, TimeUnit.MILLISECONDS);
+        // Initialize audio target
+        exec.schedule(DeviceManager::initAudioTarget, 0, TimeUnit.MILLISECONDS);
+        // Initialize video grabber
+        exec.schedule((Runnable) DeviceManager::initGrabber, 0, TimeUnit.MILLISECONDS);
     }
 
     @FXML
@@ -192,38 +200,52 @@ public class MeetingRoomController implements Initializable {
 
     private VideoPushTask videoPushTask;
 
-    private VideoGrabTask videoGrabTask;
-
-    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
+    private Grabber grabber;
 
     @FXML
     public void videoSwitch(ActionEvent event) {
         if (videoSwitchBtn.isSelected()) {
+            log.warn("Open video");
             if (videoPushTask == null) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
                 User user = sessionManager.getCurrentUser();
                 String outputStream = getVideoOutputStream(user.getName());
-                videoGrabTask = new VideoGrabTask(outputStream, mainImageView, imageLoadingTask);
+                grabber = Grabber.createDefault(outputStream, mainImageView, imageLoadingTask);
                 videoPushTask = new VideoPushTask(outputStream);
                 exec.scheduleAtFixedRate(videoPushTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+            } else if (grabber.isStopped()) {
+                grabber.reset();
             }
-            else if (videoGrabTask.isStopped()) {
-                videoGrabTask.reset();
-            }
-            exec.schedule(videoGrabTask, 0, TimeUnit.MILLISECONDS);
+            exec.schedule(grabber, 0, TimeUnit.MILLISECONDS);
         } else {
-            if (videoGrabTask != null) {
-                videoGrabTask.stop();
+            log.warn("Close video");
+            if (grabber != null) {
+                grabber.stop();
+                exec.remove(grabber);
             }
         }
     }
 
     @FXML
+    private RadioButton audioSwitchBtn;
+
+    private AudioPushTask audioPushTask;
+
+    @FXML
     public void audioSwitch(ActionEvent event) throws LineUnavailableException {
-        User user = sessionManager.getCurrentUser();
-        String outputStream = getAudioOutputStream(user.getName());
-        AudioPushTask audioPushTask = new AudioPushTask(outputStream);
-        exec.scheduleAtFixedRate(audioPushTask, 1000 / Config.getRecorderFrameRate(), Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+        if (audioSwitchBtn.isSelected()) {
+            log.warn("Audio open");
+            if (audioPushTask == null) {
+                User user = sessionManager.getCurrentUser();
+                String outputStream = getAudioOutputStream(user.getName());
+                audioPushTask = new AudioPushTask(outputStream);
+            }
+            exec.scheduleAtFixedRate(audioPushTask, 1000 / Config.getRecorderFrameRate(),
+                    Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+        } else {
+            log.warn("Audio close");
+            exec.remove(audioPushTask);
+        }
     }
 
     public String getVideoOutputStream(String username) {

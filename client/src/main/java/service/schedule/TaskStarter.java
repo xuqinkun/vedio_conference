@@ -22,7 +22,7 @@ public class TaskStarter {
             if (startMethod != null) {
                 Thread thread = new Thread(() -> {
                     try {
-                        LOG.warn("Start task[{}]...", holder);
+                        LOG.warn("Task[{}] starting...", holder);
                         startMethod.invoke(task);
                         holder.setStarted();
                         LOG.warn("Task[{}] started", holder);
