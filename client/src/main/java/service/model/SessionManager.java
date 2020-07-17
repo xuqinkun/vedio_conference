@@ -7,9 +7,9 @@ public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private User currentUser;
+    private volatile User currentUser;
 
-    private Meeting currentMeeting;
+    private volatile Meeting currentMeeting;
 
     public Meeting getCurrentMeeting() {
         return currentMeeting;

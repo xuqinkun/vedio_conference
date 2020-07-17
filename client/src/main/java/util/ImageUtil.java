@@ -36,14 +36,14 @@ public class ImageUtil {
     }
 
     public static byte[] imageToBytes(BufferedImage img) {
-        if (img == null) {
-            return null;
+        if (img != null) {
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                ImageIO.write(img, "png", bos);
+                return bos.toByteArray();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            ImageIO.write(img, "png", bos);
-            return bos.toByteArray();
-        } catch (IOException ex) {
-            return null;
-        }
+        return null;
     }
 }

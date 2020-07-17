@@ -5,28 +5,27 @@ import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Duration;
-import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.TaskHolder;
+import service.schedule.DeviceHolder;
 import util.Config;
 import util.DeviceManager;
 import util.ImageUtil;
 
-public class VideoPullService extends ScheduledService<Image> {
+public class VideoPlayerService extends ScheduledService<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(FFmpegGrabberTask.class);
 
     private String inStream;
 
     private FrameGrabber grabber;
 
-    private TaskHolder<FrameGrabber> grabberHolder;
+    private DeviceHolder<FrameGrabber> grabberHolder;
 
-    public VideoPullService(String inStream, ImageView iv) {
+    public VideoPlayerService(String inStream, ImageView iv) {
         this.inStream = inStream;
-        grabberHolder = DeviceManager.getGrabber(inStream);
-        grabber = grabberHolder.getTask();
+        grabberHolder = DeviceManager.getVideoGrabber(inStream);
+        grabber = grabberHolder.getDevice();
         init(iv);
     }
 
@@ -38,7 +37,7 @@ public class VideoPullService extends ScheduledService<Image> {
         });
         // Start grabber
         if (!grabberHolder.isSubmitted()) {
-            LOG.warn("Submit grabber task! Please wait...");
+            LOG.debug("Submit grabber task! Please wait...");
             grabberHolder.submit();
         }
 
@@ -52,7 +51,7 @@ public class VideoPullService extends ScheduledService<Image> {
             @Override
             protected Image call() throws Exception {
                 if (!grabberHolder.isStarted()) {
-                    LOG.warn("Grabber started!");
+                    LOG.debug("Grabber started!");
                     return ImageUtil.convert(grabber.grabFrame());
                 }
                 return null;

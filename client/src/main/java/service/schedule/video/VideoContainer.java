@@ -35,7 +35,7 @@ public class VideoContainer {
         try {
             imageQueue.offer(img);
         } catch (Exception e) {
-            LOG.error(e.getCause().toString());
+            LOG.error(e.getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ public class VideoContainer {
                 frame = frameQueue.take();
             }
         } catch (InterruptedException e) {
-            LOG.error(e.getCause().toString());
+            LOG.error(e.getMessage());
             frame = null;
         }
         return frame;

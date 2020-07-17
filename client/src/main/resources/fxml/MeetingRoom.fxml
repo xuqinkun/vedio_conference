@@ -22,44 +22,51 @@
          </children>
       </AnchorPane>
       <Separator prefWidth="200.0" />
-      <HBox maxWidth="1.7976931348623157E308" prefHeight="770.0" prefWidth="1273.0">
+      <AnchorPane prefHeight="694.0" prefWidth="989.0">
          <children>
-            <VBox alignment="TOP_CENTER" maxWidth="750.0" minWidth="750.0" prefHeight="770.0" prefWidth="750.0">
-               <children>
-                  <BorderPane prefHeight="688.0" prefWidth="750.0">
-                     <center>
-                        <ImageView fx:id="mainImageView" fitHeight="464.0" fitWidth="523.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
-                     </center>
-                  </BorderPane>
-                  <GridPane alignment="CENTER" prefHeight="82.0" prefWidth="688.0">
-                     <children>
-                        <RadioButton fx:id="audioSwitchBtn" mnemonicParsing="false" onAction="#audioSwitch" text="Audio" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
-                        <RadioButton fx:id="videoSwitchBtn" mnemonicParsing="false" onAction="#videoSwitch" prefHeight="16.0" prefWidth="58.0" text="Video" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
-                        <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
-                        <RadioButton fx:id="inviteBtn" mnemonicParsing="false" onAction="#invite" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                        <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                        <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                        <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                     </children>
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                     </rowConstraints>
-                  </GridPane>
-               </children>
-            </VBox>
-            <VBox fx:id="userListLayout" prefHeight="770.0" prefWidth="272.0" />
+            <BorderPane prefHeight="687.0" prefWidth="714.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <center>
+                  <ImageView fx:id="mainImageView" fitHeight="464.0" fitWidth="523.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+               </center>
+            </BorderPane>
+            <VBox fx:id="userListLayout" prefHeight="770.0" prefWidth="272.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding></VBox>
          </children>
-      </HBox>
+      </AnchorPane>
+      <AnchorPane prefHeight="91.0" prefWidth="999.0">
+         <children>
+            <GridPane alignment="CENTER" prefHeight="100.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <RadioButton fx:id="audioSwitchBtn" mnemonicParsing="false" onAction="#audioSwitch" text="Audio" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+                  <RadioButton fx:id="videoSwitchBtn" mnemonicParsing="false" onAction="#videoSwitch" prefHeight="16.0" prefWidth="58.0" text="Video" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+                  <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+                  <RadioButton fx:id="inviteBtn" mnemonicParsing="false" onAction="#invite" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                  <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                  <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                  <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
+                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="End Meeting" textFill="RED" GridPane.columnIndex="8" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="20.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+         </children>
+      </AnchorPane>
    </children>
 </VBox>

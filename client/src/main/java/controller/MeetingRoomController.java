@@ -8,6 +8,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -26,9 +28,10 @@ import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
 import service.schedule.*;
+import service.schedule.audio.AudioPlayerService;
 import service.schedule.audio.AudioRecordService;
 import service.schedule.video.GrabberScheduledService;
-import service.schedule.video.VideoPullService;
+import service.schedule.video.VideoPlayerService;
 import service.schedule.video.VideoRecordTask;
 import util.Config;
 import util.DeviceManager;
@@ -36,7 +39,9 @@ import util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +78,8 @@ public class MeetingRoomController implements Initializable {
     private Stage invitationStage;
     @FXML
     private RadioButton inviteBtn;
+    private Map<String, VideoPlayerService> videoPullServiceMap = new HashMap<>();
+    private Map<String, AudioPlayerService> audioPlayerServiceMap = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -86,10 +93,14 @@ public class MeetingRoomController implements Initializable {
         }
         // Only for debug
         if (sessionManager.getCurrentUser() == null || currentMeeting == null) {
-            sessionManager.setCurrentUser(new User("aa", "a"));
+            User user = new User("aa", "a");
+            sessionManager.setCurrentUser(user);
             Meeting meeting = new Meeting();
             meeting.setUuid("test");
+            meeting.setOwner(user.getName());
             sessionManager.setCurrentMeeting(meeting);
+            // Display user list
+            initUserList(meeting);
         }
         initializeDevice();
     }
@@ -132,6 +143,8 @@ public class MeetingRoomController implements Initializable {
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio target
         exec.schedule(DeviceManager::initAudioTarget, 0, TimeUnit.MILLISECONDS);
+        // Initialize audio player
+        exec.schedule(DeviceManager::initAudioPlayer, 0, TimeUnit.MILLISECONDS);
         // Initialize video grabber
         exec.schedule((Runnable) DeviceManager::initGrabber, 0, TimeUnit.MILLISECONDS);
     }
@@ -176,33 +189,70 @@ public class MeetingRoomController implements Initializable {
         String portrait = user.getPortrait() == null ? Config.getDefaultPortrait() : user.getPortrait();
         Image image = new Image(portrait);
         ImageView imageView = new ImageView(image);
-        imageView.setFitHeight(60);
-        imageView.setFitWidth(60);
+        imageView.setFitWidth(180);
+        imageView.setFitHeight(130);
 
         HBox hBox = new HBox();
         Label label = new Label(user.getName());
+        label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
+        label.setPrefSize(100, 20);
+        hBox.setPadding(new Insets(0,0,0,5));
         hBox.getChildren().addAll(label);
 
         VBox vBox = new VBox();
         vBox.setId(user.getName());
-        vBox.setMaxSize(200, 50);
+        vBox.setPrefSize(240, 150);
+        vBox.setMaxSize(240, 150);
         vBox.getChildren().addAll(imageView, hBox);
-        vBox.setStyle("-fx-border-color: red");
+        vBox.setPadding(new Insets(5));
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setStyle("-fx-border-color: #9B9EA4;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5");
 
         userListLayout.getChildren().add(vBox);
 
         log.warn("User[{}] add to list", user);
 
+        String userName = user.getName();
         if (!user.equals(sessionManager.getCurrentUser())) {
-            VideoPullService pullService = new VideoPullService(getVideoOutputStream(user.getName()), imageView);
+            startVideoPlayer(imageView, userName);
+            startAudioPlayer(userName);
+        }
+    }
 
+    private void startAudioPlayer(String userName) {
+        AudioPlayerService audioPlayerService;
+        if (!audioPlayerServiceMap.containsKey(userName)) {
+            audioPlayerService = new AudioPlayerService(getAudioOutputStream(userName));
+            audioPlayerServiceMap.put(userName, audioPlayerService);
+        } else {
+            audioPlayerService = audioPlayerServiceMap.get(userName);
+        }
+        if (!audioPlayerService.isRunning()) {
+            audioPlayerService.restart();;
+        } else{
+            audioPlayerService.start();
+        }
+    }
+
+    private void startVideoPlayer(ImageView imageView, String userName) {
+        VideoPlayerService videoPlayerService;
+        if (!videoPullServiceMap.containsKey(userName)) {
+            videoPlayerService = new VideoPlayerService(getVideoOutputStream(userName), imageView);
+            videoPullServiceMap.put(userName, videoPlayerService);
+        } else {
+            videoPlayerService = videoPullServiceMap.get(userName);
+        }
+        if (!videoPlayerService.isRunning()) {
+            videoPlayerService.restart();
+        } else {
+            videoPlayerService.start();
         }
     }
 
     @FXML
     public void videoSwitch(ActionEvent event) {
         if (videoSwitchBtn.isSelected()) {
-            log.warn("Open video");
+            log.debug("Open video");
             if (videoRecordTask == null || grabberScheduledService == null) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
                 User user = sessionManager.getCurrentUser();
@@ -215,7 +265,7 @@ public class MeetingRoomController implements Initializable {
                 grabberScheduledService.restart();
             }
         } else {
-            log.warn("Close video");
+            log.debug("Close video");
             if (grabberScheduledService != null) {
                 grabberScheduledService.cancel();
             }
@@ -226,7 +276,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void audioSwitch(ActionEvent event) {
         if (audioSwitchBtn.isSelected()) {
-            log.warn("Audio open");
+            log.debug("Audio open");
             if (audioRecordService == null) {
                 User user = sessionManager.getCurrentUser();
                 String outputStream = getAudioOutputStream(user.getName());
@@ -235,9 +285,8 @@ public class MeetingRoomController implements Initializable {
             } else if (!audioRecordService.isRunning()) {
                 audioRecordService.restart();
             }
-
         } else {
-            log.warn("Audio close");
+            log.debug("Audio close");
             audioRecordService.cancel();
         }
         event.consume();

@@ -2,30 +2,30 @@ package service.schedule;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TaskHolder<T> {
-    private T task;
+public class DeviceHolder<T> {
+    private T device;
     private volatile AtomicBoolean started;
     private volatile AtomicBoolean submitted;
     private final String taskName;
 
-    public TaskHolder(T task, String taskName) {
-        this.task = task;
+    public DeviceHolder(T device, String taskName) {
+        this.device = device;
         started = new AtomicBoolean(false);
         submitted = new AtomicBoolean(false);
         this.taskName = taskName;
     }
 
-    public T getTask() {
-        return task;
+    public T getDevice() {
+        return device;
     }
 
-    public synchronized boolean isStarted() {
+    public boolean isStarted() {
         return started.get();
     }
 
     public synchronized void submit() {
         if (!submitted.get()) {
-            TaskStarter.submit(this);
+            DeviceStarter.submit(this);
             submitted.getAndSet(true);
         }
     }
