@@ -37,7 +37,6 @@ public class AudioRecordService extends ScheduledService<ShortBuffer> {
         if (targetDataLineHolder != null) {
             targetDataLine = targetDataLineHolder.getDevice();
         }
-
         init();
     }
 

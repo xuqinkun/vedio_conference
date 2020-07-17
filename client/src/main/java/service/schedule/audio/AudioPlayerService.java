@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-public class AudioPlayerService extends ScheduledService<byte []> {
+public class AudioPlayerService extends ScheduledService<byte[]> {
 
     private FFmpegFrameGrabber audioGrabber;
 
@@ -28,7 +28,7 @@ public class AudioPlayerService extends ScheduledService<byte []> {
     }
 
     private void init() {
-        setDelay(Duration.millis(1000.0/ Config.getRecorderFrameRate()));
+        setDelay(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
         setPeriod(Duration.millis(Config.getRecorderFrameRate()));
 
         DeviceHolder<SourceDataLine> sourceDataLineHolder = DeviceManager.getSourceDataLineHolder();

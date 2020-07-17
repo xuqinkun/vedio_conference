@@ -192,6 +192,9 @@ public class DeviceManager {
     public static DeviceHolder<FrameGrabber> getVideoGrabber(String inStream) {
         if (videoGrabberMap.get(inStream) == null) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
+            grabber.setOption("probesize", "1024");
+            // Max duration for analyzing video frame
+            grabber.setOption("max_analyze_duration", "1");
             DeviceHolder<FrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Video Grabber[%s]", inStream));
             deviceHolder.submit();
             videoGrabberMap.put(inStream, deviceHolder);
@@ -209,6 +212,9 @@ public class DeviceManager {
             grabber.setAudioChannels(Config.getAudioChannels());
             grabber.setAudioOption("crf", "0");
             grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+            grabber.setOption("probesize", "1024");
+            // Max duration for analyzing video frame
+            grabber.setOption("max_analyze_duration", "1");
             DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Audio Grabber[%s]", inStream));
             deviceHolder.submit();
             audioGrabberMap.put(inStream, deviceHolder);

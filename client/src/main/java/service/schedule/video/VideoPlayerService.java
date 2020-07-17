@@ -50,7 +50,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
         return new Task<Image>() {
             @Override
             protected Image call() throws Exception {
-                if (!grabberHolder.isStarted()) {
+                if (grabberHolder.isStarted()) {
                     LOG.debug("Grabber started!");
                     return ImageUtil.convert(grabber.grabFrame());
                 }
