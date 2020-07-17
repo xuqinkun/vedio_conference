@@ -19,7 +19,7 @@ public class FFmpegGrabberTask extends Grabber {
 
     public FFmpegGrabberTask() {
         try {
-            grabberHolder = DeviceManager.getVideoGrabber(Config.getCaptureDevice());
+            grabberHolder = DeviceManager.getFFmpegFrameGrabber(Config.getCaptureDevice());
             grabber = grabberHolder.getDevice();
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();

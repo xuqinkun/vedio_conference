@@ -84,8 +84,13 @@ public class MeetingRoomController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
+        exec.schedule(this::init, 0, TimeUnit.MILLISECONDS);
+    }
+
+    private void init() {
         Meeting currentMeeting = sessionManager.getCurrentMeeting();
         if (currentMeeting != null) {
+            initializeDevice();
             initUserList(currentMeeting);
             listenUserListChange(currentMeeting);
         } else {
@@ -100,9 +105,9 @@ public class MeetingRoomController implements Initializable {
             meeting.setOwner(user.getName());
             sessionManager.setCurrentMeeting(meeting);
             // Display user list
+            initializeDevice();
             initUserList(meeting);
         }
-        initializeDevice();
     }
 
     private void listenUserListChange(Meeting currentMeeting) {

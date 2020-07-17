@@ -10,6 +10,8 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static util.Config.WEBCAM;
+
 public class VideoContainer {
     private static final Logger LOG = LoggerFactory.getLogger(VideoContainer.class);
 
@@ -24,7 +26,7 @@ public class VideoContainer {
     private VideoContainer() {
         imageQueue = new LinkedBlockingQueue<>();
         frameQueue = new LinkedBlockingQueue<>();
-        useWebcam = Config.useWebcam();
+        useWebcam = Config.getCaptureType() == WEBCAM;
     }
 
     public static VideoContainer getInstance() {

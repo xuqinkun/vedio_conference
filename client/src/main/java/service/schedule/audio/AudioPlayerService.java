@@ -28,8 +28,8 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
     }
 
     private void init() {
-        setDelay(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
-        setPeriod(Duration.millis(Config.getRecorderFrameRate()));
+        setDelay(Duration.millis(0));
+        setPeriod(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
 
         DeviceHolder<SourceDataLine> sourceDataLineHolder = DeviceManager.getSourceDataLineHolder();
         SourceDataLine sourceDataLine = sourceDataLineHolder.getDevice();

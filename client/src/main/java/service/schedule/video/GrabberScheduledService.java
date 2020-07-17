@@ -8,7 +8,6 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.ImageLoadingTask;
-import util.Config;
 
 public class GrabberScheduledService extends ScheduledService<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(GrabberScheduledService.class);
@@ -16,7 +15,7 @@ public class GrabberScheduledService extends ScheduledService<Image> {
     public GrabberScheduledService(ImageView iv, ImageLoadingTask imageLoadingTask) {
         initListener(iv, imageLoadingTask);
         setDelay(Duration.millis(0));
-        setPeriod(Duration.millis(Config.getRecorderFrameRate()));
+        setPeriod(Duration.millis(5));
     }
 
     protected void initListener(ImageView iv, ImageLoadingTask imageLoadingTask) {
@@ -33,7 +32,11 @@ public class GrabberScheduledService extends ScheduledService<Image> {
         });
         // If service is cancelled, then hide the ImageView
         setOnCancelled(event -> iv.setVisible(false));
-        exceptionProperty().addListener((observable, oldValue, newValue) -> LOG.error(newValue.toString()));
+        exceptionProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                LOG.error(newValue.toString());
+            }
+        });
     }
 
     @Override

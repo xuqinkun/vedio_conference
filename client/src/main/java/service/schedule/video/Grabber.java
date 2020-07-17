@@ -4,13 +4,21 @@ import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import util.Config;
 
+import static util.Config.*;
+
 public abstract class Grabber extends Task<Image> {
 
     public static Grabber createDefault() {
-        if (Config.useWebcam()) {
-            return new WebcamGrabberTask();
-        } else {
-            return new FFmpegGrabberTask();
+        int captureType = Config.getCaptureType();
+        switch (captureType) {
+            case WEBCAM:
+                return new WebcamGrabberTask();
+            case OPENCV_GRABBER:
+                return new OpenCVGrabberTask();
+            case FFMPEG_GRABBER:
+                return new FFmpegGrabberTask();
+            default:
+                return null;
         }
     }
 }

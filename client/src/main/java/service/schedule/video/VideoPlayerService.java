@@ -9,7 +9,6 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.DeviceHolder;
-import util.Config;
 import util.DeviceManager;
 import util.ImageUtil;
 
@@ -24,7 +23,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
 
     public VideoPlayerService(String inStream, ImageView iv) {
         this.inStream = inStream;
-        grabberHolder = DeviceManager.getVideoGrabber(inStream);
+        grabberHolder = DeviceManager.getFFmpegFrameGrabber(inStream);
         grabber = grabberHolder.getDevice();
         init(iv);
     }
@@ -42,7 +41,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
         }
 
         setDelay(Duration.millis(0));
-        setPeriod(Duration.millis(Config.getRecorderFrameRate()));
+        setPeriod(Duration.millis(2));
     }
 
     @Override

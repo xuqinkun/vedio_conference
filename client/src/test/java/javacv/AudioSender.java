@@ -1,47 +1,43 @@
 package javacv;
 
-import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 import javax.sound.sampled.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class AudioTest {
+public class AudioSender {
 
     public static void main(String[] args) throws InterruptedException, FrameRecorder.Exception, LineUnavailableException, FrameGrabber.Exception {
         ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
         int frameRate = 24;
 
-        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder("rtmp://localhost:1935/live/room", 640, 480);
+        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder("rtmp://localhost:1935/live/room", 0, 0);
 //        OpenCVFrameGrabber grabber = OpenCVFrameGrabber.createDefault(0);
-//        grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         recorder.setFormat("flv");
         recorder.setSampleRate(44100);
-//        recorder.setOption("probesize", "1024");
+        recorder.setOption("probesize", "1024");
 //        // Max duration for analyzing video frame
-//        recorder.setOption("max_analyze_duration", "1");
+        recorder.setOption("max_analyze_duration", "1");
         recorder.setFrameRate(frameRate);
         recorder.setAudioChannels(2);
         recorder.setAudioOption("crf", "0");
-        recorder.setAudioQuality(0);
-        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+//        recorder.setAudioQuality(0);
+//        recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         recorder.start();
 
-        Runnable crabAudio = recordMicroPhone(4, recorder, frameRate);//对应上面的方法体
-        ScheduledFuture tasker = exec.scheduleAtFixedRate(crabAudio, 1000 / frameRate, frameRate,
+        Runnable crabAudio = recordMicroPhone(recorder);//对应上面的方法体
+        exec.scheduleAtFixedRate(crabAudio, 1000 / frameRate, frameRate,
                 TimeUnit.MILLISECONDS);
         Thread.sleep(5000 * 1000);
     }
 
-    public static Runnable recordMicroPhone(int audioDevice, FFmpegFrameRecorder recorder, int frameRate) throws FrameRecorder.Exception, LineUnavailableException, FrameGrabber.Exception {
+    public static Runnable recordMicroPhone(FFmpegFrameRecorder recorder) {
         /**
          * 设置音频编码器 最好是系统支持的格式，否则getLine() 会发生错误
          * 采样率:44.1k;采样率位数:16位;立体声(stereo);是否签名;true:
@@ -50,24 +46,19 @@ public class AudioTest {
         AudioFormat audioFormat = new AudioFormat(44100.0F, 16, 2, true, false);
         System.out.println("准备开启音频！");
         // 通过AudioSystem获取本地音频混合器信息
-//        Mixer.Info[] minfoSet = AudioSystem.getMixerInfo();
-//        // 通过AudioSystem获取本地音频混合器
-//        Mixer mixer = AudioSystem.getMixer(minfoSet[audioDevice]);
         // 通过设置好的音频编解码器获取数据线信息
         DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
 
         // 打开并开始捕获音频
         // 通过line可以获得更多控制权
         // 获取设备：TargetDataLine targetDataLine
-        // =(TargetDataLine)mixer.getLine(dataLineInfo);
-        Line line = null;
+        Line line;
         try {
             line = AudioSystem.getLine(dataLineInfo);
         } catch (LineUnavailableException e2) {
             System.err.println("开启失败...");
             return null;
         }
-//        TargetDataLine targetDataLine = (TargetDataLine) mixer.getLine(dataLineInfo);
         TargetDataLine targetDataLine = (TargetDataLine) line;
         try {
             targetDataLine.open(audioFormat);
@@ -107,19 +98,10 @@ public class AudioTest {
             ShortBuffer sBuff = ShortBuffer.wrap(samples, 0, nSamplesRead);
             // 按通道录制shortBuffer
             try {
-                if (recorder.recordSamples(sampleRate, numChannels, sBuff)) {
-//                        recorder.flush();
-                } else {
-                    System.out.println("Failed");
-                }
+                recorder.recordSamples(sampleRate, numChannels, sBuff);
             } catch (FrameRecorder.Exception e) {
                 e.printStackTrace();
             }
-//                try {
-//                    recorder.record(grabber.grab());
-//                } catch (FrameRecorder.Exception | FrameGrabber.Exception e) {
-//                    e.printStackTrace();
-//                }
         };
     }
 

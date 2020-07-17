@@ -50,8 +50,8 @@ public class AudioRecordService extends ScheduledService<ShortBuffer> {
                 }
             }
         });
-        setDelay(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
-        setPeriod(Duration.millis(Config.getRecorderFrameRate()));
+        setDelay(Duration.millis(0));
+        setPeriod(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
     }
 
     @Override

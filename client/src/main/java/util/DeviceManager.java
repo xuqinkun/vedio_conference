@@ -6,6 +6,7 @@ import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.DeviceHolder;
@@ -14,6 +15,9 @@ import javax.sound.sampled.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import static util.Config.OPENCV_GRABBER;
+import static util.Config.WEBCAM;
 
 public class DeviceManager {
 
@@ -42,12 +46,13 @@ public class DeviceManager {
     }
 
     public static void initGrabber(String inStream) {
-        getVideoGrabber(inStream);
+        getFFmpegFrameGrabber(inStream);
     }
 
     public static void initGrabber() {
         try {
-            if (Config.useWebcam()) {
+            int captureType = Config.getCaptureType();
+            if (captureType == WEBCAM) {
                 DeviceHolder<Webcam> webcamHolder = getWebcam();
                 if (!webcamHolder.isStarted()) {
                     Webcam webcam = webcamHolder.getDevice();
@@ -58,11 +63,27 @@ public class DeviceManager {
                         log.warn("WebCam started");
                     }
                 }
-            } else
-                getVideoGrabber(Config.getCaptureDevice());
+            } else if (captureType == OPENCV_GRABBER) {
+                log.warn("Initialize OpenCVFrameGrabber");
+                getOpenCVFrameGrabber(Config.getCaptureDevice());
+            } else {
+                log.warn("Initialize FFmpegFrameGrabber");
+                getFFmpegFrameGrabber(Config.getCaptureDevice());
+            }
         } catch (Exception e) {
             log.error(e.getCause().toString());
         }
+    }
+
+    public static DeviceHolder<FrameGrabber> getOpenCVFrameGrabber(int captureDevice) {
+        if (frameGrabberHolder == null) {
+            FrameGrabber grabber = new OpenCVFrameGrabber(captureDevice);
+            grabber.setImageHeight(Config.getCaptureImageHeight());
+            grabber.setImageWidth(Config.getCaptureImageWidth());
+            frameGrabberHolder = new DeviceHolder<>(grabber, String.format("OpenCvFrameGrabber[%s]", captureDevice));
+            frameGrabberHolder.submit();
+        }
+        return frameGrabberHolder;
     }
 
     public static void initAudioTarget() {
@@ -124,11 +145,10 @@ public class DeviceManager {
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
             recorder.setInterleaved(true);
             // Related to clarity 18 is good, 28 is bad.
-            recorder.setVideoOption("crf", "28");
-//            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
+            recorder.setVideoOption("crf", "18");
+            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
             // H264 causes high latency
-//            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-            recorder.setGopSize(2);
+            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
             recorder.setVideoBitrate(2000000);
             recorder.setVideoOption("tune", "zerolatency");
             recorder.setFormat("flv");
@@ -150,8 +170,10 @@ public class DeviceManager {
             log.debug("Create audio recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getAudioChannels());
             recorder.setInterleaved(true);
-            recorder.setGopSize(2);
             recorder.setFormat("flv");
+            recorder.setVideoOption("preset", "ultrafast");
+            recorder.setVideoOption("tune", "zerolatency");
+            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
             recorder.setFrameRate(Config.getRecorderFrameRate());
             recorder.setSampleRate(Config.getAudioSampleRate());
             recorder.setAudioOption("crf", "0");
@@ -169,12 +191,12 @@ public class DeviceManager {
         return audioRecorderHolder;
     }
 
-    public static DeviceHolder<FrameGrabber> getVideoGrabber(int deviceNumber) throws FrameGrabber.Exception {
+    public static DeviceHolder<FrameGrabber> getFFmpegFrameGrabber(int deviceNumber) throws FrameGrabber.Exception {
         if (frameGrabberHolder == null) {
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
-            frameGrabberHolder = new DeviceHolder<>(grabber, String.format("Frame Grabber[%s]", deviceNumber));
+            frameGrabberHolder = new DeviceHolder<>(grabber, String.format("FFmpegFrameGrabber[%s]", deviceNumber));
             frameGrabberHolder.submit();
         }
         return frameGrabberHolder;
@@ -189,7 +211,7 @@ public class DeviceManager {
         return webcamHolder;
     }
 
-    public static DeviceHolder<FrameGrabber> getVideoGrabber(String inStream) {
+    public static DeviceHolder<FrameGrabber> getFFmpegFrameGrabber(String inStream) {
         if (videoGrabberMap.get(inStream) == null) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
             grabber.setOption("probesize", "1024");
@@ -228,9 +250,10 @@ public class DeviceManager {
         DeviceManager.initAudioRecorder(audioStream);
         String videoStream = "rtmp://192.168.0.104:1935/live/test-aa-video";
         DeviceManager.initVideoRecorder(videoStream);
-        DeviceHolder<FFmpegFrameRecorder> audioRecorder = DeviceManager.getAudioRecorder(audioStream);
-        DeviceHolder<FFmpegFrameRecorder> videoRecorder = DeviceManager.getVideoRecorder(videoStream);
-        while (!audioRecorder.isStarted() && videoRecorder.isStarted())
+//        DeviceHolder<FFmpegFrameRecorder> audioRecorder = DeviceManager.getAudioRecorder(audioStream);
+//        DeviceHolder<FFmpegFrameRecorder> videoRecorder = DeviceManager.getVideoRecorder(videoStream);
+        DeviceHolder<FFmpegFrameGrabber> audioGrabber = DeviceManager.getAudioGrabber("rtmp://192.168.0.104:1935/live/589861f2f9d9-aa-audio");
+        while (!audioGrabber.isStarted())
             Thread.sleep(100);
         System.out.println(System.currentTimeMillis() - start);
     }

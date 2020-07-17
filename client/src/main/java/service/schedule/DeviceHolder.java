@@ -30,12 +30,12 @@ public class DeviceHolder<T> {
         }
     }
 
-    public synchronized boolean isSubmitted() {
+    public boolean isSubmitted() {
         return submitted.get();
     }
 
-    public void setStarted() {
-        this.started.getAndSet(true);
+    public synchronized void setStarted() {
+        started.getAndSet(true);
     }
 
     @Override

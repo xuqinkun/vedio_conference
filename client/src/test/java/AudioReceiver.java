@@ -26,13 +26,13 @@ class AudioGrabber implements Runnable {
             mSourceLine.open(audioFormat);
             mSourceLine.start();
 
-            grabber.setOption("fflags", "nobuffer");
-            grabber.setFormat("flv");
-            grabber.setSampleRate(44100);
-            grabber.setFrameRate(24);
-            grabber.setAudioChannels(2);
-            grabber.setAudioOption("crf", "0");
-            grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+//            grabber.setOption("fflags", "nobuffer");
+//            grabber.setFormat("flv");
+//            grabber.setSampleRate(44100);
+//            grabber.setFrameRate(24);
+//            grabber.setAudioChannels(2);
+//            grabber.setAudioOption("crf", "0");
+//            grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
 
 
             grabber.start();
@@ -44,7 +44,7 @@ class AudioGrabber implements Runnable {
     @Override
     public void run() {
         try {
-            Frame frame = grabber.grab();
+            Frame frame = grabber.grabSamples();
             if (grabber.hasAudio()) {
                 Buffer[] samples = frame.samples;
                 if (samples != null && samples.length > 0) {
@@ -63,10 +63,9 @@ class AudioGrabber implements Runnable {
 }
 
 
-public class AudioReceiver {
-
-    public static void main(String[] args) throws LineUnavailableException {
-        /*SourceDataLine sourceLine;
+class Test {
+    public static void test() throws LineUnavailableException {
+        SourceDataLine sourceLine;
         DataLine.Info info = new DataLine.Info(
                 SourceDataLine.class, VideoFormat.getAudioFormat());
         sourceLine = (SourceDataLine) AudioSystem.getLine(info);
@@ -82,13 +81,17 @@ public class AudioReceiver {
         byte[] buffer = new byte[size];
         while (targetLine.isOpen() && targetLine.read(buffer, 0, size) != -1) {
             sourceLine.write(buffer, 0, size);
-        }*/
+        }
+    }
+}
 
+public class AudioReceiver {
 
+    public static void main(String[] args) {
         ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
         AudioGrabber audioGrabber = new AudioGrabber("rtmp://localhost:1935/live/room");
         long frameRate = 24;
-        exec.scheduleAtFixedRate(audioGrabber,1000 / frameRate, (long) 1000 / frameRate,
+        exec.scheduleAtFixedRate(audioGrabber, 1000 / frameRate, (long) 1000 / frameRate,
                 TimeUnit.MILLISECONDS);
     }
 }

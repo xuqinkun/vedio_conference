@@ -16,7 +16,7 @@ public class VideoRecordTask implements Runnable {
     private DeviceHolder<FFmpegFrameRecorder> recorderHolder;
 
     public VideoRecordTask(String output) {
-        LOG.warn(output);
+        LOG.debug(output);
         recorderHolder = DeviceManager.getVideoRecorder(output);
         recorder = recorderHolder.getDevice();
     }

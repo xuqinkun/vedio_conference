@@ -143,14 +143,21 @@ public class Config {
         return Integer.parseInt(sampleRate);
     }
 
-    public static boolean useWebcam() {
-        String useWebcam = properties.getProperty("useWebcam", "true");
-        return Boolean.parseBoolean(useWebcam);
+    public static final int WEBCAM = 0;
+
+    public static final int OPENCV_GRABBER = 1;
+
+    public static final int FFMPEG_GRABBER = 2;
+
+    public static int getCaptureType() {
+        String captureType = properties.getProperty("capture.type", String.valueOf(WEBCAM));
+        return Integer.parseInt(captureType);
     }
 
     public static void main(String[] args) {
 //        System.out.println(useWebcam());
-        log.warn("{}", useWebcam());
+        log.warn("{}", getCaptureType());
+        log.warn("{}", getAudioBitrate());
 //        System.out.println(Arrays.toString(getKafkaTrustedPackages()));
     }
 }

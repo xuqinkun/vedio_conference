@@ -1,5 +1,9 @@
 package service.schedule;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,23 +22,48 @@ public class DeviceStarter {
             LOG.warn("Null task!");
             return;
         }
-        T task = holder.getDevice();
-        try {
-            Method startMethod = task.getClass().getMethod("start");
-            if (startMethod != null) {
-                exec.schedule(() -> {
+        new DeviceStartupService<>(holder).start();
+    }
+
+    static class DeviceStartupService<T> extends Service<Boolean> {
+        private DeviceHolder<T> holder;
+
+        public DeviceStartupService(DeviceHolder<T> holder) {
+            this.holder = holder;
+            valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    holder.setStarted();
+                }
+            });
+        }
+
+        @Override
+        protected Task<Boolean> createTask() {
+            return new Task<Boolean>() {
+                @Override
+                protected Boolean call() {
+                    T device = holder.getDevice();
                     try {
-                        LOG.warn("Task[{}] starting...", holder);
-                        startMethod.invoke(task);
-                        holder.setStarted();
-                        LOG.warn("Task[{}] started", holder);
-                    } catch (Exception e) {
-                        LOG.error("Task[{}] failed to start. Error: {}", holder, e.getMessage());
+                        Method startMethod = device.getClass().getMethod("start");
+                        if (startMethod != null) {
+                            exec.schedule(() -> {
+                                try {
+                                    LOG.warn("Device[{}] starting...", holder);
+                                    startMethod.invoke(device);
+                                    holder.setStarted();
+                                    LOG.warn("Device[{}] started", holder);
+                                } catch (Exception e) {
+                                    LOG.error("Device[{}] failed to start. Error: {}", holder, e.getMessage());
+                                }
+                            }, 0, TimeUnit.MILLISECONDS);
+                        }
+                        return true;
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
                     }
-                }, 0 , TimeUnit.MILLISECONDS);
-            }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+                    return false;
+                }
+            };
         }
     }
 }
