@@ -15,10 +15,10 @@ public class Program extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Meeting");
-//        Parent root = FXMLLoader.load(
-//                getClass().getResource("/fxml/main.fxml"));
         Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/MeetingRoom.fxml"));
+                getClass().getResource("/fxml/main.fxml"));
+//        Parent root = FXMLLoader.load(
+//                getClass().getResource("/fxml/MeetingRoom.fxml"));
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(true);
         primaryStage.show();

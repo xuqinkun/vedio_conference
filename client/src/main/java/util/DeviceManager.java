@@ -242,7 +242,7 @@ public class DeviceManager {
             while (audioRecorderHolder == null || !audioRecorderHolder.isStarted()
                     || videoRecorderHolder == null || !videoRecorderHolder.isStarted()) {
                 try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

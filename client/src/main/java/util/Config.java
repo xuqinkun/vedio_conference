@@ -1,8 +1,10 @@
 package util;
 
+import common.bean.Meeting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.UrlMap;
+import service.model.SessionManager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,16 +13,6 @@ import java.util.Properties;
 
 public class Config {
 
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
-
-    private static final String DEFAULT_HOST = "localhost";
-    private static final String HOST_KEY = "server.host";
-    private static final String PORT_KEY = "server.port";
-    private static final String DEFAULT_SERVER_PORT = "8080";
-    private static final String NGINX_HOST_KEY = "nginx.host";
-    private static final String NGINX_PORT_KEY = "nginx.port";
-    private static final String DEFAULT_NGINX_HOST = "localhost";
-    private static final String DEFAULT_NGINX_PORT = "1935";
     public static final String PORTRAIT_KEY = "portrait";
     public static final String DEFAULT_PORTRAIT_SRC = "/fxml/img/orange.png";
     public static final String CAPTURE_DEVICE_KEY = "capture.device";
@@ -37,7 +29,18 @@ public class Config {
     public static final String DEFAULT_RECORDER_FRAMERATE = "30";
     public static final String CAPTURE_WIDTH_KEY = "capture.width";
     public static final String CAPTURE_HEIGHT_KEY = "capture.height";
-
+    public static final int WEBCAM = 0;
+    public static final int OPENCV_GRABBER = 1;
+    public static final int FFMPEG_GRABBER = 2;
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private static final String DEFAULT_HOST = "localhost";
+    private static final String HOST_KEY = "server.host";
+    private static final String PORT_KEY = "server.port";
+    private static final String DEFAULT_SERVER_PORT = "8080";
+    private static final String NGINX_HOST_KEY = "nginx.host";
+    private static final String NGINX_PORT_KEY = "nginx.port";
+    private static final String DEFAULT_NGINX_HOST = "localhost";
+    private static final String DEFAULT_NGINX_PORT = "1935";
     private static Properties properties;
 
     static {
@@ -143,11 +146,17 @@ public class Config {
         return Integer.parseInt(sampleRate);
     }
 
-    public static final int WEBCAM = 0;
+    private static SessionManager sessionManager = SessionManager.getInstance();
 
-    public static final int OPENCV_GRABBER = 1;
+    public static String getVideoOutputStream(String username) {
+        Meeting meeting = sessionManager.getCurrentMeeting();
+        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-video";
+    }
 
-    public static final int FFMPEG_GRABBER = 2;
+    public static String getAudioOutputStream(String username) {
+        Meeting meeting = sessionManager.getCurrentMeeting();
+        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-audio";
+    }
 
     public static int getCaptureType() {
         String captureType = properties.getProperty("capture.type", String.valueOf(WEBCAM));

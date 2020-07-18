@@ -31,7 +31,10 @@ public class GrabberScheduledService extends ScheduledService<Image> {
             }
         });
         // If service is cancelled, then hide the ImageView
-        setOnCancelled(event -> iv.setVisible(false));
+        setOnCancelled(event -> {
+            LOG.warn("Service Canceled");
+            iv.setVisible(false);
+        });
 //        exceptionProperty().addListener((observable, oldValue, newValue) -> {
 //            if (newValue != null) {
 //                LOG.error(newValue.toString());

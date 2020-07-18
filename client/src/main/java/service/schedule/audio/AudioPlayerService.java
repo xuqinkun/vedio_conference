@@ -40,7 +40,6 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
         SourceDataLine sourceDataLine = sourceDataLineHolder.getDevice();
         valueProperty().addListener((observable, oldValue, data) -> {
             if (data != null && audioGrabberHolder.isStarted()) {
-                log.warn("Play audio");
                 sourceDataLine.write(data, 0, data.length);
             }
         });

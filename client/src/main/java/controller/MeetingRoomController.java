@@ -27,12 +27,10 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
-import service.schedule.*;
 import service.schedule.audio.AudioPlayerService;
-import service.schedule.audio.AudioRecordService;
-import service.schedule.video.GrabberScheduledService;
+import service.schedule.layout.AudioSwitchTask;
+import service.schedule.layout.VideoSwitchTask;
 import service.schedule.video.VideoPlayerService;
-import service.schedule.video.VideoRecordTask;
 import util.Config;
 import util.DeviceManager;
 import util.JsonUtil;
@@ -70,11 +68,8 @@ public class MeetingRoomController implements Initializable {
     private RadioButton videoSwitchBtn;
     @FXML
     private ImageView mainImageView;
-    private VideoRecordTask videoRecordTask;
-    private GrabberScheduledService grabberScheduledService;
     @FXML
     private RadioButton audioSwitchBtn;
-    private AudioRecordService audioRecordService;
     private Stage invitationStage;
     @FXML
     private RadioButton inviteBtn;
@@ -140,11 +135,11 @@ public class MeetingRoomController implements Initializable {
         String username = sessionManager.getCurrentUser().getName();
         // Initialize video recorder
         exec.schedule(() -> {
-            DeviceManager.initVideoRecorder(getVideoOutputStream(username));
+            DeviceManager.initVideoRecorder(Config.getVideoOutputStream(username));
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio recorder
         exec.schedule(() -> {
-            DeviceManager.initAudioRecorder(getAudioOutputStream(username));
+            DeviceManager.initAudioRecorder(Config.getAudioOutputStream(username));
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio target
         exec.schedule(DeviceManager::initAudioTarget, 0, TimeUnit.MILLISECONDS);
@@ -201,7 +196,7 @@ public class MeetingRoomController implements Initializable {
         Label label = new Label(user.getName());
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
         label.setPrefSize(100, 20);
-        hBox.setPadding(new Insets(0,0,0,5));
+        hBox.setPadding(new Insets(0, 0, 0, 5));
         hBox.getChildren().addAll(label);
 
         VBox vBox = new VBox();
@@ -219,22 +214,23 @@ public class MeetingRoomController implements Initializable {
 
         String userName = user.getName();
         if (!user.equals(sessionManager.getCurrentUser())) {
+            startVideoPlayer(imageView, userName);
+            startAudioPlayer(userName);
         }
-        startVideoPlayer(imageView, userName);
-        startAudioPlayer(userName);
     }
 
     private void startAudioPlayer(String userName) {
         AudioPlayerService audioPlayerService;
         if (!audioPlayerServiceMap.containsKey(userName)) {
-            audioPlayerService = new AudioPlayerService(getAudioOutputStream(userName));
+            audioPlayerService = new AudioPlayerService(Config.getAudioOutputStream(userName));
             audioPlayerServiceMap.put(userName, audioPlayerService);
         } else {
             audioPlayerService = audioPlayerServiceMap.get(userName);
         }
         if (!audioPlayerService.isRunning()) {
-            audioPlayerService.restart();;
-        } else{
+            audioPlayerService.restart();
+            ;
+        } else {
             audioPlayerService.start();
         }
     }
@@ -242,7 +238,7 @@ public class MeetingRoomController implements Initializable {
     private void startVideoPlayer(ImageView imageView, String userName) {
         VideoPlayerService videoPlayerService;
         if (!videoPullServiceMap.containsKey(userName)) {
-            videoPlayerService = new VideoPlayerService(getVideoOutputStream(userName), imageView);
+            videoPlayerService = new VideoPlayerService(Config.getVideoOutputStream(userName), imageView);
             videoPullServiceMap.put(userName, videoPlayerService);
         } else {
             videoPlayerService = videoPullServiceMap.get(userName);
@@ -256,55 +252,16 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void videoSwitch(ActionEvent event) {
-        if (videoSwitchBtn.isSelected()) {
-            log.debug("Open video");
-            if (videoRecordTask == null || grabberScheduledService == null) {
-                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(mainImageView);
-                User user = sessionManager.getCurrentUser();
-                String outputStream = getVideoOutputStream(user.getName());
-                grabberScheduledService = new GrabberScheduledService(mainImageView, imageLoadingTask);
-                videoRecordTask = new VideoRecordTask(outputStream);
-                exec.scheduleAtFixedRate(videoRecordTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
-                grabberScheduledService.start();
-            } else if (!grabberScheduledService.isRunning()) {
-                grabberScheduledService.restart();
-            }
-        } else {
-            log.debug("Close video");
-            if (grabberScheduledService != null) {
-                grabberScheduledService.cancel();
-            }
-        }
+        boolean selected = videoSwitchBtn.isSelected();
+        exec.schedule(new VideoSwitchTask(selected, mainImageView), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 
     @FXML
     public void audioSwitch(ActionEvent event) {
-        if (audioSwitchBtn.isSelected()) {
-            log.debug("Audio open");
-            if (audioRecordService == null) {
-                User user = sessionManager.getCurrentUser();
-                String outputStream = getAudioOutputStream(user.getName());
-                audioRecordService = new AudioRecordService(outputStream);
-                audioRecordService.start();
-            } else if (!audioRecordService.isRunning()) {
-                audioRecordService.restart();
-            }
-        } else {
-            log.debug("Audio close");
-            audioRecordService.cancel();
-        }
+        boolean selected = audioSwitchBtn.isSelected();
+        exec.schedule(new AudioSwitchTask(selected), 0, TimeUnit.MILLISECONDS);
         event.consume();
-    }
-
-    public String getVideoOutputStream(String username) {
-        Meeting meeting = sessionManager.getCurrentMeeting();
-        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-video";
-    }
-
-    public String getAudioOutputStream(String username) {
-        Meeting meeting = sessionManager.getCurrentMeeting();
-        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-audio";
     }
 
     @FXML
@@ -325,5 +282,6 @@ public class MeetingRoomController implements Initializable {
             infoLabel.setText("");
             inviteBtn.setSelected(false);
         });
+        event.consume();
     }
 }
