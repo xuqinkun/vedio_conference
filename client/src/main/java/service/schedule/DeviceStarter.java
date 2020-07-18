@@ -52,16 +52,28 @@ public class DeviceStarter {
             exec.schedule(() -> {
                 try {
                     LOG.debug("Device[{}] starting (boolean)...", holder);
-                    startMethod.invoke(device, true);
+                    startMethod.invoke(device, false);
                     holder.setStarted();
                 } catch (Exception e) {
-                    if (e.getCause() != null)
-                        LOG.error("Device[{}] failed to start. Error: {}", holder, e.getCause().getMessage());
-                    else if (e.getMessage() != null)
-                        LOG.error("Device[{}] failed to start. Error: {}", holder, e.getMessage());
+                    String errMessage = printException(holder.toString(), e);
+                    if (errMessage.contains("Did not find a video or audio stream inside")) {
+                        holder.setStarted();
+                    }
                 }
             }, 0, TimeUnit.MILLISECONDS);
         }
+    }
+
+    private static <T> String printException(String deviceName, Exception e) {
+        String errMessage;
+        if (e.getCause() != null) {
+            errMessage = e.getCause().getMessage();
+        }
+        else {
+            errMessage = e.getMessage();
+        }
+        LOG.error("Device[{}] failed to start. Error: {}", deviceName, errMessage);
+        return errMessage;
     }
 
     private static <T> void startWithNoParameter(DeviceHolder<T> holder) throws NoSuchMethodException {
@@ -74,10 +86,7 @@ public class DeviceStarter {
                     startMethod.invoke(device);
                     holder.setStarted();
                 } catch (Exception e) {
-                    if (e.getCause() != null)
-                        LOG.error("Device[{}] failed to start. Error: {}", holder, e.getCause().getMessage());
-                    else if (e.getMessage() != null)
-                        LOG.error("Device[{}] failed to start. Error: {}", holder, e.getMessage());
+                    printException(holder.toString(), e);
                 }
             }, 0, TimeUnit.MILLISECONDS);
         }

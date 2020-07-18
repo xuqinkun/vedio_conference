@@ -29,11 +29,16 @@ public class DeviceHolder<T> {
         return started.get();
     }
 
-    public void submit() {
+    public void submit(boolean force) {
         if (!submitted.get()) {
-            log.warn("[{}] submit", taskName);
+            log.debug("[{}] submit", taskName);
             DeviceStarter.submit(this);
             submitted.getAndSet(true);
+        } else if (force) {
+            log.debug("[{}] already submitted, force to submit", taskName);
+            DeviceStarter.submit(this);
+        } else {
+            log.debug("[{}] already submitted, don't submit again", taskName);
         }
     }
 

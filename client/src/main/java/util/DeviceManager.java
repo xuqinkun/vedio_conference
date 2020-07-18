@@ -85,7 +85,7 @@ public class DeviceManager {
             grabber.setImageHeight(Config.getCaptureImageHeight());
             grabber.setImageWidth(Config.getCaptureImageWidth());
             frameGrabberHolder = new DeviceHolder<>(grabber, String.format("OpenCvFrameGrabber[%s]", captureDevice));
-            frameGrabberHolder.submit();
+            frameGrabberHolder.submit(false);
         }
         return frameGrabberHolder;
     }
@@ -166,7 +166,7 @@ public class DeviceManager {
             recorder.setOption("max_analyze_duration", "1");
 
             videoRecorderHolder = new DeviceHolder<>(recorder, String.format("Video Recorder[%s]", outStream));
-            videoRecorderHolder.submit();
+            videoRecorderHolder.submit(false);
         }
         return videoRecorderHolder;
     }
@@ -192,7 +192,7 @@ public class DeviceManager {
             // Max duration for analyzing video frame
             recorder.setOption("max_analyze_duration", "1");
             audioRecorderHolder = new DeviceHolder<>(recorder, String.format("Audio Recorder[%s]", outStream));
-            audioRecorderHolder.submit();
+            audioRecorderHolder.submit(false);
         }
         return audioRecorderHolder;
     }
@@ -203,7 +203,7 @@ public class DeviceManager {
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
             frameGrabberHolder = new DeviceHolder<>(grabber, String.format("FFmpegFrameGrabber[%s]", deviceNumber));
-            frameGrabberHolder.submit();
+            frameGrabberHolder.submit(false);
         }
         return frameGrabberHolder;
     }
@@ -247,9 +247,9 @@ public class DeviceManager {
                 }
             }
             while (!deviceHolder.isStarted()) {
-                deviceHolder.submit();
+                deviceHolder.submit(true);
                 try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(5));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
