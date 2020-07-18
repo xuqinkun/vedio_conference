@@ -49,6 +49,8 @@ public class VideoPlayerService extends ScheduledService<Image> {
                 localView.setImage(image);
                 if (layoutName.equals(SessionManager.getInstance().getActiveLayout())) {
                     globalView.setImage(image);
+                    if (!globalView.isVisible())
+                        globalView.setVisible(true);
                 }
             }
         });

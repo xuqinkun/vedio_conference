@@ -167,11 +167,14 @@ public class MeetingRoomInitTask extends Task<Boolean> {
 
         stackPane.setOnMouseClicked(event -> {
             log.debug("Clicked:{}", stackPane.getId());
-            SessionManager.getInstance().setActiveLayout(user.getName());
-            stackPane.setStyle(activeStyle);
-            if (lastClicked != stackPane) {
-                lastClicked.setStyle(normalStyle);
-                lastClicked = stackPane;
+            if (event.getClickCount() == 2) {
+                SessionManager.getInstance().setActiveLayout(user.getName());
+                stackPane.setStyle(activeStyle);
+                if (lastClicked != stackPane) {
+                    lastClicked.setStyle(normalStyle);
+                    lastClicked = stackPane;
+                    globalView.setVisible(false);
+                }
             }
         });
 
