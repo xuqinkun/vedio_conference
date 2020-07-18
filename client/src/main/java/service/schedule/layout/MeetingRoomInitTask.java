@@ -128,31 +128,33 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     }
 
     public void addUser(User user) {
+        VBox vBox = new VBox();
+        vBox.setId(user.getName());
+        vBox.setPrefSize(240, 150);
+        vBox.setMaxSize(240, 150);
+        vBox.setPadding(new Insets(10));
+        vBox.setSpacing(5);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setStyle("-fx-border-color: #9B9EA4;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5");
+
+
         String portrait = user.getPortrait() == null ? Config.getDefaultPortrait() : user.getPortrait();
         Image image = new Image(portrait);
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(180);
+        imageView.setFitWidth(vBox.getPrefWidth());
         imageView.setFitHeight(130);
 
         Label label = new Label(user.getName());
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
-        label.setPrefSize(imageView.getFitWidth(), 20);
+        label.setPrefSize(imageView.getFitWidth(), 25);
         label.setAlignment(Pos.CENTER);
+        label.setStyle("-fx-text-alignment: center");
 
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         hBox.getChildren().addAll(label);
 
-        VBox vBox = new VBox();
-        vBox.setId(user.getName());
-        vBox.setPrefSize(240, 150);
-        vBox.setMaxSize(240, 150);
         vBox.getChildren().addAll(imageView, hBox);
-        vBox.setPadding(new Insets(5));
-        vBox.setSpacing(5);
-        vBox.setAlignment(Pos.CENTER);
-        vBox.setStyle("-fx-border-color: #9B9EA4;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5");
-
         userListLayout.getChildren().add(vBox);
 
         log.warn("User[{}] add to list", user);
