@@ -180,7 +180,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
             startVideoPlayer(localView, userName);
             startAudioPlayer(userName);
         }
-        if (sessionManager.getGrabberScheduledService() == null) {
+        if (sessionManager.getGrabberScheduledService() == null && sessionManager.isCurrentUser(userName)) {
             GrabberScheduledService grabberScheduledService = new GrabberScheduledService(localView, globalView, userName);
             sessionManager.setGrabberScheduledService(grabberScheduledService);
         }

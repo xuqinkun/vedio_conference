@@ -4,10 +4,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import service.model.SessionManager;
+import util.DeviceManager;
 
 import java.util.List;
 
 public class Program extends Application {
+
+    @Override
+    public void init() throws Exception {
+        super.init();
+        /* Initialize grabber */
+        new Thread(DeviceManager::initGrabber).start();
+    }
 
     public static void main(String[] args) {
         launch(args);

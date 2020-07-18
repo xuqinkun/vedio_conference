@@ -24,8 +24,8 @@ public class GrabberScheduledService extends ScheduledService<Image> {
 
     public GrabberScheduledService(ImageView localView, ImageView globalView, String layoutName) {
         this.layoutName = layoutName;
-        this.globalView = globalView;
         this.localView = localView;
+        this.globalView = globalView;
         initListener();
         setDelay(Duration.millis(0));
         setPeriod(Duration.millis(5));
@@ -41,7 +41,7 @@ public class GrabberScheduledService extends ScheduledService<Image> {
                 if (!globalView.isVisible()) {
                     globalView.setVisible(true);
                 }
-                localView.setRotate(0);
+//                localView.setRotate(0);
                 localView.setImage(image);
                 if (layoutName.equals(SessionManager.getInstance().getActiveLayout())) {
                     globalView.setImage(image);
