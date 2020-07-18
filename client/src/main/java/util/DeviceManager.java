@@ -134,6 +134,7 @@ public class DeviceManager {
             try {
                 SourceDataLine mSourceLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
                 mSourceLine.open(audioFormat);
+                mSourceLine.start();
                 sourceDataLineHolder = new DeviceHolder<>(mSourceLine, "Audio player");
             } catch (LineUnavailableException e) {
                 e.printStackTrace();
@@ -246,8 +247,7 @@ public class DeviceManager {
                     e.printStackTrace();
                 }
             }
-            log.warn("Submit [{}]", deviceHolder);
-            DeviceStarter.submit(deviceHolder);
+            deviceHolder.submit();
         }, 0, TimeUnit.MILLISECONDS);
     }
 

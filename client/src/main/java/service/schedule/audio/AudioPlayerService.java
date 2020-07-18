@@ -33,12 +33,13 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
 
     private void init() {
         setDelay(Duration.millis(0));
-        setPeriod(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
+//        setPeriod(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
+        setPeriod(Duration.millis(5));
 
         DeviceHolder<SourceDataLine> sourceDataLineHolder = DeviceManager.getSourceDataLineHolder();
         SourceDataLine sourceDataLine = sourceDataLineHolder.getDevice();
         valueProperty().addListener((observable, oldValue, data) -> {
-            if (data != null && sourceDataLine.isRunning()) {
+            if (data != null && audioGrabberHolder.isStarted()) {
                 log.warn("Play audio");
                 sourceDataLine.write(data, 0, data.length);
             }
