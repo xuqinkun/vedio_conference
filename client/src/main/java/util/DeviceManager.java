@@ -246,14 +246,7 @@ public class DeviceManager {
                     e.printStackTrace();
                 }
             }
-            while (!deviceHolder.isStarted()) {
-                deviceHolder.submit(true);
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(5));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            deviceHolder.submit(false);
         }, 0, TimeUnit.MILLISECONDS);
     }
 

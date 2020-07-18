@@ -1,6 +1,7 @@
 package service.schedule;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +20,10 @@ public class DeviceStarter {
         if (holder != null && holder.getDevice() != null){
             try {
                 T device = holder.getDevice();
-                if (device instanceof FFmpegFrameGrabber) {
-                    startWithParameter(holder);
+                if (device instanceof FFmpegFrameGrabber || device instanceof FrameRecorder) {
+                    startUnsafe(holder);
                 } else {
-                    startWithNoParameter(holder);
+                    start(holder);
                 }
             } catch (NoSuchMethodException e) {
                 printException(e);
@@ -45,14 +46,14 @@ public class DeviceStarter {
      * @param <T>
      * @throws NoSuchMethodException
      */
-    private static <T> void startWithParameter(DeviceHolder<T> holder) throws NoSuchMethodException {
+    private static <T> void startUnsafe(DeviceHolder<T> holder) throws NoSuchMethodException {
         T device = holder.getDevice();
-        Method startMethod = device.getClass().getMethod("start", boolean.class);
+        Method startMethod = device.getClass().getMethod("startUnsafe");
         if (startMethod != null) {
             exec.schedule(() -> {
                 try {
-                    LOG.debug("Device[{}] starting (boolean)...", holder);
-                    startMethod.invoke(device, false);
+                    LOG.debug("Device[{}] starting (startUnsafe)...", holder);
+                    startMethod.invoke(device);
                     holder.setStarted();
                 } catch (Exception e) {
                     String errMessage = printException(holder.toString(), e);
@@ -76,7 +77,7 @@ public class DeviceStarter {
         return errMessage;
     }
 
-    private static <T> void startWithNoParameter(DeviceHolder<T> holder) throws NoSuchMethodException {
+    private static <T> void start(DeviceHolder<T> holder) throws NoSuchMethodException {
         T device = holder.getDevice();
         Method startMethod = device.getClass().getMethod("start");
         if (startMethod != null) {

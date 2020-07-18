@@ -53,7 +53,7 @@ public class FFmpegStreamingTimeout {
 
     }
 
-    private static final String SOURCE_RTSP = "rtmp://192.168.0.104:1935/live/room";
+    private static final String SOURCE_RTSP = "rtmp://192.168.0.104:1935/live/63659c1cbed2-aa-video";
     private static final int TIMEOUT = 2; // In seconds.
 
     public static void main(String[] args) {
@@ -62,8 +62,8 @@ public class FFmpegStreamingTimeout {
     }
 
     private static void rtspStreamingTest() {
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(SOURCE_RTSP);
         try {
-            FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(SOURCE_RTSP);
             /**
              * "timeout" - IS IGNORED when a network cable have been unplugged
              * before a connection and sometimes when connection is lost.
@@ -78,7 +78,8 @@ public class FFmpegStreamingTimeout {
                     TimeoutOption.STIMEOUT.getKey(),
                     String.valueOf(TIMEOUT * 1000000)
             ); // In microseconds.
-            grabber.start();
+            grabber.setVideoStream(1);
+            grabber.startUnsafe();
             System.out.println("Grabber started");
 
             Frame frame = null;
@@ -96,6 +97,11 @@ public class FFmpegStreamingTimeout {
             System.out.println("loop end with frame: " + frame);
         } catch (FrameGrabber.Exception ex) {
             System.out.println("exception: " + ex);
+            try {
+                System.out.println(grabber.grab());
+            } catch (FrameGrabber.Exception e) {
+                e.printStackTrace();
+            }
         }
         System.out.println("end");
     }
@@ -111,7 +117,7 @@ public class FFmpegStreamingTimeout {
              * That's why interrupt_callback not suitable for "network disabled
              * case".
              */
-            grabber.start();
+            grabber.start(false);
 
             final AtomicBoolean interruptFlag = new AtomicBoolean(false);
             AVIOInterruptCB.Callback_Pointer cp = new AVIOInterruptCB.Callback_Pointer() {
