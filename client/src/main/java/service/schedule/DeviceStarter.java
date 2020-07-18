@@ -84,44 +84,4 @@ public class DeviceStarter {
             }, 0, TimeUnit.MILLISECONDS);
         }
     }
-
-    static class DeviceStartupService<T> extends Service<Boolean> {
-        private DeviceHolder<T> holder;
-
-        public DeviceStartupService(DeviceHolder<T> holder) {
-            this.holder = holder;
-        }
-
-        @Override
-        protected Task<Boolean> createTask() {
-            return new Task<Boolean>() {
-                @Override
-                protected Boolean call() {
-                    T device = holder.getDevice();
-                    try {
-                        Method startMethod = device.getClass().getMethod("start");
-                        if (startMethod != null) {
-                            exec.schedule(() -> {
-                                try {
-                                    LOG.warn("Device[{}] starting...", holder);
-                                    startMethod.invoke(device);
-//                                    LOG.warn("Device[{}] started", holder);
-                                    holder.setStarted();
-                                } catch (Exception e) {
-                                    if (e.getCause() != null)
-                                        LOG.error("Device[{}] failed to start. Error: {}", holder, e.getCause().getMessage());
-                                    else if (e.getMessage() != null)
-                                        LOG.error("Device[{}] failed to start. Error: {}", holder, e.getMessage());
-                                }
-                            }, 0, TimeUnit.MILLISECONDS);
-                        }
-                        return true;
-                    } catch (NoSuchMethodException e) {
-                        e.printStackTrace();
-                    }
-                    return false;
-                }
-            };
-        }
-    }
 }
