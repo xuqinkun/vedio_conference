@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.DefaultThreadFactory;
 import service.schedule.DeviceHolder;
-import service.schedule.DeviceStarter;
 
 import javax.sound.sampled.*;
 import java.awt.*;
@@ -224,17 +223,17 @@ public class DeviceManager {
             grabber.setOption("probesize", "1024");
             // Max duration for analyzing video frame
             grabber.setOption("max_analyze_duration", "1");
+            grabber.setOption("stimeout", String.valueOf(TimeUnit.SECONDS.toMicros(2)));
+//            grabber.setTimeout((int) TimeUnit.SECONDS.toMicros(2));
             DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Video Grabber[%s]", url));
-
-            delayStart(deviceHolder);
-
             videoGrabberMap.put(url, deviceHolder);
+            delayStart(deviceHolder);
         }
         return videoGrabberMap.get(url);
     }
 
     private static final ScheduledExecutorService scheduler =
-            Executors.newScheduledThreadPool(2, new DefaultThreadFactory("DeviceManager-"));
+            Executors.newScheduledThreadPool(10, new DefaultThreadFactory("DeviceManager-"));
 
     public static void delayStart(DeviceHolder<FFmpegFrameGrabber> deviceHolder) {
         scheduler.schedule(() -> {
@@ -247,7 +246,14 @@ public class DeviceManager {
                     e.printStackTrace();
                 }
             }
-            deviceHolder.submit();
+            while (!deviceHolder.isStarted()) {
+                deviceHolder.submit();
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }, 0, TimeUnit.MILLISECONDS);
     }
 
@@ -264,6 +270,7 @@ public class DeviceManager {
             grabber.setOption("probesize", "1024");
             // Max duration for analyzing video frame
             grabber.setOption("max_analyze_duration", "1");
+            grabber.setOption("stimeout", String.valueOf(TimeUnit.SECONDS.toMicros(2)));
             DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Audio Grabber[%s]", inStream));
             delayStart(deviceHolder);
             audioGrabberMap.put(inStream, deviceHolder);
@@ -273,15 +280,16 @@ public class DeviceManager {
 
     public static void main(String[] args) throws InterruptedException {
         long start = System.currentTimeMillis();
-        String audioStream = "rtmp://192.168.0.104:1935/live/test-aa-audio";
-        DeviceManager.initAudioRecorder(audioStream);
-        String videoStream = "rtmp://192.168.0.104:1935/live/test-aa-video";
-        DeviceManager.initVideoRecorder(videoStream);
-//        DeviceHolder<FFmpegFrameRecorder> audioRecorder = DeviceManager.getAudioRecorder(audioStream);
-//        DeviceHolder<FFmpegFrameRecorder> videoRecorder = DeviceManager.getVideoRecorder(videoStream);
-        DeviceHolder<FFmpegFrameGrabber> audioGrabber = DeviceManager.getAudioGrabber("rtmp://192.168.0.104:1935/live/589861f2f9d9-aa-audio");
-        while (!audioGrabber.isStarted())
-            Thread.sleep(100);
-        System.out.println(System.currentTimeMillis() - start);
+//        String audioStream = "rtmp://192.168.0.104:1935/live/test-aa-audio";
+//        DeviceManager.initAudioRecorder(audioStream);
+//        String videoStream = "rtmp://192.168.0.104:1935/live/test-aa-video";
+//        DeviceManager.initVideoRecorder(videoStream);
+////        DeviceHolder<FFmpegFrameRecorder> audioRecorder = DeviceManager.getAudioRecorder(audioStream);
+////        DeviceHolder<FFmpegFrameRecorder> videoRecorder = DeviceManager.getVideoRecorder(videoStream);
+//        DeviceHolder<FFmpegFrameGrabber> audioGrabber = DeviceManager.getAudioGrabber("rtmp://192.168.0.104:1935/live/589861f2f9d9-aa-audio");
+//        while (!audioGrabber.isStarted())
+//            Thread.sleep(100);
+//        System.out.println(System.currentTimeMillis() - start);
+        System.out.println(TimeUnit.SECONDS.toMicros(2));
     }
 }

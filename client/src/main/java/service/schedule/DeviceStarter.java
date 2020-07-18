@@ -1,7 +1,5 @@
 package service.schedule;
 
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

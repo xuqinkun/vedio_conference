@@ -159,9 +159,9 @@ public class MeetingRoomInitTask extends Task<Boolean> {
 
         String userName = user.getName();
         if (!userName.equals(sessionManager.getCurrentUser().getName())) {
-            startVideoPlayer(imageView, userName);
-            startAudioPlayer(userName);
         }
+        startVideoPlayer(imageView, userName);
+        startAudioPlayer(userName);
     }
 
     private void startAudioPlayer(String userName) {

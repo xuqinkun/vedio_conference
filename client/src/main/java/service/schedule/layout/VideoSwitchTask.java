@@ -38,7 +38,7 @@ public class VideoSwitchTask extends Task<Boolean> {
     protected void updateValue(Boolean isOpen) {
         super.updateValue(isOpen);
         if (isOpen) {
-            log.warn("Open video");
+            log.debug("Open video");
             if (videoRecordTask == null || grabberScheduledService == null) {
                 ImageLoadingTask imageLoadingTask = new ImageLoadingTask(imageView);
                 User user = sessionManager.getCurrentUser();
@@ -51,7 +51,7 @@ public class VideoSwitchTask extends Task<Boolean> {
                 grabberScheduledService.restart();
             }
         } else {
-            log.warn("Close video");
+            log.debug("Close video");
             if (grabberScheduledService != null) {
                 grabberScheduledService.cancel();
             }

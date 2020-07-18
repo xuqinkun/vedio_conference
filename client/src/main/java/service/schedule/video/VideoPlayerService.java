@@ -6,6 +6,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.schedule.DeviceHolder;
@@ -43,10 +45,15 @@ public class VideoPlayerService extends ScheduledService<Image> {
     protected Task<Image> createTask() {
         return new Task<Image>() {
             @Override
-            protected Image call() throws Exception {
-                if (videoGrabberHolder.isStarted()) {
-                    LOG.debug("Grabber started!");
-                    return ImageUtil.convert(grabber.grabFrame());
+            protected Image call() {
+                try {
+                    Frame frame;
+                    if (videoGrabberHolder.isStarted() && (frame = grabber.grabFrame()) != null) {
+                        LOG.debug("Grabber started!");
+                        return ImageUtil.convert(frame);
+                    }
+                } catch (Exception e) {
+                    LOG.error(e.getCause().getMessage());
                 }
                 return null;
             }
