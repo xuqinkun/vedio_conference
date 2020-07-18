@@ -158,10 +158,10 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         log.warn("User[{}] add to list", user);
 
         String userName = user.getName();
-        if (!userName.equals(sessionManager.getCurrentUser().getName())) {
+        if (!userName.equals(sessionManager.getCurrentUser().getName()) || sessionManager.isDebugMode()) {
+            startVideoPlayer(imageView, userName);
+            startAudioPlayer(userName);
         }
-        startVideoPlayer(imageView, userName);
-        startAudioPlayer(userName);
     }
 
     private void startAudioPlayer(String userName) {

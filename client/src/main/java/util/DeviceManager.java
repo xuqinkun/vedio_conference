@@ -277,19 +277,4 @@ public class DeviceManager {
         }
         return audioGrabberMap.get(inStream);
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        long start = System.currentTimeMillis();
-//        String audioStream = "rtmp://192.168.0.104:1935/live/test-aa-audio";
-//        DeviceManager.initAudioRecorder(audioStream);
-//        String videoStream = "rtmp://192.168.0.104:1935/live/test-aa-video";
-//        DeviceManager.initVideoRecorder(videoStream);
-////        DeviceHolder<FFmpegFrameRecorder> audioRecorder = DeviceManager.getAudioRecorder(audioStream);
-////        DeviceHolder<FFmpegFrameRecorder> videoRecorder = DeviceManager.getVideoRecorder(videoStream);
-//        DeviceHolder<FFmpegFrameGrabber> audioGrabber = DeviceManager.getAudioGrabber("rtmp://192.168.0.104:1935/live/589861f2f9d9-aa-audio");
-//        while (!audioGrabber.isStarted())
-//            Thread.sleep(100);
-//        System.out.println(System.currentTimeMillis() - start);
-        System.out.println(TimeUnit.SECONDS.toMicros(2));
-    }
 }

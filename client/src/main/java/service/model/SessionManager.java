@@ -11,6 +11,8 @@ public class SessionManager {
 
     private volatile Meeting currentMeeting;
 
+    private volatile boolean debugMode;
+
     public Meeting getCurrentMeeting() {
         return currentMeeting;
     }
@@ -36,5 +38,13 @@ public class SessionManager {
 
     private User createDefault() {
         return new User("user_" + System.currentTimeMillis(), false);
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 }

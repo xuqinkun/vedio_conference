@@ -162,11 +162,4 @@ public class Config {
         String captureType = properties.getProperty("capture.type", String.valueOf(WEBCAM));
         return Integer.parseInt(captureType);
     }
-
-    public static void main(String[] args) {
-//        System.out.println(useWebcam());
-        log.warn("{}", getCaptureType());
-        log.warn("{}", getAudioBitrate());
-//        System.out.println(Arrays.toString(getKafkaTrustedPackages()));
-    }
 }

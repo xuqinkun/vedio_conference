@@ -3,6 +3,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import service.model.SessionManager;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class Program extends Application {
         boolean debugMode = params.size() > 0 && params.get(0).equalsIgnoreCase("-d");
         primaryStage.setTitle("Meeting");
         Parent root;
+        SessionManager.getInstance().setDebugMode(debugMode);
         if (debugMode) {
             root = FXMLLoader.load(getClass().getResource("/fxml/MeetingRoom.fxml"));
         } else {
