@@ -13,8 +13,10 @@ public class Program extends Application {
     @Override
     public void init() throws Exception {
         super.init();
-        /* Initialize grabber */
+        /* Initialize Devices */
         new Thread(DeviceManager::initGrabber).start();
+        new Thread(DeviceManager::initAudioPlayer).start();
+        new Thread(DeviceManager::initAudioTarget).start();
     }
 
     public static void main(String[] args) {
