@@ -83,6 +83,8 @@ public class User {
                 "name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
+                ", portrait='" + portrait + '\'' +
+                ", registered=" + registered +
                 '}';
     }
 }

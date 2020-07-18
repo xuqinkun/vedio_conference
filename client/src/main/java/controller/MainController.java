@@ -167,6 +167,7 @@ public class MainController implements Initializable {
                 }
             }
         }
+        event.consume();
     }
 
     private void gotoProfile() throws IOException {

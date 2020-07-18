@@ -138,10 +138,8 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
         label.setPrefSize(imageView.getFitWidth(), 20);
         label.setAlignment(Pos.CENTER);
-        label.setPadding(new Insets(5,0,0,0));
 
         HBox hBox = new HBox();
-        hBox.setPadding(new Insets(0, 0, 0, 5));
         hBox.setAlignment(Pos.CENTER);
         hBox.getChildren().addAll(label);
 
@@ -151,6 +149,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         vBox.setMaxSize(240, 150);
         vBox.getChildren().addAll(imageView, hBox);
         vBox.setPadding(new Insets(5));
+        vBox.setSpacing(5);
         vBox.setAlignment(Pos.CENTER);
         vBox.setStyle("-fx-border-color: #9B9EA4;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5");
 
@@ -159,7 +158,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         log.warn("User[{}] add to list", user);
 
         String userName = user.getName();
-        if (!user.equals(sessionManager.getCurrentUser())) {
+        if (!userName.equals(sessionManager.getCurrentUser().getName())) {
             startVideoPlayer(imageView, userName);
             startAudioPlayer(userName);
         }
