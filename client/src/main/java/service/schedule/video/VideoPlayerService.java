@@ -30,6 +30,8 @@ public class VideoPlayerService extends ScheduledService<Image> {
 
     private final DeviceHolder<FFmpegFrameGrabber> videoGrabberHolder;
 
+    private String portraitSrc;
+
     public VideoPlayerService(String inStream, ImageView localView, ImageView globalView, String layoutName) {
         this.inStream = inStream;
         this.layoutName = layoutName;
@@ -37,6 +39,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
         this.globalView = globalView;
         videoGrabberHolder = DeviceManager.getFFmpegFrameGrabber(inStream);
         grabber = videoGrabberHolder.getDevice();
+        portraitSrc = SessionManager.getInstance().getPortraitSrc(layoutName);
         init();
     }
 

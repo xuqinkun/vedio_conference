@@ -4,19 +4,14 @@ import common.bean.HttpResult;
 import common.bean.Meeting;
 import common.bean.MessageType;
 import common.bean.User;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -46,6 +41,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     private Pane userListLayout;
 
     private ImageView globalView;
+    private StackPane lastClicked;
 
     public MeetingRoomInitTask(Pane userListLayout, ImageView globalView) {
         this.userListLayout = userListLayout;
@@ -76,17 +72,6 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         initUserList(sessionManager.getCurrentMeeting());
         /* Listen user change (join or leave)*/
         listenUserListChange(sessionManager.getCurrentMeeting());
-    }
-
-    private void listenUserListChange(Meeting currentMeeting) {
-        MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
-        new Thread(task).start();
-        task.valueProperty().addListener((observable, oldValue, msg) -> {
-            if (msg.getType() == MessageType.USER_ADD) {
-                User user = JsonUtil.jsonToObject(msg.getData(), User.class);
-                addUser(user);
-            }
-        });
     }
 
     @Override
@@ -122,48 +107,76 @@ public class MeetingRoomInitTask extends Task<Boolean> {
                     doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
             List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
             log.warn(userList.toString());
-            for (User user : userList)
+            for (User user : userList) {
                 addUser(user);
+            }
         }
     }
 
-    public void addUser(User user) {
-        VBox vBox = new VBox();
-        vBox.setId(user.getName());
-        vBox.setPrefSize(240, 150);
-        vBox.setMaxSize(240, 150);
-        vBox.setPadding(new Insets(10));
-        vBox.setSpacing(5);
-        vBox.setAlignment(Pos.CENTER);
-        vBox.setStyle("-fx-border-color: #9B9EA4;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5");
+    private void listenUserListChange(Meeting currentMeeting) {
+        MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
+        new Thread(task).start();
+        task.valueProperty().addListener((observable, oldValue, msg) -> {
+            if (msg.getType() == MessageType.USER_ADD) {
+                User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                addUser(user);
+            }
+        });
+    }
 
-        String portrait = user.getPortrait() == null ? Config.getDefaultPortrait() : user.getPortrait();
+    public void addUser(User user) {
+        sessionManager.addUser(user);
+
+        String userName = user.getName();
+        String activeStyle = "-fx-border-color: #00cc66;-fx-border-width: 3;-fx-border-radius: 5;-fx-background-radius: 5";
+        String normalStyle = "-fx-border-color: #9B9EA4;-fx-border-width: 3;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5";
+
+        int width = 230;
+        int height = 150;
+        StackPane stackPane = new StackPane();
+        stackPane.setId(user.getName());
+        stackPane.setPadding(new Insets(3));
+        stackPane.setPrefSize(width, height);
+        stackPane.setMaxSize(width, height);
+        stackPane.setMinSize(width, height);
+        stackPane.setAlignment(Pos.CENTER);
+
+        if (sessionManager.isCurrentUser(userName)) {
+            stackPane.setStyle(activeStyle);
+            lastClicked = stackPane;
+        } else {
+            stackPane.setStyle(normalStyle);
+        }
+
+        String portrait = user.getPortraitSrc() == null ? Config.getDefaultPortraitSrc() : user.getPortraitSrc();
         Image image = new Image(portrait);
         ImageView localView = new ImageView(image);
-        localView.setFitWidth(vBox.getPrefWidth());
-        localView.setFitHeight(130);
+        localView.setFitWidth(stackPane.getPrefWidth() - 7);
+        localView.setFitHeight(stackPane.getPrefHeight() - 7);
 
         Label label = new Label(user.getName());
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
-        label.setPrefSize(localView.getFitWidth(), 25);
+        label.setPrefSize(localView.getFitWidth(), 20);
         label.setAlignment(Pos.CENTER);
-        label.setStyle("-fx-text-alignment: center");
+//        label.setStyle("-fx-text-alignment: center");
+        label.setOpacity(0.3);
+        StackPane.setAlignment(label, Pos.BOTTOM_CENTER);
 
-        HBox hBox = new HBox();
-        hBox.setAlignment(Pos.CENTER);
-        hBox.getChildren().addAll(label);
+        stackPane.getChildren().addAll(localView, label);
+        userListLayout.getChildren().add(stackPane);
 
-        vBox.getChildren().addAll(localView, hBox);
-        userListLayout.getChildren().add(vBox);
-
-        vBox.onMouseClickedProperty().addListener((observable, oldValue, newValue) -> {
+        stackPane.setOnMouseClicked(event -> {
+            log.debug("Clicked:{}", stackPane.getId());
             SessionManager.getInstance().setActiveLayout(user.getName());
+            stackPane.setStyle(activeStyle);
+            if (lastClicked != stackPane) {
+                lastClicked.setStyle(normalStyle);
+                lastClicked = stackPane;
+            }
         });
 
         log.warn("User[{}] added", user);
-
-        String userName = user.getName();
-        if (!userName.equals(sessionManager.getCurrentUser().getName()) || sessionManager.isDebugMode()) {
+        if (!sessionManager.isCurrentUser(userName) || sessionManager.isDebugMode()) {
             startVideoPlayer(localView, userName);
             startAudioPlayer(userName);
         }

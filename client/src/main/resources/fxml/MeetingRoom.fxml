@@ -29,9 +29,9 @@
                   <ImageView fx:id="globalImageView" fitHeight="464.0" fitWidth="523.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
                </center>
             </BorderPane>
-            <VBox fx:id="userListLayout" prefHeight="770.0" prefWidth="272.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <VBox fx:id="userListLayout" alignment="TOP_CENTER" prefHeight="770.0" prefWidth="272.0" spacing="5.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  <Insets bottom="10.0" top="10.0" />
                </padding></VBox>
          </children>
       </AnchorPane>

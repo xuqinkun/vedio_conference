@@ -3,6 +3,10 @@ package service.model;
 import common.bean.Meeting;
 import common.bean.User;
 import service.schedule.video.GrabberScheduledService;
+import util.Config;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SessionManager {
 
@@ -17,6 +21,8 @@ public class SessionManager {
     private volatile String activeLayout;
 
     private GrabberScheduledService grabberScheduledService;
+
+    private Map<String, User> userCache = new HashMap<>();
 
     public Meeting getCurrentMeeting() {
         return currentMeeting;
@@ -39,6 +45,22 @@ public class SessionManager {
             currentUser = createDefault();
         }
         return currentUser;
+    }
+
+    public boolean isCurrentUser(String username) {
+        return username.equals(currentUser.getName());
+    }
+
+    public void addUser(User user) {
+        userCache.put(user.getName(), user);
+    }
+
+    public void removeUser(User user) {
+        userCache.remove(user.getName());
+    }
+
+    public User getUser(String username) {
+        return userCache.get(username);
     }
 
     private User createDefault() {
@@ -67,5 +89,10 @@ public class SessionManager {
 
     public GrabberScheduledService getGrabberScheduledService() {
         return grabberScheduledService;
+    }
+
+    public String getPortraitSrc(String username) {
+        User user = userCache.get(username);
+        return user == null || user.getPortraitSrc() == null ? Config.getDefaultPortraitSrc() : user.getPortraitSrc();
     }
 }

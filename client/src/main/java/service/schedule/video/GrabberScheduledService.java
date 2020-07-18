@@ -1,5 +1,6 @@
 package service.schedule.video;
 
+import common.bean.User;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -8,11 +9,14 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
+import util.Config;
 
 public class GrabberScheduledService extends ScheduledService<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(GrabberScheduledService.class);
 
     private String layoutName;
+
+    private String portraitSrc;
 
     private ImageView localView;
 
@@ -25,6 +29,7 @@ public class GrabberScheduledService extends ScheduledService<Image> {
         initListener();
         setDelay(Duration.millis(0));
         setPeriod(Duration.millis(5));
+        portraitSrc = SessionManager.getInstance().getPortraitSrc(layoutName);
     }
 
     protected void initListener() {
@@ -32,6 +37,9 @@ public class GrabberScheduledService extends ScheduledService<Image> {
             if (image != null) {
                 if (!localView.isVisible()) {
                     localView.setVisible(true);
+                }
+                if (!globalView.isVisible()) {
+                    globalView.setVisible(true);
                 }
                 localView.setRotate(0);
                 localView.setImage(image);
@@ -43,7 +51,9 @@ public class GrabberScheduledService extends ScheduledService<Image> {
         // If service is cancelled, then hide the ImageView
         setOnCancelled(event -> {
             LOG.debug("Service Canceled");
-            localView.setVisible(false);
+            Image image = new Image(portraitSrc);
+            localView.setImage(image);
+            globalView.setVisible(false);
         });
     }
 

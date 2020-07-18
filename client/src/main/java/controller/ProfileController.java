@@ -31,8 +31,8 @@ public class ProfileController implements Initializable {
         User currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser != null) {
             usernameLabel.setText(currentUser.getName());
-            if (currentUser.getPortrait() != null) {
-                portrait.setImage(new Image(currentUser.getPortrait()));
+            if (currentUser.getPortraitSrc() != null) {
+                portrait.setImage(new Image(currentUser.getPortraitSrc()));
             }
         }
     }

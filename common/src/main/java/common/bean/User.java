@@ -7,7 +7,7 @@ public class User {
 
     private String email;
 
-    private String portrait;
+    private String portraitSrc;
 
     private boolean registered = true;
 
@@ -23,7 +23,7 @@ public class User {
         this.name = name;
         this.password = password;
         this.email = email;
-        this.portrait = src;
+        this.portraitSrc = src;
     }
 
     public User(String name, String password, String email) {
@@ -37,8 +37,8 @@ public class User {
         this.password = password;
     }
 
-    public String getPortrait() {
-        return portrait;
+    public String getPortraitSrc() {
+        return portraitSrc;
     }
 
     public String getName() {
@@ -73,8 +73,8 @@ public class User {
         this.registered = registered;
     }
 
-    public void setPortrait(String portrait) {
-        this.portrait = portrait;
+    public void setPortraitSrc(String portraitSrc) {
+        this.portraitSrc = portraitSrc;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class User {
                 "name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
-                ", portrait='" + portrait + '\'' +
+                ", portrait='" + portraitSrc + '\'' +
                 ", registered=" + registered +
                 '}';
     }

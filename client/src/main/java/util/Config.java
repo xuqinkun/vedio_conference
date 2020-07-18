@@ -73,7 +73,7 @@ public class Config {
         return properties.getProperty(NGINX_PORT_KEY, DEFAULT_NGINX_PORT);
     }
 
-    public static String getDefaultPortrait() {
+    public static String getDefaultPortraitSrc() {
         return properties.getProperty(PORTRAIT_KEY, DEFAULT_PORTRAIT_SRC);
     }
 
