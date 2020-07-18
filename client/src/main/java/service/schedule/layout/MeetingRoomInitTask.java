@@ -4,12 +4,16 @@ import common.bean.HttpResult;
 import common.bean.Meeting;
 import common.bean.MessageType;
 import common.bean.User;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -21,6 +25,7 @@ import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
 import service.schedule.DeviceStarter;
 import service.schedule.audio.AudioPlayerService;
+import service.schedule.video.GrabberScheduledService;
 import service.schedule.video.VideoPlayerService;
 import util.Config;
 import util.DeviceManager;
@@ -34,25 +39,43 @@ import java.util.concurrent.TimeUnit;
 
 public class MeetingRoomInitTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(DeviceStarter.class);
-
+    private final SessionManager sessionManager = SessionManager.getInstance();
+    private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
+    private final Map<String, VideoPlayerService> videoPullServiceMap = new HashMap<>();
+    private final Map<String, AudioPlayerService> audioPlayerServiceMap = new HashMap<>();
     private Pane userListLayout;
 
-    private final SessionManager sessionManager = SessionManager.getInstance();
+    private ImageView globalView;
 
-    private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
-
-    private final Map<String, VideoPlayerService> videoPullServiceMap = new HashMap<>();
-
-    private final Map<String, AudioPlayerService> audioPlayerServiceMap = new HashMap<>();
-
-    public MeetingRoomInitTask(Pane userListLayout) {
+    public MeetingRoomInitTask(Pane userListLayout, ImageView globalView) {
         this.userListLayout = userListLayout;
+        this.globalView = globalView;
     }
 
     @Override
     protected void updateValue(Boolean value) {
         super.updateValue(value);
         init();
+    }
+
+    private void init() {
+        Meeting currentMeeting = sessionManager.getCurrentMeeting();
+        if (currentMeeting == null) {
+            log.warn("Can't find current meeting info!");
+            /* Only for debug */
+            User user = new User("aa", "a");
+            sessionManager.setCurrentUser(user);
+            Meeting meeting = new Meeting();
+            meeting.setUuid("test");
+            meeting.setOwner(user.getName());
+            sessionManager.setCurrentMeeting(meeting);
+        }
+        initializeDevice();
+        sessionManager.setActiveLayout(sessionManager.getCurrentUser().getName());
+        /* Display user list */
+        initUserList(sessionManager.getCurrentMeeting());
+        /* Listen user change (join or leave)*/
+        listenUserListChange(sessionManager.getCurrentMeeting());
     }
 
     private void listenUserListChange(Meeting currentMeeting) {
@@ -69,29 +92,6 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     @Override
     protected Boolean call() {
         return true;
-    }
-
-    private void init() {
-        Meeting currentMeeting = sessionManager.getCurrentMeeting();
-        if (currentMeeting != null) {
-            initializeDevice();
-            initUserList(currentMeeting);
-        } else {
-            log.warn("Can't find current meeting info!");
-        }
-        // Only for debug
-        if (sessionManager.getCurrentUser() == null || currentMeeting == null) {
-            User user = new User("aa", "a");
-            sessionManager.setCurrentUser(user);
-            Meeting meeting = new Meeting();
-            meeting.setUuid("test");
-            meeting.setOwner(user.getName());
-            sessionManager.setCurrentMeeting(meeting);
-            // Display user list
-            initializeDevice();
-            initUserList(meeting);
-        }
-        listenUserListChange(sessionManager.getCurrentMeeting());
     }
 
     private void initializeDevice() {
@@ -137,16 +137,15 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         vBox.setAlignment(Pos.CENTER);
         vBox.setStyle("-fx-border-color: #9B9EA4;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5");
 
-
         String portrait = user.getPortrait() == null ? Config.getDefaultPortrait() : user.getPortrait();
         Image image = new Image(portrait);
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(vBox.getPrefWidth());
-        imageView.setFitHeight(130);
+        ImageView localView = new ImageView(image);
+        localView.setFitWidth(vBox.getPrefWidth());
+        localView.setFitHeight(130);
 
         Label label = new Label(user.getName());
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
-        label.setPrefSize(imageView.getFitWidth(), 25);
+        label.setPrefSize(localView.getFitWidth(), 25);
         label.setAlignment(Pos.CENTER);
         label.setStyle("-fx-text-alignment: center");
 
@@ -154,15 +153,23 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         hBox.setAlignment(Pos.CENTER);
         hBox.getChildren().addAll(label);
 
-        vBox.getChildren().addAll(imageView, hBox);
+        vBox.getChildren().addAll(localView, hBox);
         userListLayout.getChildren().add(vBox);
 
-        log.warn("User[{}] add to list", user);
+        vBox.onMouseClickedProperty().addListener((observable, oldValue, newValue) -> {
+            SessionManager.getInstance().setActiveLayout(user.getName());
+        });
+
+        log.warn("User[{}] added", user);
 
         String userName = user.getName();
         if (!userName.equals(sessionManager.getCurrentUser().getName()) || sessionManager.isDebugMode()) {
-            startVideoPlayer(imageView, userName);
+            startVideoPlayer(localView, userName);
             startAudioPlayer(userName);
+        }
+        if (sessionManager.getGrabberScheduledService() == null) {
+            GrabberScheduledService grabberScheduledService = new GrabberScheduledService(localView, globalView, userName);
+            sessionManager.setGrabberScheduledService(grabberScheduledService);
         }
     }
 
@@ -176,16 +183,16 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         }
         if (!audioPlayerService.isRunning()) {
             audioPlayerService.restart();
-            ;
         } else {
             audioPlayerService.start();
         }
     }
 
-    private void startVideoPlayer(ImageView imageView, String userName) {
+    private void startVideoPlayer(ImageView localView, String userName) {
         VideoPlayerService videoPlayerService;
         if (!videoPullServiceMap.containsKey(userName)) {
-            videoPlayerService = new VideoPlayerService(Config.getVideoOutputStream(userName), imageView);
+            videoPlayerService = new VideoPlayerService(Config.getVideoOutputStream(userName),
+                    localView, globalView, userName);
             videoPullServiceMap.put(userName, videoPlayerService);
         } else {
             videoPlayerService = videoPullServiceMap.get(userName);

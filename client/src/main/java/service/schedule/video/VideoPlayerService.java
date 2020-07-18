@@ -10,6 +10,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.model.SessionManager;
 import service.schedule.DeviceHolder;
 import util.DeviceManager;
 import util.ImageUtil;
@@ -17,23 +18,35 @@ import util.ImageUtil;
 public class VideoPlayerService extends ScheduledService<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(FFmpegGrabberTask.class);
 
-    private String inStream;
+    private final String inStream;
 
-    private FFmpegFrameGrabber grabber;
+    private final String layoutName;
 
-    private DeviceHolder<FFmpegFrameGrabber> videoGrabberHolder;
+    private final ImageView localView;
 
-    public VideoPlayerService(String inStream, ImageView iv) {
+    private final ImageView globalView;
+
+    private final FFmpegFrameGrabber grabber;
+
+    private final DeviceHolder<FFmpegFrameGrabber> videoGrabberHolder;
+
+    public VideoPlayerService(String inStream, ImageView localView, ImageView globalView, String layoutName) {
         this.inStream = inStream;
+        this.layoutName = layoutName;
+        this.localView = localView;
+        this.globalView = globalView;
         videoGrabberHolder = DeviceManager.getFFmpegFrameGrabber(inStream);
         grabber = videoGrabberHolder.getDevice();
-        init(iv);
+        init();
     }
 
-    private void init(ImageView iv) {
-        valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                iv.setImage(newValue);
+    private void init() {
+        valueProperty().addListener((observable, oldValue, image) -> {
+            if (image != null) {
+                localView.setImage(image);
+                if (layoutName.equals(SessionManager.getInstance().getActiveLayout())) {
+                    globalView.setImage(image);
+                }
             }
         });
 

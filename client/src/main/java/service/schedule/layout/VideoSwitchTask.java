@@ -19,31 +19,29 @@ public class VideoSwitchTask extends Task<Boolean> {
 
     private boolean isOpen;
 
-    private static ImageView imageView;
-
     private static VideoRecordTask videoRecordTask;
-
-    private static GrabberScheduledService grabberScheduledService;
 
     private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
 
     private static SessionManager sessionManager = SessionManager.getInstance();
 
-    public VideoSwitchTask(boolean isOpen, ImageView imageView) {
+    public VideoSwitchTask(boolean isOpen) {
         this.isOpen = isOpen;
-        VideoSwitchTask.imageView = imageView;
     }
 
     @Override
     protected void updateValue(Boolean isOpen) {
         super.updateValue(isOpen);
+        GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
+        if (grabberScheduledService == null) {
+            log.warn("Please wait for system initializing...");
+            return;
+        }
         if (isOpen) {
             log.debug("Open video");
-            if (videoRecordTask == null || grabberScheduledService == null) {
-                ImageLoadingTask imageLoadingTask = new ImageLoadingTask(imageView);
+            if (videoRecordTask == null) {
                 User user = sessionManager.getCurrentUser();
                 String outputStream = Config.getVideoOutputStream(user.getName());
-                grabberScheduledService = new GrabberScheduledService(imageView, imageLoadingTask);
                 videoRecordTask = new VideoRecordTask(outputStream);
                 exec.scheduleAtFixedRate(videoRecordTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
                 grabberScheduledService.start();
@@ -52,9 +50,7 @@ public class VideoSwitchTask extends Task<Boolean> {
             }
         } else {
             log.debug("Close video");
-            if (grabberScheduledService != null) {
-                grabberScheduledService.cancel();
-            }
+            grabberScheduledService.cancel();
         }
     }
 

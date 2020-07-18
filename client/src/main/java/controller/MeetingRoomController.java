@@ -14,17 +14,12 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.model.SessionManager;
-import service.schedule.audio.AudioPlayerService;
 import service.schedule.layout.AudioSwitchTask;
 import service.schedule.layout.MeetingRoomInitTask;
 import service.schedule.layout.VideoSwitchTask;
-import service.schedule.video.VideoPlayerService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +46,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private RadioButton videoSwitchBtn;
     @FXML
-    private ImageView mainImageView;
+    private ImageView globalImageView;
     @FXML
     private RadioButton audioSwitchBtn;
     private Stage invitationStage;
@@ -61,7 +56,7 @@ public class MeetingRoomController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-        exec.schedule(new MeetingRoomInitTask(userListLayout), 0, TimeUnit.MILLISECONDS);
+        exec.schedule(new MeetingRoomInitTask(userListLayout, globalImageView), 0, TimeUnit.MILLISECONDS);
     }
 
     @FXML
@@ -103,7 +98,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void videoSwitch(ActionEvent event) {
         boolean selected = videoSwitchBtn.isSelected();
-        exec.schedule(new VideoSwitchTask(selected, mainImageView), 0, TimeUnit.MILLISECONDS);
+        exec.schedule(new VideoSwitchTask(selected), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 

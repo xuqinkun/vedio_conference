@@ -26,7 +26,7 @@
          <children>
             <BorderPane prefHeight="687.0" prefWidth="714.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                <center>
-                  <ImageView fx:id="mainImageView" fitHeight="464.0" fitWidth="523.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+                  <ImageView fx:id="globalImageView" fitHeight="464.0" fitWidth="523.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
                </center>
             </BorderPane>
             <VBox fx:id="userListLayout" prefHeight="770.0" prefWidth="272.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

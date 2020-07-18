@@ -2,6 +2,7 @@ package service.model;
 
 import common.bean.Meeting;
 import common.bean.User;
+import service.schedule.video.GrabberScheduledService;
 
 public class SessionManager {
 
@@ -12,6 +13,10 @@ public class SessionManager {
     private volatile Meeting currentMeeting;
 
     private volatile boolean debugMode;
+
+    private volatile String activeLayout;
+
+    private GrabberScheduledService grabberScheduledService;
 
     public Meeting getCurrentMeeting() {
         return currentMeeting;
@@ -46,5 +51,21 @@ public class SessionManager {
 
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
+    }
+
+    public void setActiveLayout(String layoutName) {
+        activeLayout = layoutName;
+    }
+
+    public String getActiveLayout() {
+        return activeLayout;
+    }
+
+    public void setGrabberScheduledService(GrabberScheduledService grabberScheduledService) {
+        this.grabberScheduledService = grabberScheduledService;
+    }
+
+    public GrabberScheduledService getGrabberScheduledService() {
+        return grabberScheduledService;
     }
 }
