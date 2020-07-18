@@ -5,6 +5,8 @@ import javafx.concurrent.Task;
 import javafx.util.Duration;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.schedule.DeviceHolder;
 import util.Config;
 import util.DeviceManager;
@@ -16,6 +18,8 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 public class AudioPlayerService extends ScheduledService<byte[]> {
+
+    private static final Logger log = LoggerFactory.getLogger(AudioPlayerService.class);
 
     private FFmpegFrameGrabber audioGrabber;
 
@@ -35,6 +39,7 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
         SourceDataLine sourceDataLine = sourceDataLineHolder.getDevice();
         valueProperty().addListener((observable, oldValue, data) -> {
             if (data != null && sourceDataLine.isRunning()) {
+                log.warn("Play audio");
                 sourceDataLine.write(data, 0, data.length);
             }
         });
@@ -45,7 +50,7 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
         return new Task<byte[]>() {
             @Override
             protected byte[] call() throws Exception {
-                if (audioGrabberHolder.isStarted() && !audioGrabber.isCloseInputStream()) {
+                if (audioGrabberHolder.isStarted()) {
                     Frame frame = audioGrabber.grabSamples();
                     Buffer[] samples = frame.samples;
                     if (samples != null && samples.length > 0) {

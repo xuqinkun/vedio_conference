@@ -1,8 +1,14 @@
 package service.schedule;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DeviceHolder<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(DeviceHolder.class);
+
     private T device;
     private volatile AtomicBoolean started;
     private volatile AtomicBoolean submitted;
@@ -23,8 +29,9 @@ public class DeviceHolder<T> {
         return started.get();
     }
 
-    public synchronized void submit() {
+    public void submit() {
         if (!submitted.get()) {
+            log.warn("[{}] submit", taskName);
             DeviceStarter.submit(this);
             submitted.getAndSet(true);
         }
@@ -34,12 +41,17 @@ public class DeviceHolder<T> {
         return submitted.get();
     }
 
-    public synchronized void setStarted() {
+    public void setStarted() {
+        log.warn("[{}] started", taskName);
         started.getAndSet(true);
     }
 
     @Override
     public String toString() {
+        return taskName;
+    }
+
+    public String getTaskName() {
         return taskName;
     }
 }

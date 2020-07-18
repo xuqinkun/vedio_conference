@@ -219,9 +219,9 @@ public class MeetingRoomController implements Initializable {
 
         String userName = user.getName();
         if (!user.equals(sessionManager.getCurrentUser())) {
-            startVideoPlayer(imageView, userName);
-            startAudioPlayer(userName);
         }
+        startVideoPlayer(imageView, userName);
+        startAudioPlayer(userName);
     }
 
     private void startAudioPlayer(String userName) {

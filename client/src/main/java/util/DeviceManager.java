@@ -9,12 +9,17 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.schedule.DefaultThreadFactory;
 import service.schedule.DeviceHolder;
+import service.schedule.DeviceStarter;
 
 import javax.sound.sampled.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static util.Config.OPENCV_GRABBER;
 import static util.Config.WEBCAM;
@@ -23,7 +28,7 @@ public class DeviceManager {
 
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
 
-    private static Map<String, DeviceHolder<FrameGrabber>> videoGrabberMap = new HashMap<>();
+    private static Map<String, DeviceHolder<FFmpegFrameGrabber>> videoGrabberMap = new HashMap<>();
 
     private static Map<String, DeviceHolder<FFmpegFrameGrabber>> audioGrabberMap = new HashMap<>();
 
@@ -142,7 +147,8 @@ public class DeviceManager {
     public synchronized static DeviceHolder<FFmpegFrameRecorder> getVideoRecorder(String outStream) {
         if (videoRecorderHolder == null) {
             log.debug("Create video recorder [out={}]", outStream);
-            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream,
+                    Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
             recorder.setInterleaved(true);
             // Related to clarity 18 is good, 28 is bad.
             recorder.setVideoOption("crf", "18");
@@ -211,17 +217,38 @@ public class DeviceManager {
         return webcamHolder;
     }
 
-    public static DeviceHolder<FrameGrabber> getFFmpegFrameGrabber(String inStream) {
-        if (videoGrabberMap.get(inStream) == null) {
-            FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
+    public static DeviceHolder<FFmpegFrameGrabber> getFFmpegFrameGrabber(String url) {
+        if (videoGrabberMap.get(url) == null) {
+            FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(url);
             grabber.setOption("probesize", "1024");
             // Max duration for analyzing video frame
             grabber.setOption("max_analyze_duration", "1");
-            DeviceHolder<FrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Video Grabber[%s]", inStream));
-            deviceHolder.submit();
-            videoGrabberMap.put(inStream, deviceHolder);
+            DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Video Grabber[%s]", url));
+
+            delayStart(deviceHolder);
+
+            videoGrabberMap.put(url, deviceHolder);
         }
-        return videoGrabberMap.get(inStream);
+        return videoGrabberMap.get(url);
+    }
+
+    private static final ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(2, new DefaultThreadFactory("DeviceManager-"));
+
+    public static void delayStart(DeviceHolder<FFmpegFrameGrabber> deviceHolder) {
+        scheduler.schedule(() -> {
+            /** Submit grabber startup task only if the recorders have been started and the grabber is not started */
+            while (audioRecorderHolder == null || !audioRecorderHolder.isStarted()
+                    || videoRecorderHolder == null || !videoRecorderHolder.isStarted()) {
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            log.warn("Submit [{}]", deviceHolder);
+            DeviceStarter.submit(deviceHolder);
+        }, 0, TimeUnit.MILLISECONDS);
     }
 
     public static DeviceHolder<FFmpegFrameGrabber> getAudioGrabber(String inStream) {
@@ -238,7 +265,7 @@ public class DeviceManager {
             // Max duration for analyzing video frame
             grabber.setOption("max_analyze_duration", "1");
             DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Audio Grabber[%s]", inStream));
-            deviceHolder.submit();
+            delayStart(deviceHolder);
             audioGrabberMap.put(inStream, deviceHolder);
         }
         return audioGrabberMap.get(inStream);
