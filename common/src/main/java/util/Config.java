@@ -1,10 +1,7 @@
 package util;
 
-import common.bean.Meeting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.http.UrlMap;
-import service.model.SessionManager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,12 +36,14 @@ public class Config {
     private static final String DEFAULT_NGINX_PORT = "1935";
     public static final String KAFKA_SERVER_PORT_KEY = "kafka.port";
     public static final String DEFAULT_KAFKA_SERVER_PORT = "9092";
+    public static final String HEARTBEATS_SERVER_PORT_KEY = "heartbeats.server.port";
+    public static final String DEFAULT_HEARTBEATS_SERVER_PORT_VALUE = "8888";
     private static Properties properties;
 
     static {
         properties = new Properties();
         try {
-            URL url = UrlMap.class.getClassLoader().getResource("app.properties");
+            URL url = Config.class.getClassLoader().getResource("app.properties");
             if (url != null) {
                 properties.load(new FileInputStream(url.getPath()));
             } else {
@@ -145,20 +144,25 @@ public class Config {
         return Integer.parseInt(sampleRate);
     }
 
-    private static SessionManager sessionManager = SessionManager.getInstance();
-
-    public static String getVideoOutputStream(String username) {
-        Meeting meeting = sessionManager.getCurrentMeeting();
-        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-video";
+    public static String getVideoOutputStream(String meetingId, String username) {
+        return Config.getNginxOutputStream(meetingId, username) + "-video";
     }
 
-    public static String getAudioOutputStream(String username) {
-        Meeting meeting = sessionManager.getCurrentMeeting();
-        return Config.getNginxOutputStream(meeting.getUuid(), username) + "-audio";
+    public static String getAudioOutputStream(String meetingId, String username) {
+        return Config.getNginxOutputStream(meetingId, username) + "-audio";
     }
 
     public static int getCaptureType() {
         String captureType = properties.getProperty("capture.type", String.valueOf(WEBCAM));
         return Integer.parseInt(captureType);
+    }
+
+    public static String getHeartBeatsServerHost() {
+        return getServerHost();
+    }
+
+    public static int getHeartBeatsServerPort() {
+        String port = properties.getProperty(HEARTBEATS_SERVER_PORT_KEY, DEFAULT_HEARTBEATS_SERVER_PORT_VALUE);
+        return Integer.parseInt(port);
     }
 }

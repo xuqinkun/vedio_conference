@@ -27,8 +27,9 @@ public class AudioSwitchTask extends Task<Boolean> {
         if (isOpen) {
             log.debug("Audio open");
             if (audioRecordService == null) {
-                User user = sessionManager.getCurrentUser();
-                String outputStream = Config.getAudioOutputStream(user.getName());
+                String username = sessionManager.getCurrentUser().getName();
+                String uuid = sessionManager.getCurrentMeeting().getUuid();
+                String outputStream = Config.getAudioOutputStream(uuid, username);
                 audioRecordService = new AudioRecordService(outputStream);
                 audioRecordService.start();
             } else if (!audioRecordService.isRunning()) {

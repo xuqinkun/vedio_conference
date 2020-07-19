@@ -9,9 +9,20 @@ public class User {
 
     private String portraitSrc;
 
+    private String host;
+
+    private int port;
+
+    private long timeStamp;
+
     private boolean registered = true;
 
     public User() {
+    }
+
+    public User(String name, long timeStamp) {
+        this.name = name;
+        this.timeStamp = timeStamp;
     }
 
     public User(String name, boolean registered) {
@@ -77,13 +88,40 @@ public class User {
         this.portraitSrc = portraitSrc;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
-                ", portrait='" + portraitSrc + '\'' +
+                ", portraitSrc='" + portraitSrc + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", timeStamp=" + timeStamp +
                 ", registered=" + registered +
                 '}';
     }

@@ -1,10 +1,13 @@
 package service.network;
 
-import com.github.sarxos.webcam.Webcam;
+import common.bean.StateType;
+import common.bean.UserState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.model.Message;
 import service.model.MessageType;
+import util.Config;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -15,17 +18,20 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static service.model.MessageType.IMAGE;
 import static service.model.MessageType.TEXT;
 
 public class AsyncClient implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(AsyncClient.class);
+
     private String host;
     private int port;
     private Selector selector;
     private SocketChannel socketChannel;
     private volatile boolean stopped;
-    private BlockingQueue<Message> msgSendQueue;
+    private BlockingQueue<UserState> msgSendQueue;
 
     private long lastRead;
     private long lastWrite;
@@ -46,8 +52,8 @@ public class AsyncClient implements Runnable {
         }
     }
 
-    public void addMessage(Message msg) {
-        msgSendQueue.add(msg);
+    public void addMessage(UserState state) {
+        msgSendQueue.add(state);
     }
 
     @Override
@@ -61,15 +67,19 @@ public class AsyncClient implements Runnable {
         while (!stopped) {
             try {
                 if (socketChannel.isConnected() && !msgSendQueue.isEmpty()) {
-                    Message msg = msgSendQueue.remove();
-                    ByteBuffer [] buffers = msg.serialize();
+                    UserState userState = msgSendQueue.poll(1, TimeUnit.SECONDS);
+                    if (userState == null) {
+                        Thread.sleep(1000);
+                        continue;
+                    }
+                    ByteBuffer[] buffers = userState.serialize();
                     while (socketChannel.write(buffers) != 0)
                         ;
-                    System.out.println("Send image take:" +
-                            (System.currentTimeMillis() - lastWrite) + "ms");
+                    log.warn("Send image take:" + (System.currentTimeMillis() - lastWrite) + "ms");
                     lastWrite = System.currentTimeMillis();
                 }
-               if (selector.select(1000) == 0)
+
+                if (selector.select(1000) == 0)
                     continue;
                 Set<SelectionKey> keys = selector.selectedKeys();
                 Iterator<SelectionKey> it = keys.iterator();
@@ -102,10 +112,10 @@ public class AsyncClient implements Runnable {
             SocketChannel sc = (SocketChannel) key.channel();
             if (key.isConnectable()) {
                 if (sc.finishConnect()) {
-                    System.out.println("Connect succeed!");
+                    log.warn("Connect[{}] succeed!", sc.getRemoteAddress());
                     sc.register(selector, SelectionKey.OP_READ);
                 } else {
-                    System.out.println("Connect failed");
+                    log.warn("Connect[{}] failed!", sc.getRemoteAddress());
                     System.exit(1);
                 }
             }
@@ -126,9 +136,7 @@ public class AsyncClient implements Runnable {
             if (type == TEXT) {
                 System.out.println("From " + sc.getRemoteAddress());
                 System.out.println(new String(message.getData()));
-            }
-            else if (type == IMAGE) {
-//                VideoReceiverService.getInstance().addImage(message.toImage());
+            } else if (type == IMAGE) {
                 System.out.println("Read image take:" +
                         (System.currentTimeMillis() - lastRead) + "ms");
                 lastRead = System.currentTimeMillis();
@@ -137,29 +145,13 @@ public class AsyncClient implements Runnable {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        AsyncClient asyncClient = new AsyncClient("localhost", 8888);
+        AsyncClient asyncClient = new AsyncClient(Config.getHeartBeatsServerHost(), Config.getHeartBeatsServerPort());
         Thread thread = new Thread(asyncClient);
         thread.start();
 
-
-        Webcam webcam = Webcam.getDefault();
-        webcam.setViewSize(new Dimension(640, 480));
-        webcam.open();
-        ByteBuffer imageBytes = webcam.getImageBytes();
-        byte[] data = new byte[imageBytes.limit()];
-        imageBytes.get(data);
-
-        System.out.println(data.length);
-
-        asyncClient.addMessage(new Message(IMAGE, data.length, data));
+        asyncClient.addMessage(new UserState("123", "test", StateType.RUNNING));
 
         thread.join();
 
-       /* Scanner sc = new Scanner(System.in);
-        String s;
-        while ((s = sc.nextLine()) != null) {
-            byte[] data = s.getBytes();
-            client.addMessage(new Message(TEXT, data.length, data));
-        }*/
     }
 }

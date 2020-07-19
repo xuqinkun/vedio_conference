@@ -6,16 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import service.KafkaService;
-import service.MeetingService;
-import service.UserService;
+import service.*;
 import util.JsonUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static common.bean.MessageType.USER_ADD;
 import static common.bean.ResultCode.ERROR;
@@ -31,7 +26,7 @@ public class MeetingController {
 
     private KafkaService kafkaService;
 
-    private Map<String, List<User>> meetingUserMap = new HashMap<>();
+    private MeetingCache meetingCache = MeetingCache.getInstance();
 
     @Autowired
     public void setMeetingService(MeetingService meetingService) {
@@ -64,25 +59,35 @@ public class MeetingController {
             return new HttpResult<>(ERROR, "Invalid owner[" + meeting.getOwner() + "]");
         }
         HttpResult<String> ret = meetingService.createMeeting(meeting);
-        meetingUserMap.put(meeting.getUuid(), new ArrayList<>());
-        meetingUserMap.get(meeting.getUuid()).add(user);
+        meetingCache.addUser(meeting.getUuid(), user); // TODO add client info for creator
         return ret;
     }
 
     @PostMapping("/getUserList")
     public @ResponseBody
     HttpResult<String> getUserList(@RequestBody String uuid) {
-        if (uuid == null || meetingUserMap.get(uuid) == null) {
+        if (uuid == null || meetingCache.getUserList(uuid) == null) {
             return new HttpResult<>(ERROR, "[]");
         }
-        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingUserMap.get(uuid)));
+        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingCache.getUserList(uuid)));
     }
 
-    @PostMapping(value = "/joinMeeting", produces = "application/json;charset=UTF-8")
+    @RequestMapping(value = "/joinMeeting")
     public @ResponseBody
-    HttpResult<String> getUserList(@RequestBody JoinMeetingContext context) {
+    HttpResult<String> joinMeeting(@RequestBody JoinMeetingContext context, HttpServletRequest request) {
         Meeting meeting = context.getMeeting();
         User user = context.getUser();
+
+        String remoteHost = request.getRemoteHost();
+        int remotePort = request.getRemotePort();
+        String userName = user.getName();
+
+        user.setHost(remoteHost);
+        user.setPort(remotePort);
+        user.setTimeStamp(System.currentTimeMillis());
+
+        log.warn("User[{}] join meeting host: {} port: {}", userName, remoteHost, remotePort);
+
         String uuid = meeting.getUuid();
         Meeting oldMeeting = meetingService.findMeeting(uuid);
         if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
@@ -91,10 +96,10 @@ public class MeetingController {
             return new HttpResult<>(ERROR, errMessage);
         }
         kafkaService.sendMessage(uuid, new Message(USER_ADD, JsonUtil.toJsonString(user)));
-        meetingUserMap.get(uuid).add(user);
-//        Map<String, String> resp = new HashMap<>();
-//        resp.put("meeting", JsonUtil.toJsonString(oldMeeting));
-//        resp.put("users", JsonUtil.toJsonString(meetingUserMap.get(uuid)));
+        User cacheUser = meetingCache.getUser(uuid, user.getName());
+        if (cacheUser == null) {
+            meetingCache.addUser(uuid, user);
+        }
         return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
     }
 }

@@ -81,8 +81,9 @@ public class MeetingRoomInitTask extends Task<Boolean> {
 
     private void initRecorder() {
         if (videoRecordTask == null) {
-            User user = sessionManager.getCurrentUser();
-            String outputStream = Config.getVideoOutputStream(user.getName());
+            String username = sessionManager.getCurrentUser().getName();
+            String meetingId = sessionManager.getCurrentMeeting().getUuid();
+            String outputStream = Config.getVideoOutputStream(meetingId, username);
             videoRecordTask = new VideoRecordTask(outputStream);
             exec.scheduleAtFixedRate(videoRecordTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
         }
@@ -97,15 +98,16 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     private void initializeDevice() {
         log.warn("Initializing devices...");
         String username = sessionManager.getCurrentUser().getName();
+        String meetingId = sessionManager.getCurrentMeeting().getUuid();
         // Initialize video grabber, grabber should be started first
         exec.schedule((Runnable) DeviceManager::initGrabber, 0, TimeUnit.MILLISECONDS);
         // Initialize video recorder
         exec.schedule(() -> {
-            DeviceManager.initVideoRecorder(Config.getVideoOutputStream(username));
+            DeviceManager.initVideoRecorder(Config.getVideoOutputStream(meetingId, username));
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio recorder
         exec.schedule(() -> {
-            DeviceManager.initAudioRecorder(Config.getAudioOutputStream(username));
+            DeviceManager.initAudioRecorder(Config.getAudioOutputStream(meetingId, username));
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio target
         exec.schedule(DeviceManager::initAudioTarget, 0, TimeUnit.MILLISECONDS);
@@ -173,7 +175,6 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
         label.setPrefSize(localView.getFitWidth(), 20);
         label.setAlignment(Pos.CENTER);
-//        label.setStyle("-fx-text-alignment: center");
         label.setOpacity(0.3);
         StackPane.setAlignment(label, Pos.BOTTOM_CENTER);
 
@@ -192,13 +193,13 @@ public class MeetingRoomInitTask extends Task<Boolean> {
                 }
             }
         });
-
+        String meetingId = sessionManager.getCurrentMeeting().getUuid();
         log.warn("User[{}] added", user);
         if (!sessionManager.isCurrentUser(userName)) {
-            startVideoPlayer(localView, userName);
-            startAudioPlayer(userName);
+            startVideoPlayer(localView, meetingId, userName);
+            startAudioPlayer(meetingId, userName);
         } else if (sessionManager.isDebugMode()) {
-            startAudioPlayer(userName);
+            startAudioPlayer(meetingId, userName);
         }
         if (sessionManager.getGrabberScheduledService() == null && sessionManager.isCurrentUser(userName)) {
             GrabberScheduledService grabberScheduledService = new GrabberScheduledService(localView, globalView, userName);
@@ -206,10 +207,10 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         }
     }
 
-    private void startAudioPlayer(String userName) {
+    private void startAudioPlayer(String meetingId, String userName) {
         AudioPlayerService audioPlayerService;
         if (!audioPlayerServiceMap.containsKey(userName)) {
-            audioPlayerService = new AudioPlayerService(Config.getAudioOutputStream(userName));
+            audioPlayerService = new AudioPlayerService(Config.getAudioOutputStream(meetingId, userName));
             audioPlayerServiceMap.put(userName, audioPlayerService);
         } else {
             audioPlayerService = audioPlayerServiceMap.get(userName);
@@ -221,10 +222,10 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         }
     }
 
-    private void startVideoPlayer(ImageView localView, String userName) {
+    private void startVideoPlayer(ImageView localView, String meetingId, String userName) {
         VideoPlayerService videoPlayerService;
         if (!videoPullServiceMap.containsKey(userName)) {
-            videoPlayerService = new VideoPlayerService(Config.getVideoOutputStream(userName),
+            videoPlayerService = new VideoPlayerService(Config.getVideoOutputStream(meetingId, userName),
                     localView, globalView, userName);
             videoPullServiceMap.put(userName, videoPlayerService);
         } else {

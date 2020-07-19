@@ -3,7 +3,9 @@ package util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import common.bean.StateType;
 import common.bean.User;
+import common.bean.UserState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +31,17 @@ public class JsonUtil {
     }
 
     public static void main(String[] args) {
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(new User("aaa", true));
-        String jsonString = toJsonString(list);
-        System.out.println(jsonString);
-        System.out.println(jsonToList(jsonString, User.class));
+        UserState aa = new UserState("aa", "123", StateType.RUNNING);
+        byte [] data = JsonUtil.toByteArray(aa);
+        UserState userState = byteArrayToObject(data, UserState.class);
+        System.out.println(userState);
+    }
+
+    public static byte[] toByteArray(UserState userState) {
+        return toJsonString(userState).getBytes();
+    }
+
+    public static UserState byteArrayToObject(byte[] data, Class<UserState> clazz) {
+        return jsonToObject(new String(data), clazz);
     }
 }
