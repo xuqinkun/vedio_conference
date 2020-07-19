@@ -98,7 +98,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void videoSwitch(ActionEvent event) {
         boolean selected = videoSwitchBtn.isSelected();
-        exec.schedule(new VideoSwitchTask(selected), 0, TimeUnit.MILLISECONDS);
+        exec.schedule(new VideoSwitchTask(selected, globalImageView), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 

@@ -7,8 +7,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.DeviceHolder;
-import util.Config;
+import service.schedule.SlowTaskHolder;
 import util.DeviceManager;
 
 import javax.sound.sampled.SourceDataLine;
@@ -23,11 +22,11 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
 
     private FFmpegFrameGrabber audioGrabber;
 
-    private DeviceHolder<FFmpegFrameGrabber> audioGrabberHolder;
+    private SlowTaskHolder<FFmpegFrameGrabber> audioGrabberHolder;
 
     public AudioPlayerService(String inStream) {
         audioGrabberHolder = DeviceManager.getAudioGrabber(inStream);
-        audioGrabber = audioGrabberHolder.getDevice();
+        audioGrabber = audioGrabberHolder.getContent();
         init();
     }
 
@@ -36,8 +35,8 @@ public class AudioPlayerService extends ScheduledService<byte[]> {
 //        setPeriod(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
         setPeriod(Duration.millis(5));
 
-        DeviceHolder<SourceDataLine> sourceDataLineHolder = DeviceManager.getSourceDataLineHolder();
-        SourceDataLine sourceDataLine = sourceDataLineHolder.getDevice();
+        SlowTaskHolder<SourceDataLine> sourceDataLineHolder = DeviceManager.getSourceDataLineHolder();
+        SourceDataLine sourceDataLine = sourceDataLineHolder.getContent();
         valueProperty().addListener((observable, oldValue, data) -> {
             if (data != null && audioGrabberHolder.isStarted()) {
                 sourceDataLine.write(data, 0, data.length);

@@ -5,7 +5,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 import util.DeviceManager;
 
 public class VideoRecordTask implements Runnable {
@@ -13,12 +13,12 @@ public class VideoRecordTask implements Runnable {
 
     private FFmpegFrameRecorder recorder;
     private long start;
-    private DeviceHolder<FFmpegFrameRecorder> recorderHolder;
+    private SlowTaskHolder<FFmpegFrameRecorder> recorderHolder;
 
     public VideoRecordTask(String output) {
         LOG.debug(output);
         recorderHolder = DeviceManager.getVideoRecorder(output);
-        recorder = recorderHolder.getDevice();
+        recorder = recorderHolder.getContent();
     }
 
     @Override

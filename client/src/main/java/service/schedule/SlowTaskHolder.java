@@ -5,24 +5,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DeviceHolder<T> {
+public class SlowTaskHolder<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(DeviceHolder.class);
+    private static final Logger log = LoggerFactory.getLogger(SlowTaskHolder.class);
 
-    private T device;
+    private T content;
     private volatile AtomicBoolean started;
     private volatile AtomicBoolean submitted;
     private final String taskName;
 
-    public DeviceHolder(T device, String taskName) {
-        this.device = device;
+    public SlowTaskHolder(T content, String taskName) {
+        this.content = content;
         started = new AtomicBoolean(false);
         submitted = new AtomicBoolean(false);
         this.taskName = taskName;
     }
 
-    public T getDevice() {
-        return device;
+    public T getContent() {
+        return content;
     }
 
     public boolean isStarted() {
@@ -32,11 +32,11 @@ public class DeviceHolder<T> {
     public void submit(boolean force) {
         if (!submitted.get()) {
             log.debug("[{}] submit", taskName);
-            DeviceStarter.submit(this);
+            TaskStarter.submit(this);
             submitted.getAndSet(true);
         } else if (force) {
             log.debug("[{}] already submitted, force to submit", taskName);
-            DeviceStarter.submit(this);
+            TaskStarter.submit(this);
         } else {
             log.debug("[{}] already submitted, don't submit again", taskName);
         }

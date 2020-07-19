@@ -1,4 +1,4 @@
-package service.schedule;
+package util;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,9 +13,7 @@ public class DefaultThreadFactory implements ThreadFactory {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
                 Thread.currentThread().getThreadGroup();
-        namePrefix = groupName +
-                poolNumber.getAndIncrement() +
-                "-thread-";
+        namePrefix = groupName + "-thread-";
     }
 
     public Thread newThread(Runnable r) {

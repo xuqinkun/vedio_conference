@@ -4,22 +4,23 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.DefaultThreadFactory;
+import util.ThreadPoolUtil;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class DeviceStarter {
-    private static final Logger LOG = LoggerFactory.getLogger(DeviceStarter.class);
+public class TaskStarter {
+    private static final Logger LOG = LoggerFactory.getLogger(TaskStarter.class);
 
-    private static final ScheduledExecutorService exec =
-            Executors.newScheduledThreadPool(5, new DefaultThreadFactory("DeviceStarter-"));
+    private static final ScheduledExecutorService exec = ThreadPoolUtil.getScheduledExecutor(5, "DeviceStarter");
 
-    public static <T> void submit(DeviceHolder<T> holder) {
-        if (holder != null && holder.getDevice() != null){
+    public static <T> void submit(SlowTaskHolder<T> holder) {
+        if (holder != null && holder.getContent() != null){
             try {
-                T device = holder.getDevice();
+                T device = holder.getContent();
                 if (device instanceof FFmpegFrameGrabber || device instanceof FrameRecorder) {
                     startUnsafe(holder);
                 } else {
@@ -46,8 +47,8 @@ public class DeviceStarter {
      * @param <T>
      * @throws NoSuchMethodException
      */
-    private static <T> void startUnsafe(DeviceHolder<T> holder) throws NoSuchMethodException {
-        T device = holder.getDevice();
+    private static <T> void startUnsafe(SlowTaskHolder<T> holder) throws NoSuchMethodException {
+        T device = holder.getContent();
         Method startMethod = device.getClass().getMethod("startUnsafe");
         if (startMethod != null) {
             exec.schedule(() -> {
@@ -77,8 +78,8 @@ public class DeviceStarter {
         return errMessage;
     }
 
-    private static <T> void start(DeviceHolder<T> holder) throws NoSuchMethodException {
-        T device = holder.getDevice();
+    private static <T> void start(SlowTaskHolder<T> holder) throws NoSuchMethodException {
+        T device = holder.getContent();
         Method startMethod = device.getClass().getMethod("start");
         if (startMethod != null) {
             exec.schedule(() -> {

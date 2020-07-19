@@ -1,25 +1,28 @@
 package service.schedule.layout;
 
 import javafx.concurrent.Task;
+import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.schedule.video.GrabberScheduledService;
-import service.schedule.video.VideoRecordTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class VideoSwitchTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(VideoSwitchTask.class);
 
-    private boolean isOpen;
-
     private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
 
     private static SessionManager sessionManager = SessionManager.getInstance();
 
-    public VideoSwitchTask(boolean isOpen) {
+    private boolean isOpen;
+
+    private ImageView globalView;
+
+    public VideoSwitchTask(boolean isOpen, ImageView globalView) {
         this.isOpen = isOpen;
+        this.globalView = globalView;
     }
 
     @Override
@@ -28,6 +31,7 @@ public class VideoSwitchTask extends Task<Boolean> {
         GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
         if (grabberScheduledService == null) {
             log.warn("Please wait for system initializing...");
+            // TODO print a system info
             return;
         }
         if (isOpen) {

@@ -4,6 +4,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import service.model.SessionManager;
+import service.schedule.layout.LayoutInitTask;
 import util.DeviceManager;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class Program extends Application {
         new Thread(DeviceManager::initGrabber).start();
         new Thread(DeviceManager::initAudioPlayer).start();
         new Thread(DeviceManager::initAudioTarget).start();
+//        new Thread(new LayoutInitTask()).start();
     }
 
     public static void main(String[] args) {

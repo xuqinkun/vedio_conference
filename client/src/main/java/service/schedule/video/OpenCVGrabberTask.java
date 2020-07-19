@@ -3,19 +3,19 @@ package service.schedule.video;
 import javafx.scene.image.Image;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 import util.Config;
 import util.DeviceManager;
 import util.ImageUtil;
 
 public class OpenCVGrabberTask extends Grabber {
-    private DeviceHolder<FrameGrabber> openCVFrameGrabber;
+    private SlowTaskHolder<FrameGrabber> openCVFrameGrabber;
 
     private FrameGrabber grabber;
 
     public OpenCVGrabberTask() {
         openCVFrameGrabber = DeviceManager.getOpenCVFrameGrabber(Config.getCaptureDevice());
-        grabber = openCVFrameGrabber.getDevice();
+        grabber = openCVFrameGrabber.getContent();
     }
 
     @Override

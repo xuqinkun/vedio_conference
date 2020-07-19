@@ -4,7 +4,7 @@ import com.github.sarxos.webcam.Webcam;
 import javafx.scene.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 import util.DeviceManager;
 import util.ImageUtil;
 
@@ -15,11 +15,11 @@ public class WebcamGrabberTask extends Grabber {
 
     private static Webcam webcam;
 
-    private static DeviceHolder<Webcam> webcamHolder;
+    private static SlowTaskHolder<Webcam> webcamHolder;
 
     public WebcamGrabberTask() {
         webcamHolder = DeviceManager.getWebcam();
-        webcam = webcamHolder.getDevice();
+        webcam = webcamHolder.getContent();
     }
 
     @Override

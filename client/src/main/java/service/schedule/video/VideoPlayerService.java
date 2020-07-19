@@ -7,11 +7,10 @@ import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 import util.DeviceManager;
 import util.ImageUtil;
 
@@ -28,7 +27,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
 
     private final FFmpegFrameGrabber grabber;
 
-    private final DeviceHolder<FFmpegFrameGrabber> videoGrabberHolder;
+    private final SlowTaskHolder<FFmpegFrameGrabber> videoGrabberHolder;
 
     private String portraitSrc;
 
@@ -38,7 +37,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
         this.localView = localView;
         this.globalView = globalView;
         videoGrabberHolder = DeviceManager.getFFmpegFrameGrabber(inStream);
-        grabber = videoGrabberHolder.getDevice();
+        grabber = videoGrabberHolder.getContent();
         portraitSrc = SessionManager.getInstance().getPortraitSrc(layoutName);
         init();
     }

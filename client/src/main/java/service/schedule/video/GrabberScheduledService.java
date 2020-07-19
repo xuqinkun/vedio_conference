@@ -1,6 +1,5 @@
 package service.schedule.video;
 
-import common.bean.User;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -9,7 +8,6 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
-import util.Config;
 
 public class GrabberScheduledService extends ScheduledService<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(GrabberScheduledService.class);
@@ -41,9 +39,9 @@ public class GrabberScheduledService extends ScheduledService<Image> {
                 if (!globalView.isVisible()) {
                     globalView.setVisible(true);
                 }
-//                localView.setRotate(0);
                 localView.setImage(image);
                 if (layoutName.equals(SessionManager.getInstance().getActiveLayout())) {
+                    globalView.setRotate(0);
                     globalView.setImage(image);
                 }
             }

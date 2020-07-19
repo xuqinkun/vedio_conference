@@ -18,7 +18,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
-import service.schedule.DeviceStarter;
+import service.schedule.TaskStarter;
 import service.schedule.audio.AudioPlayerService;
 import service.schedule.video.GrabberScheduledService;
 import service.schedule.video.VideoPlayerService;
@@ -26,6 +26,7 @@ import service.schedule.video.VideoRecordTask;
 import util.Config;
 import util.DeviceManager;
 import util.JsonUtil;
+import util.ThreadPoolUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +35,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class MeetingRoomInitTask extends Task<Boolean> {
-    private static final Logger log = LoggerFactory.getLogger(DeviceStarter.class);
+    private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
     private final SessionManager sessionManager = SessionManager.getInstance();
-    private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
+    private final ScheduledThreadPoolExecutor exec = ThreadPoolUtil.getScheduledExecutor(5, "MeetingRoomStart");
+
     private final Map<String, VideoPlayerService> videoPullServiceMap = new HashMap<>();
     private final Map<String, AudioPlayerService> audioPlayerServiceMap = new HashMap<>();
     private Pane userListLayout;

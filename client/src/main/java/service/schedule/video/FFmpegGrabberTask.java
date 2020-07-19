@@ -5,7 +5,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 import util.Config;
 import util.DeviceManager;
 import util.ImageUtil;
@@ -13,14 +13,14 @@ import util.ImageUtil;
 public class FFmpegGrabberTask extends Grabber {
     private static final Logger LOG = LoggerFactory.getLogger(FFmpegGrabberTask.class);
 
-    private DeviceHolder<FrameGrabber> grabberHolder;
+    private SlowTaskHolder<FrameGrabber> grabberHolder;
 
     private FrameGrabber grabber;
 
     public FFmpegGrabberTask() {
         try {
             grabberHolder = DeviceManager.getFFmpegFrameGrabber(Config.getCaptureDevice());
-            grabber = grabberHolder.getDevice();
+            grabber = grabberHolder.getContent();
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }

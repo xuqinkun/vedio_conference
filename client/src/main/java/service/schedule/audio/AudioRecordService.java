@@ -7,7 +7,7 @@ import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.FrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 import util.Config;
 import util.DeviceManager;
 
@@ -22,8 +22,8 @@ public class AudioRecordService extends ScheduledService<ShortBuffer> {
     private TargetDataLine targetDataLine;
     private byte[] audioBytes;
     private FFmpegFrameRecorder audioRecorder;
-    private DeviceHolder<FFmpegFrameRecorder> audioRecorderHolder;
-    private DeviceHolder<TargetDataLine> targetDataLineHolder;
+    private SlowTaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
+    private SlowTaskHolder<TargetDataLine> targetDataLineHolder;
     int sampleRate;
 
     public AudioRecordService(String outputStream) {
@@ -32,10 +32,10 @@ public class AudioRecordService extends ScheduledService<ShortBuffer> {
         int audioBufferSize = sampleRate * audioChannels;
         this.audioBytes = new byte[audioBufferSize];
         audioRecorderHolder = DeviceManager.getAudioRecorder(outputStream);
-        audioRecorder = audioRecorderHolder.getDevice();
+        audioRecorder = audioRecorderHolder.getContent();
         targetDataLineHolder = DeviceManager.getTargetDataLineHolder();
         if (targetDataLineHolder != null) {
-            targetDataLine = targetDataLineHolder.getDevice();
+            targetDataLine = targetDataLineHolder.getContent();
         }
         init();
     }

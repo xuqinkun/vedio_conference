@@ -9,8 +9,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.schedule.DefaultThreadFactory;
-import service.schedule.DeviceHolder;
+import service.schedule.SlowTaskHolder;
 
 import javax.sound.sampled.*;
 import java.awt.*;
@@ -27,19 +26,19 @@ public class DeviceManager {
 
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
 
-    private static Map<String, DeviceHolder<FFmpegFrameGrabber>> videoGrabberMap = new HashMap<>();
+    private static Map<String, SlowTaskHolder<FFmpegFrameGrabber>> videoGrabberMap = new HashMap<>();
 
-    private static Map<String, DeviceHolder<FFmpegFrameGrabber>> audioGrabberMap = new HashMap<>();
+    private static Map<String, SlowTaskHolder<FFmpegFrameGrabber>> audioGrabberMap = new HashMap<>();
 
-    private static DeviceHolder<Webcam> webcamHolder;
+    private static SlowTaskHolder<Webcam> webcamHolder;
 
-    private volatile static DeviceHolder<FrameGrabber> frameGrabberHolder;
+    private volatile static SlowTaskHolder<FrameGrabber> frameGrabberHolder;
 
-    private volatile static DeviceHolder<FFmpegFrameRecorder> videoRecorderHolder;
+    private volatile static SlowTaskHolder<FFmpegFrameRecorder> videoRecorderHolder;
 
-    private volatile static DeviceHolder<FFmpegFrameRecorder> audioRecorderHolder;
+    private volatile static SlowTaskHolder<FFmpegFrameRecorder> audioRecorderHolder;
 
-    private volatile static DeviceHolder<TargetDataLine> targetDataLineHolder;
+    private volatile static SlowTaskHolder<TargetDataLine> targetDataLineHolder;
 
     public static void initVideoRecorder(String outStream) {
         getVideoRecorder(outStream);
@@ -49,17 +48,13 @@ public class DeviceManager {
         getAudioRecorder(outStream);
     }
 
-    public static void initGrabber(String inStream) {
-        getFFmpegFrameGrabber(inStream);
-    }
-
     public static void initGrabber() {
         try {
             int captureType = Config.getCaptureType();
             if (captureType == WEBCAM) {
-                DeviceHolder<Webcam> webcamHolder = getWebcam();
+                SlowTaskHolder<Webcam> webcamHolder = getWebcam();
                 if (!webcamHolder.isStarted()) {
-                    Webcam webcam = webcamHolder.getDevice();
+                    Webcam webcam = webcamHolder.getContent();
                     if (!webcam.isOpen()) {
                         log.warn("Open WebCam. Please wait...");
                         webcam.open();
@@ -77,35 +72,35 @@ public class DeviceManager {
         }
     }
 
-    public synchronized static DeviceHolder<FrameGrabber> getOpenCVFrameGrabber(int captureDevice) {
+    public synchronized static SlowTaskHolder<FrameGrabber> getOpenCVFrameGrabber(int captureDevice) {
         if (frameGrabberHolder == null) {
             log.warn("Initialize OpenCVFrameGrabber");
             FrameGrabber grabber = new OpenCVFrameGrabber(captureDevice);
             grabber.setImageHeight(Config.getCaptureImageHeight());
             grabber.setImageWidth(Config.getCaptureImageWidth());
-            frameGrabberHolder = new DeviceHolder<>(grabber, String.format("OpenCvFrameGrabber[%s]", captureDevice));
+            frameGrabberHolder = new SlowTaskHolder<>(grabber, String.format("OpenCvFrameGrabber[%s]", captureDevice));
             frameGrabberHolder.submit(false);
         }
         return frameGrabberHolder;
     }
 
     public static void initAudioTarget() {
-        DeviceHolder<TargetDataLine> dataLineHolder = getTargetDataLineHolder();
+        SlowTaskHolder<TargetDataLine> dataLineHolder = getTargetDataLineHolder();
         if (dataLineHolder != null && !dataLineHolder.isStarted()) {
-            dataLineHolder.getDevice().start();
+            dataLineHolder.getContent().start();
             dataLineHolder.setStarted();
         }
     }
 
     public static void initAudioPlayer() {
-        DeviceHolder<SourceDataLine> sourceDataLineHolder = getSourceDataLineHolder();
+        SlowTaskHolder<SourceDataLine> sourceDataLineHolder = getSourceDataLineHolder();
         if (sourceDataLineHolder != null && !sourceDataLineHolder.isStarted()) {
-            sourceDataLineHolder.getDevice().start();
+            sourceDataLineHolder.getContent().start();
             sourceDataLineHolder.setStarted();
         }
     }
 
-    public synchronized static DeviceHolder<TargetDataLine> getTargetDataLineHolder() {
+    public synchronized static SlowTaskHolder<TargetDataLine> getTargetDataLineHolder() {
         if (targetDataLineHolder == null) {
             AudioFormat audioFormat = new AudioFormat(Config.getAudioSampleRate(), Config.getAudioSampleSize(),
                     Config.getAudioChannels(), true, false);
@@ -113,7 +108,7 @@ public class DeviceManager {
             try {
                 TargetDataLine targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
                 targetDataLine.open();
-                targetDataLineHolder = new DeviceHolder<>(targetDataLine, "TargetDataLine");
+                targetDataLineHolder = new SlowTaskHolder<>(targetDataLine, "TargetDataLine");
             } catch (LineUnavailableException e) {
                 log.error("Start audio device failed.Cause:{}", e.getCause().toString());
                 return null;
@@ -122,9 +117,9 @@ public class DeviceManager {
         return targetDataLineHolder;
     }
 
-    private static DeviceHolder<SourceDataLine> sourceDataLineHolder;
+    private static SlowTaskHolder<SourceDataLine> sourceDataLineHolder;
 
-    public synchronized static DeviceHolder<SourceDataLine> getSourceDataLineHolder() {
+    public synchronized static SlowTaskHolder<SourceDataLine> getSourceDataLineHolder() {
         AudioFormat audioFormat = new AudioFormat(Config.getAudioSampleRate(), Config.getAudioSampleSize(),
                 Config.getAudioChannels(), true, false);
         if (sourceDataLineHolder == null) {
@@ -133,7 +128,7 @@ public class DeviceManager {
                 SourceDataLine mSourceLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
                 mSourceLine.open(audioFormat);
                 mSourceLine.start();
-                sourceDataLineHolder = new DeviceHolder<>(mSourceLine, "Audio player");
+                sourceDataLineHolder = new SlowTaskHolder<>(mSourceLine, "Audio player");
             } catch (LineUnavailableException e) {
                 e.printStackTrace();
                 log.error("Audio player start failed");
@@ -143,7 +138,7 @@ public class DeviceManager {
         return sourceDataLineHolder;
     }
 
-    public synchronized static DeviceHolder<FFmpegFrameRecorder> getVideoRecorder(String outStream) {
+    public synchronized static SlowTaskHolder<FFmpegFrameRecorder> getVideoRecorder(String outStream) {
         if (videoRecorderHolder == null) {
             log.debug("Create video recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream,
@@ -164,13 +159,13 @@ public class DeviceManager {
             // Max duration for analyzing video frame
             recorder.setOption("max_analyze_duration", "1");
 
-            videoRecorderHolder = new DeviceHolder<>(recorder, String.format("Video Recorder[%s]", outStream));
+            videoRecorderHolder = new SlowTaskHolder<>(recorder, String.format("Video Recorder[%s]", outStream));
             videoRecorderHolder.submit(false);
         }
         return videoRecorderHolder;
     }
 
-    public synchronized static DeviceHolder<FFmpegFrameRecorder> getAudioRecorder(String outStream) {
+    public synchronized static SlowTaskHolder<FFmpegFrameRecorder> getAudioRecorder(String outStream) {
         if (audioRecorderHolder == null) {
             log.debug("Create audio recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getAudioChannels());
@@ -190,34 +185,34 @@ public class DeviceManager {
             recorder.setOption("probesize", "1024");
             // Max duration for analyzing video frame
             recorder.setOption("max_analyze_duration", "1");
-            audioRecorderHolder = new DeviceHolder<>(recorder, String.format("Audio Recorder[%s]", outStream));
+            audioRecorderHolder = new SlowTaskHolder<>(recorder, String.format("Audio Recorder[%s]", outStream));
             audioRecorderHolder.submit(false);
         }
         return audioRecorderHolder;
     }
 
-    public synchronized static DeviceHolder<FrameGrabber> getFFmpegFrameGrabber(int deviceNumber) throws FrameGrabber.Exception {
+    public synchronized static SlowTaskHolder<FrameGrabber> getFFmpegFrameGrabber(int deviceNumber) throws FrameGrabber.Exception {
         if (frameGrabberHolder == null) {
             log.warn("Initialize FFmpegFrameGrabber");
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
-            frameGrabberHolder = new DeviceHolder<>(grabber, String.format("FFmpegFrameGrabber[%s]", deviceNumber));
+            frameGrabberHolder = new SlowTaskHolder<>(grabber, String.format("FFmpegFrameGrabber[%s]", deviceNumber));
             frameGrabberHolder.submit(false);
         }
         return frameGrabberHolder;
     }
 
-    public synchronized static DeviceHolder<Webcam> getWebcam() {
+    public synchronized static SlowTaskHolder<Webcam> getWebcam() {
         if (webcamHolder == null) {
             Webcam webcam = Webcam.getDefault();
             webcam.setViewSize(new Dimension(Config.getCaptureImageWidth(), Config.getCaptureImageHeight()));
-            webcamHolder = new DeviceHolder<>(webcam, "WebCam");
+            webcamHolder = new SlowTaskHolder<>(webcam, "WebCam");
         }
         return webcamHolder;
     }
 
-    public synchronized static DeviceHolder<FFmpegFrameGrabber> getFFmpegFrameGrabber(String url) {
+    public synchronized static SlowTaskHolder<FFmpegFrameGrabber> getFFmpegFrameGrabber(String url) {
         if (videoGrabberMap.get(url) == null) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(url);
             grabber.setOption("probesize", "1024");
@@ -225,9 +220,9 @@ public class DeviceManager {
             grabber.setOption("max_analyze_duration", "1");
             grabber.setOption("stimeout", String.valueOf(TimeUnit.SECONDS.toMicros(2)));
 //            grabber.setTimeout((int) TimeUnit.SECONDS.toMicros(2));
-            DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Video Grabber[%s]", url));
-            videoGrabberMap.put(url, deviceHolder);
-            delayStart(deviceHolder);
+            SlowTaskHolder<FFmpegFrameGrabber> slowTaskHolder = new SlowTaskHolder<>(grabber, String.format("Video Grabber[%s]", url));
+            videoGrabberMap.put(url, slowTaskHolder);
+            delayStart(slowTaskHolder);
         }
         return videoGrabberMap.get(url);
     }
@@ -235,7 +230,7 @@ public class DeviceManager {
     private static final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(10, new DefaultThreadFactory("DeviceManager-"));
 
-    public static void delayStart(DeviceHolder<FFmpegFrameGrabber> deviceHolder) {
+    public static void delayStart(SlowTaskHolder<FFmpegFrameGrabber> slowTaskHolder) {
         scheduler.schedule(() -> {
             /** Submit grabber startup task only if the recorders have been started and the grabber is not started */
             while (audioRecorderHolder == null || !audioRecorderHolder.isStarted()
@@ -246,11 +241,11 @@ public class DeviceManager {
                     e.printStackTrace();
                 }
             }
-            deviceHolder.submit(false);
+            slowTaskHolder.submit(false);
         }, 0, TimeUnit.MILLISECONDS);
     }
 
-    public static DeviceHolder<FFmpegFrameGrabber> getAudioGrabber(String inStream) {
+    public static SlowTaskHolder<FFmpegFrameGrabber> getAudioGrabber(String inStream) {
         if (audioGrabberMap.get(inStream) == null) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
             grabber.setOption("fflags", "nobuffer");
@@ -264,9 +259,9 @@ public class DeviceManager {
             // Max duration for analyzing video frame
             grabber.setOption("max_analyze_duration", "1");
             grabber.setOption("stimeout", String.valueOf(TimeUnit.SECONDS.toMicros(2)));
-            DeviceHolder<FFmpegFrameGrabber> deviceHolder = new DeviceHolder<>(grabber, String.format("Audio Grabber[%s]", inStream));
-            delayStart(deviceHolder);
-            audioGrabberMap.put(inStream, deviceHolder);
+            SlowTaskHolder<FFmpegFrameGrabber> slowTaskHolder = new SlowTaskHolder<>(grabber, String.format("Audio Grabber[%s]", inStream));
+            delayStart(slowTaskHolder);
+            audioGrabberMap.put(inStream, slowTaskHolder);
         }
         return audioGrabberMap.get(inStream);
     }
