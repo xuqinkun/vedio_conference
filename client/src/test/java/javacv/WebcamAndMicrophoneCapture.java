@@ -57,7 +57,7 @@ public class WebcamAndMicrophoneCapture
         // imageHeight = height we specified for the grabber
         // audioChannels = 2, because we like stereo
         final FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(
-                "rtmp://localhost:1935/live/room",
+                "rtmp://47.108.114.76:1935/live/room",
                 captureWidth, captureHeight, 2);
         recorder.setInterleaved(true);
 

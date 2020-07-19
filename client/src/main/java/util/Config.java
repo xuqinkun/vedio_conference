@@ -12,15 +12,12 @@ import java.net.URL;
 import java.util.Properties;
 
 public class Config {
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     public static final String PORTRAIT_KEY = "portrait";
     public static final String DEFAULT_PORTRAIT_SRC = "/fxml/img/orange.png";
     public static final String CAPTURE_DEVICE_KEY = "capture.device";
     public static final String DEFAULT_CAPTURE_DEVICE = "0";
-    public static final String KAFKA_SERVER_HOST_KEY = "kafka.server.host";
-    public static final String DEFAULT_KAFKA_SERVER_HOST = "localhost";
-    public static final String KAFKA_SERVER_PORT_KEY = "kafka.server.port";
-    public static final String DEFAULT_KAFKA_SERVER_PORT = "9092";
     public static final String KAFKA_CONSUMER_GROUP_ID_KEY = "kafka.consumer.groupID";
     public static final String DEFAULT_KAFKA_CONSUMER_GROUP_ID = "consumers";
     public static final String TRUSTED_PACKAGES_KEY = "trusted.packages";
@@ -32,15 +29,16 @@ public class Config {
     public static final int WEBCAM = 0;
     public static final int OPENCV_GRABBER = 1;
     public static final int FFMPEG_GRABBER = 2;
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
-    private static final String DEFAULT_HOST = "localhost";
-    private static final String HOST_KEY = "server.host";
+    public static final String SERVER_LOCAL_KEY = "server.local";
+    public static final String DEFAULT_LOCAL_SERVER_HOSTNAME = "localhost";
+    public static final String SERVER_REMOTE_KEY = "server.remote";
+    public static final String DEFAULT_REMOTE_SERVER_HOSTNAME = "localhost";
     private static final String PORT_KEY = "server.port";
     private static final String DEFAULT_SERVER_PORT = "8080";
-    private static final String NGINX_HOST_KEY = "nginx.host";
     private static final String NGINX_PORT_KEY = "nginx.port";
-    private static final String DEFAULT_NGINX_HOST = "localhost";
     private static final String DEFAULT_NGINX_PORT = "1935";
+    public static final String KAFKA_SERVER_PORT_KEY = "kafka.port";
+    public static final String DEFAULT_KAFKA_SERVER_PORT = "9092";
     private static Properties properties;
 
     static {
@@ -57,16 +55,8 @@ public class Config {
         }
     }
 
-    public static String getServerHost() {
-        return properties.getProperty(HOST_KEY, DEFAULT_HOST);
-    }
-
     public static String getServerPort() {
         return properties.getProperty(PORT_KEY, DEFAULT_SERVER_PORT);
-    }
-
-    public static String getNginxHost() {
-        return properties.getProperty(NGINX_HOST_KEY, DEFAULT_NGINX_HOST);
     }
 
     public static String getNginxPort() {
@@ -83,15 +73,24 @@ public class Config {
     }
 
     public static String getNginxUrlPrefix() {
-        return String.format("rtmp://%s:%s/live", getNginxHost(), getNginxPort());
+        return String.format("rtmp://%s:%s/live", getServerHost(), getNginxPort());
     }
 
     public static String getNginxOutputStream(String meetingUUID, String username) {
         return String.format("%s/%s-%s", Config.getNginxUrlPrefix(), meetingUUID, username);
     }
 
-    public static String getKafkaServerHost() {
-        return properties.getProperty(KAFKA_SERVER_HOST_KEY, DEFAULT_KAFKA_SERVER_HOST);
+    public static boolean useLocalServer() {
+        String useLocalServer = properties.getProperty("use_local_server", "false");
+        return Boolean.parseBoolean(useLocalServer);
+    }
+
+    public static String getServerHost() {
+        if (useLocalServer()) {
+            return properties.getProperty(SERVER_LOCAL_KEY, DEFAULT_LOCAL_SERVER_HOSTNAME);
+        } else {
+            return properties.getProperty(SERVER_REMOTE_KEY, DEFAULT_REMOTE_SERVER_HOSTNAME);
+        }
     }
 
     public static String getKafkaServerPort() {
@@ -103,7 +102,7 @@ public class Config {
     }
 
     public static String getKafkaServer() {
-        return String.format("%s:%s", getKafkaServerHost(), getKafkaServerPort());
+        return String.format("%s:%s", getServerHost(), getKafkaServerPort());
     }
 
     public static String[] getKafkaTrustedPackages() {

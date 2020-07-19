@@ -53,7 +53,7 @@ public class FFmpegStreamingTimeout {
 
     }
 
-    private static final String SOURCE_RTSP = "rtmp://192.168.0.104:1935/live/63659c1cbed2-aa-video";
+    private static final String SOURCE_RTSP = "rtmp://47.108.114.76:1935/live/room";
     private static final int TIMEOUT = 2; // In seconds.
 
     public static void main(String[] args) {
@@ -78,7 +78,6 @@ public class FFmpegStreamingTimeout {
                     TimeoutOption.STIMEOUT.getKey(),
                     String.valueOf(TIMEOUT * 1000000)
             ); // In microseconds.
-            grabber.setVideoStream(1);
             grabber.startUnsafe();
             System.out.println("Grabber started");
 

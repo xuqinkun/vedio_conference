@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-public class Config {
+public class KafkaConfig {
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<Integer, String>
