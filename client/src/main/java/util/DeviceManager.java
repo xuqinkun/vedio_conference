@@ -68,10 +68,8 @@ public class DeviceManager {
                     }
                 }
             } else if (captureType == OPENCV_GRABBER) {
-                log.warn("Initialize OpenCVFrameGrabber");
                 getOpenCVFrameGrabber(Config.getCaptureDevice());
             } else {
-                log.warn("Initialize FFmpegFrameGrabber");
                 getFFmpegFrameGrabber(Config.getCaptureDevice());
             }
         } catch (Exception e) {
@@ -79,8 +77,9 @@ public class DeviceManager {
         }
     }
 
-    public static DeviceHolder<FrameGrabber> getOpenCVFrameGrabber(int captureDevice) {
+    public synchronized static DeviceHolder<FrameGrabber> getOpenCVFrameGrabber(int captureDevice) {
         if (frameGrabberHolder == null) {
+            log.warn("Initialize OpenCVFrameGrabber");
             FrameGrabber grabber = new OpenCVFrameGrabber(captureDevice);
             grabber.setImageHeight(Config.getCaptureImageHeight());
             grabber.setImageWidth(Config.getCaptureImageWidth());
@@ -197,8 +196,9 @@ public class DeviceManager {
         return audioRecorderHolder;
     }
 
-    public static DeviceHolder<FrameGrabber> getFFmpegFrameGrabber(int deviceNumber) throws FrameGrabber.Exception {
+    public synchronized static DeviceHolder<FrameGrabber> getFFmpegFrameGrabber(int deviceNumber) throws FrameGrabber.Exception {
         if (frameGrabberHolder == null) {
+            log.warn("Initialize FFmpegFrameGrabber");
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(Config.getCaptureImageWidth());
             grabber.setImageHeight(Config.getCaptureImageHeight());
@@ -208,7 +208,7 @@ public class DeviceManager {
         return frameGrabberHolder;
     }
 
-    public static DeviceHolder<Webcam> getWebcam() {
+    public synchronized static DeviceHolder<Webcam> getWebcam() {
         if (webcamHolder == null) {
             Webcam webcam = Webcam.getDefault();
             webcam.setViewSize(new Dimension(Config.getCaptureImageWidth(), Config.getCaptureImageHeight()));
@@ -217,7 +217,7 @@ public class DeviceManager {
         return webcamHolder;
     }
 
-    public static DeviceHolder<FFmpegFrameGrabber> getFFmpegFrameGrabber(String url) {
+    public synchronized static DeviceHolder<FFmpegFrameGrabber> getFFmpegFrameGrabber(String url) {
         if (videoGrabberMap.get(url) == null) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(url);
             grabber.setOption("probesize", "1024");

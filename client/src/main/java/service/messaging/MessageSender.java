@@ -34,6 +34,6 @@ public class MessageSender {
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        new MessageSender().send("test", new Data("1", new Date(), TEXT, "hello".getBytes()));
+        MessageSender.getInstance().send("test", new Data("1", new Date(), TEXT, "hello".getBytes()));
     }
 }

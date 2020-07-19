@@ -22,6 +22,7 @@ import service.schedule.DeviceStarter;
 import service.schedule.audio.AudioPlayerService;
 import service.schedule.video.GrabberScheduledService;
 import service.schedule.video.VideoPlayerService;
+import service.schedule.video.VideoRecordTask;
 import util.Config;
 import util.DeviceManager;
 import util.JsonUtil;
@@ -42,6 +43,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
 
     private ImageView globalView;
     private StackPane lastClicked;
+    private VideoRecordTask videoRecordTask;
 
     public MeetingRoomInitTask(Pane userListLayout, ImageView globalView) {
         this.userListLayout = userListLayout;
@@ -51,7 +53,6 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     @Override
     protected void updateValue(Boolean value) {
         super.updateValue(value);
-        init();
     }
 
     private void init() {
@@ -72,10 +73,22 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         initUserList(sessionManager.getCurrentMeeting());
         /* Listen user change (join or leave)*/
         listenUserListChange(sessionManager.getCurrentMeeting());
+        // Initialize recorder
+        initRecorder();
+    }
+
+    private void initRecorder() {
+        if (videoRecordTask == null) {
+            User user = sessionManager.getCurrentUser();
+            String outputStream = Config.getVideoOutputStream(user.getName());
+            videoRecordTask = new VideoRecordTask(outputStream);
+            exec.scheduleAtFixedRate(videoRecordTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
     protected Boolean call() {
+        init();
         return true;
     }
 
@@ -179,8 +192,10 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         });
 
         log.warn("User[{}] added", user);
-        if (!sessionManager.isCurrentUser(userName) || sessionManager.isDebugMode()) {
+        if (!sessionManager.isCurrentUser(userName)) {
             startVideoPlayer(localView, userName);
+            startAudioPlayer(userName);
+        } else if (sessionManager.isDebugMode()) {
             startAudioPlayer(userName);
         }
         if (sessionManager.getGrabberScheduledService() == null && sessionManager.isCurrentUser(userName)) {
