@@ -100,7 +100,7 @@ public class HeartBeatsServer extends Thread {
     private void handleRead(SocketChannel sc) throws IOException {
         HeartBeatsPacket packet = HeartBeatsPacket.deserialize(sc);
         if (packet != null && packet.getState() == UserState.RUNNING) {
-            log.warn("Heart beats: [{}]", packet);
+            log.debug("Heart beats: [{}]", packet);
             String meetingId = packet.getMeetingId();
             String username = packet.getUsername();
             User user = meetingCache.getUser(meetingId, username);

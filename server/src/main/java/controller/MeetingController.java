@@ -58,9 +58,10 @@ public class MeetingController {
         if (user == null) {
             return new HttpResult<>(ERROR, "Invalid owner[" + meeting.getOwner() + "]");
         }
+        // Must add user first
+        meetingCache.addUser(meeting.getUuid(), user);
         HttpResult<String> ret = meetingService.createMeeting(meeting);
         updateUserInfo(request, user);
-        meetingCache.addUser(meeting.getUuid(), user);
         return ret;
     }
 
