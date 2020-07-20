@@ -7,8 +7,6 @@ import java.nio.channels.SocketChannel;
 public class NIOUtil {
     public static final int SIZE_BYTES_NUM = 4;
 
-    public static final int TIMEOUT_SECONDS = 5;
-
     public static ByteBuffer channelToBuffer(SocketChannel sc) throws IOException {
         if (!sc.isConnected())
             return null;

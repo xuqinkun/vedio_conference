@@ -24,8 +24,6 @@ public class MeetingController {
 
     private UserService userService;
 
-    private KafkaService kafkaService;
-
     private MeetingCache meetingCache = MeetingCache.getInstance();
 
     @Autowired
@@ -34,18 +32,8 @@ public class MeetingController {
     }
 
     @Autowired
-    public void setKafkaService(KafkaService kafkaService) {
-        this.kafkaService = kafkaService;
-    }
-
-    @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @GetMapping("/test")
-    public void test() {
-        kafkaService.sendMessage("test", new Message(USER_ADD, new User()));
     }
 
     @PostMapping("/createMeeting")
@@ -82,19 +70,7 @@ public class MeetingController {
 
         updateUserInfo(request, user);
 
-        String uuid = meeting.getUuid();
-        Meeting oldMeeting = meetingService.findMeeting(uuid);
-        if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
-            String errMessage = String.format("Can't find meeting[ID=%s] or password is not correct.\n", uuid);
-            log.error(errMessage);
-            return new HttpResult<>(ERROR, errMessage);
-        }
-        kafkaService.sendMessage(uuid, new Message(USER_ADD, JsonUtil.toJsonString(user)));
-        User cacheUser = meetingCache.getUser(uuid, user.getName());
-        if (cacheUser == null) {
-            meetingCache.addUser(uuid, user);
-        }
-        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
+        return meetingService.joinMeeting(meeting, user);
     }
 
     private void updateUserInfo(HttpServletRequest request, User user) {

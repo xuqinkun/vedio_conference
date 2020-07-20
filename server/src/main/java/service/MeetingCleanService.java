@@ -3,13 +3,12 @@ package service;
 import common.bean.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Config;
 import util.Helper;
 
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static util.NIOUtil.TIMEOUT_SECONDS;
 
 public class MeetingCleanService implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(MeetingCleanService.class);
@@ -19,6 +18,8 @@ public class MeetingCleanService implements Runnable {
     private boolean stopped;
 
     private MeetingService meetingService;
+
+    private static final int TIMEOUT_SECONDS = Config.getInstance().getHeartBeatsTimeout();
 
     public MeetingCleanService(String meetingID, MeetingService meetingService) {
         this.meetingID = meetingID;
@@ -46,7 +47,7 @@ public class MeetingCleanService implements Runnable {
                 }
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

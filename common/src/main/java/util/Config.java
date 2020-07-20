@@ -182,4 +182,9 @@ public class Config {
         String port = properties.getProperty(HEARTBEATS_SERVER_PORT_KEY, DEFAULT_HEARTBEATS_SERVER_PORT_VALUE);
         return Integer.parseInt(port);
     }
+
+    public int getHeartBeatsTimeout() {
+        String timeout = properties.getProperty("heartbeats.timeout", "3");
+        return Integer.parseInt(timeout);
+    }
 }

@@ -7,6 +7,7 @@ import common.bean.User;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -34,7 +35,23 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class MeetingRoomInitTask extends Task<StackPane> {
+import static common.bean.MessageType.USER_ADD;
+import static common.bean.MessageType.USER_LEAVE;
+
+class LayoutChangeMessage {
+    final MessageType type;
+    final String controlID;
+    final StackPane pane;
+
+    public LayoutChangeMessage(MessageType type, String controlID, StackPane pane) {
+        this.type = type;
+        this.controlID = controlID;
+        this.pane = pane;
+    }
+}
+
+public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
+
     private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
     public static final Config config = Config.getInstance();
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -53,14 +70,18 @@ public class MeetingRoomInitTask extends Task<StackPane> {
     }
 
     private void initListener(Pane userListLayout) {
-        valueProperty().addListener((observable, oldValue, stackPane) -> {
-            if (stackPane != null) {
-                userListLayout.getChildren().add(stackPane);
+        valueProperty().addListener((observable, oldValue, layoutChangeMessage) -> {
+            if (layoutChangeMessage != null) {
+                MessageType type = layoutChangeMessage.type;
+                if (type == USER_ADD) {
+                    userListLayout.getChildren().add(layoutChangeMessage.pane);
+                } else if (type == USER_LEAVE){
+                    Node node = userListLayout.lookup("#" + layoutChangeMessage.controlID);
+                    userListLayout.getChildren().remove(node);
+                }
             }
         });
-        exceptionProperty().addListener((observable, oldValue, newValue) -> {
-            log.error(newValue.getMessage());
-        });
+        exceptionProperty().addListener((observable, oldValue, newValue) -> log.error(newValue.getMessage()));
     }
 
     private void init() {
@@ -88,7 +109,7 @@ public class MeetingRoomInitTask extends Task<StackPane> {
     }
 
     @Override
-    protected StackPane call() {
+    protected LayoutChangeMessage call() {
         init();
         return null;
     }
@@ -98,7 +119,7 @@ public class MeetingRoomInitTask extends Task<StackPane> {
         String username = sessionManager.getCurrentUser().getName();
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
         // Initialize video grabber, grabber should be started first
-        exec.schedule((Runnable) DeviceManager::initGrabber, 0, TimeUnit.MILLISECONDS);
+        exec.schedule(DeviceManager::initGrabber, 0, TimeUnit.MILLISECONDS);
         // Initialize video recorder
         exec.schedule(() -> {
             DeviceManager.initVideoRecorder(config.getVideoOutputStream(meetingId, username));
@@ -132,9 +153,12 @@ public class MeetingRoomInitTask extends Task<StackPane> {
         MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
         new Thread(task).start();
         task.valueProperty().addListener((observable, oldValue, msg) -> {
-            if (msg.getType() == MessageType.USER_ADD) {
+            if (msg.getType() == USER_ADD) {
                 User user = JsonUtil.jsonToObject(msg.getData(), User.class);
                 addUser(user);
+            } else if (msg.getType() == USER_LEAVE) {
+                User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
             }
         });
     }
@@ -191,7 +215,7 @@ public class MeetingRoomInitTask extends Task<StackPane> {
             }
         });
 
-        updateValue(stackPane);
+        updateValue(new LayoutChangeMessage(USER_ADD, userName, stackPane));
 
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
         log.warn("User[{}] added", user);

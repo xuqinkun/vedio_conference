@@ -219,7 +219,6 @@ public class MainController implements Initializable {
         } else {
             openDialog();
         }
-
     }
 
     private void openDialog() {

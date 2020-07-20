@@ -1,5 +1,5 @@
 package common.bean;
 
 public enum  MessageType {
-    USER_ADD;
+    USER_ADD, USER_LEAVE;
 }

@@ -1,19 +1,21 @@
 package service;
 
-import common.bean.HttpResult;
-import common.bean.Meeting;
-import common.bean.ResultCode;
-import common.bean.User;
+import common.bean.*;
 import dao.MeetingDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import util.JsonUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static common.bean.MessageType.USER_ADD;
+import static common.bean.MessageType.USER_LEAVE;
+import static common.bean.ResultCode.ERROR;
 
 @Component
 public class MeetingService {
@@ -23,7 +25,14 @@ public class MeetingService {
 
     private MeetingDao meetingDao;
 
+    private KafkaService kafkaService;
+
     private Map<String, MeetingCleanService> cleanServiceMap;
+
+    @Autowired
+    public void setKafkaService(KafkaService kafkaService) {
+        this.kafkaService = kafkaService;
+    }
 
     @Autowired
     public void setMeetingDao(MeetingDao meetingDao) {
@@ -67,9 +76,26 @@ public class MeetingService {
 
     public void removeUser(String meetingID, User user) {
         meetingCache.removeUser(meetingID, user.getName());
+        kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
     }
 
     public List<User> getUserList(String meetingID) {
         return meetingCache.getUserList(meetingID);
+    }
+
+    public HttpResult<String> joinMeeting(Meeting meeting, User user) {
+        String uuid = meeting.getUuid();
+        Meeting oldMeeting = findMeeting(uuid);
+        if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
+            String errMessage = String.format("Can't find meeting[ID=%s] or password is not correct.\n", uuid);
+            log.error(errMessage);
+            return new HttpResult<>(ERROR, errMessage);
+        }
+        kafkaService.sendMessage(uuid, new Message(USER_ADD, JsonUtil.toJsonString(user)));
+        User cacheUser = meetingCache.getUser(uuid, user.getName());
+        if (cacheUser == null) {
+            meetingCache.addUser(uuid, user);
+        }
+        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
     }
 }
