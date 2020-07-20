@@ -3,9 +3,8 @@ package service;
 import common.bean.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.TcpUtil;
 
-import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +33,8 @@ public class UserCleanService implements Runnable {
             List<User> userList = meetingCache.getUserList(meetingID);
             for (User user : userList) {
                 if (System.currentTimeMillis() - user.getTimeStamp() > TimeUnit.SECONDS.toMillis(TIMEOUT_SECONDS)) {
-                    log.warn("User[{}] connection is timeout, do remove!", user.getName());
+                    log.warn("User[{}] connection is timeout, last alive time[{}], do remove!",
+                            user.getName(), new Date(user.getTimeStamp()));
                     meetingCache.removeUser(meetingID, user.getName());
                 }
             }

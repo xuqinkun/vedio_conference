@@ -1,7 +1,7 @@
 package service.network;
 
-import common.bean.StateType;
 import common.bean.UserState;
+import common.bean.HeartBeatsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.Config;
@@ -23,32 +23,28 @@ public class HeartBeatsClient implements Runnable {
 
     private String host;
     private int port;
+    private boolean stopped;
+    private String meetingID;
+    private String username;
     private Selector selector;
     private SocketChannel socketChannel;
-    private volatile boolean stopped;
-    private BlockingQueue<UserState> msgSendQueue;
 
-    private long lastRead;
     private long lastWrite;
 
-    public HeartBeatsClient(String host, int port) {
+    public HeartBeatsClient(String meetingID, String username, String host, int port) {
         this.host = host == null ? "127.0.0.1" : host;
         this.port = port;
         try {
             selector = Selector.open();
             socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
-            msgSendQueue = new LinkedBlockingQueue<>();
-            lastRead = System.currentTimeMillis();
+            this.meetingID = meetingID;
+            this.username = username;
             lastWrite = System.currentTimeMillis();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-    }
-
-    public void addMessage(UserState state) {
-        msgSendQueue.add(state);
     }
 
     @Override
@@ -61,28 +57,24 @@ public class HeartBeatsClient implements Runnable {
         }
         while (!stopped) {
             try {
-                if (socketChannel.isConnected() && !msgSendQueue.isEmpty()) {
-                    UserState userState = msgSendQueue.poll(1, TimeUnit.SECONDS);
-                    if (userState == null) {
-                        Thread.sleep(1000);
-                        continue;
-                    }
-                    ByteBuffer[] buffers = userState.serialize();
-                    while (socketChannel.write(buffers) != 0)
-                        ;
-                    log.warn("Send image take:" + (System.currentTimeMillis() - lastWrite) + "ms");
+                if (socketChannel.isConnected()) {
+                    HeartBeatsPacket packet = new HeartBeatsPacket(meetingID, username, UserState.RUNNING);
+                    ByteBuffer[] buffers = packet.serialize();
+                    socketChannel.write(buffers);
+                    log.debug("Send packet take:" + (System.currentTimeMillis() - lastWrite) + "ms");
                     lastWrite = System.currentTimeMillis();
-                }
-
-                if (selector.select(1000) == 0)
-                    continue;
-                Set<SelectionKey> keys = selector.selectedKeys();
-                Iterator<SelectionKey> it = keys.iterator();
-                SelectionKey key;
-                while (it.hasNext()) {
-                    key = it.next();
-                    handleResponse(key);
-                    it.remove();
+                    Thread.sleep(1000);
+                } else { // Not register ready
+                    if (selector.select(1000) == 0)
+                        continue;
+                    Set<SelectionKey> keys = selector.selectedKeys();
+                    Iterator<SelectionKey> it = keys.iterator();
+                    SelectionKey key;
+                    while (it.hasNext()) {
+                        key = it.next();
+                        handleResponse(key);
+                        it.remove();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -114,25 +106,17 @@ public class HeartBeatsClient implements Runnable {
                     System.exit(1);
                 }
             }
-//            if (sc.isConnected() && key.isReadable()) {
-//                doRead(sc);
-//            }
         }
     }
 
-//    private void doRead(SocketChannel sc) throws IOException {
-//        if (sc.isConnected()) {
-//
-//        }
-//    }
-
     public static void main(String[] args) throws InterruptedException {
         Config config = Config.getInstance();
-        HeartBeatsClient heartBeatsClient = new HeartBeatsClient(config.getHeartBeatsServerHost(), config.getHeartBeatsServerPort());
+        config.setUseLocal(true);
+        String server = config.getHeartBeatsServerHost();
+        int port = config.getHeartBeatsServerPort();
+        HeartBeatsClient heartBeatsClient = new HeartBeatsClient("123", "aa", server, port);
         Thread thread = new Thread(heartBeatsClient);
         thread.start();
-
-        heartBeatsClient.addMessage(new UserState("123", "test", StateType.RUNNING));
 
         thread.join();
 

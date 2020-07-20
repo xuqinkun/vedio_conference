@@ -1,8 +1,8 @@
 package service;
 
-import common.bean.StateType;
-import common.bean.User;
 import common.bean.UserState;
+import common.bean.User;
+import common.bean.HeartBeatsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ThreadPoolUtil;
@@ -98,11 +98,11 @@ public class HeartBeatsServer extends Thread {
     }
 
     private void handleRead(SocketChannel sc) throws IOException {
-        UserState userState = UserState.deserialize(sc);
-        if (userState != null && userState.getState() == StateType.RUNNING) {
-            log.warn("Heart beats: [{}]", userState);
-            String meetingId = userState.getMeetingId();
-            String username = userState.getUsername();
+        HeartBeatsPacket heartBeatsPacket = HeartBeatsPacket.deserialize(sc);
+        if (heartBeatsPacket != null && heartBeatsPacket.getState() == UserState.RUNNING) {
+            log.warn("Heart beats: [{}]", heartBeatsPacket);
+            String meetingId = heartBeatsPacket.getMeetingId();
+            String username = heartBeatsPacket.getUsername();
             User user = meetingCache.getUser(meetingId, username);
             if (user == null) {
                 User newUser = new User(username, System.currentTimeMillis());
