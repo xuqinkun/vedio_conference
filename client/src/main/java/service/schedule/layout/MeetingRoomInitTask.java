@@ -49,10 +49,17 @@ public class MeetingRoomInitTask extends Task<StackPane> {
 
     public MeetingRoomInitTask(Pane userListLayout, ImageView globalView) {
         this.globalView = globalView;
+        initListener(userListLayout);
+    }
+
+    private void initListener(Pane userListLayout) {
         valueProperty().addListener((observable, oldValue, stackPane) -> {
             if (stackPane != null) {
                 userListLayout.getChildren().add(stackPane);
             }
+        });
+        exceptionProperty().addListener((observable, oldValue, newValue) -> {
+            log.error(newValue.getMessage());
         });
     }
 
@@ -189,8 +196,10 @@ public class MeetingRoomInitTask extends Task<StackPane> {
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
         log.warn("User[{}] added", user);
         if (!sessionManager.isCurrentUser(userName)) {
-            startVideoPlayer(localView, meetingId, userName);
-            startAudioPlayer(meetingId, userName);
+            exec.submit(() -> {
+                startVideoPlayer(localView, meetingId, userName);
+                startAudioPlayer(meetingId, userName);
+            });
         } else if (sessionManager.isDebugMode()) {
             startAudioPlayer(meetingId, userName);
         }

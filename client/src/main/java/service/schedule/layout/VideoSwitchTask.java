@@ -23,6 +23,10 @@ public class VideoSwitchTask extends Task<Boolean> {
     public VideoSwitchTask(boolean isOpen, ImageView globalView) {
         this.isOpen = isOpen;
         this.globalView = globalView;
+
+        exceptionProperty().addListener((observable, oldValue, newValue) -> {
+            log.error(newValue.getMessage());
+        });
     }
 
     @Override

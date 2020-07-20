@@ -26,18 +26,20 @@ public class LoginService extends Service<HttpResult<String>> {
 
     private User user;
 
-    private Button loginBtn;
-
     private VBox mainLayout;
 
     public LoginService(User user, Button loginBtn, VBox mainLayout, Label loginMessageLabel) {
         this.user = user;
-        this.loginBtn = loginBtn;
         this.mainLayout = mainLayout;
 
+        initListener(loginBtn, loginMessageLabel);
+    }
+
+    private void initListener(Button loginBtn, Label loginMessageLabel) {
         valueProperty().addListener((observable, oldValue, response) -> {
             if (response.getResult() == ResultCode.OK) {
                 try {
+                    loginBtn.setDisable(true);
                     gotoProfile();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -45,14 +47,17 @@ public class LoginService extends Service<HttpResult<String>> {
             } else {
                 loginMessageLabel.setStyle("-fx-text-fill: red");
                 loginMessageLabel.setText(response.getMessage());
+                loginBtn.setDisable(false);
             }
+        });
+        exceptionProperty().addListener((observable, oldValue, throwable) -> {
+            log.error(throwable.getMessage());
         });
     }
 
     private void gotoProfile() throws IOException {
         Stage stage = (Stage) mainLayout.getScene().getWindow();
         stage.close();
-        loginBtn.setDisable(true);
         Parent root = FXMLLoader.load(
                 getClass().getResource("/fxml/profile.fxml"));
         Stage profileStage = new Stage();
