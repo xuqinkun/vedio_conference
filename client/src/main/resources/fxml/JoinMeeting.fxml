@@ -108,7 +108,7 @@
         </VBox>
       <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
          <children>
-            <Label fx:id="joinMeetingMessageLabel" maxHeight="1.7976931348623157E308" prefHeight="60.0" prefWidth="300.0" textFill="RED" wrapText="true">
+            <Label fx:id="joinMeetingMessageLabel" maxHeight="1.7976931348623157E308" prefHeight="60.0" prefWidth="300.0" textFill="#0055ff" wrapText="true">
                <font>
                   <Font name="Arial" size="14.0" />
                </font>

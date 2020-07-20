@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
-import service.model.SessionManager;
+import service.schedule.layout.LoginService;
 import util.InputChecker;
 
 import java.io.IOException;
@@ -75,6 +75,9 @@ public class MainController implements Initializable {
     @FXML
     private Button registerBtn;
 
+    @FXML
+    private Label loginMessageLabel;
+
     private Stage joinStage;
 
     private Parent root;
@@ -83,8 +86,7 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         hideControl(loginLayout);
         hideControl(registerLayout);
-        displayControl(homeLayout);
-        loginBtn.setDisable(true);
+//        displayControl(homeLayout);
         registerBtn.setDisable(true);
         loginUserName.textProperty().addListener((observable, oldValue, newValue) -> loginCheck());
         loginPassword.textProperty().addListener((observable, oldValue, newValue) -> loginCheck());
@@ -151,34 +153,17 @@ public class MainController implements Initializable {
     @FXML
     public void login(ActionEvent event) {
         if (loginCheck()) {
-            User user = new User(loginUserName.getText(), loginPassword.getText());
-            HttpResult<String> result = HttpClientUtil.getInstance().doPost(UrlMap.getLoginUrl(), user);
-            if (result == null) {
-                log.error("Send post failed! Server is down!");
-                return;
-            }
-            log.warn(result.toString());
-            if (result.getResult() == ResultCode.OK) {
-                try {
-                    SessionManager.getInstance().setCurrentUser(user);
-                    gotoProfile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            loginMessageLabel.setStyle("-fx-text-fill: #0055ff");
+            loginMessageLabel.setText("Waiting for server's response...");
+            loginBtn.setDisable(true);
+            String userNameText = loginUserName.getText();
+            String password = loginPassword.getText();
+            User user = new User(userNameText, password);
+            new LoginService(user, loginBtn, mainLayout, loginMessageLabel).start();
+        } else {
+            loginBtn.setDisable(false);
         }
         event.consume();
-    }
-
-    private void gotoProfile() throws IOException {
-        Stage stage = (Stage) mainLayout.getScene().getWindow();
-        stage.close();
-        loginBtn.setDisable(true);
-        Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/profile.fxml"));
-        Stage profileStage = new Stage();
-        profileStage.setScene(new Scene(root));
-        profileStage.show();
     }
 
     private boolean loginCheck() {

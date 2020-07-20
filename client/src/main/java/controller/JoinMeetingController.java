@@ -65,11 +65,9 @@ public class JoinMeetingController implements Initializable {
     @FXML
     public void joinMeeting(ActionEvent event) {
         joinMeetingBtn.setDisable(true);
-        joinMeetingMessageLabel.setText("Waiting for server's response...");
-        joinMeetingMessageLabel.setStyle("-fx-text-fill: #0055ff");
         if (validateInput()) {
-//            boolean openAudio = audioCheckBox.isSelected();
-//            boolean openCamera = cameraCheckBox.isSelected();
+            joinMeetingMessageLabel.setStyle("-fx-text-fill: #0055ff");
+            joinMeetingMessageLabel.setText("Waiting for server's response...");
             String userName = userNameInput.getText();
             String meetingID = meetingIDInput.getText();
             String meetingPassword = meetingPasswordInput.getText();
