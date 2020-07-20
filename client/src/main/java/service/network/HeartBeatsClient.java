@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 public class HeartBeatsClient implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(HeartBeatsClient.class);
 
-    private String host;
-    private int port;
     private boolean stopped;
     private String meetingID;
     private String username;
@@ -31,9 +29,7 @@ public class HeartBeatsClient implements Runnable {
 
     private long lastWrite;
 
-    public HeartBeatsClient(String meetingID, String username, String host, int port) {
-        this.host = host == null ? "127.0.0.1" : host;
-        this.port = port;
+    public HeartBeatsClient(String meetingID, String username) {
         try {
             selector = Selector.open();
             socketChannel = SocketChannel.open();
@@ -72,21 +68,38 @@ public class HeartBeatsClient implements Runnable {
                     SelectionKey key;
                     while (it.hasNext()) {
                         key = it.next();
-                        handleResponse(key);
+                        try {
+                            handleResponse(key);
+                        } catch (IOException e) {
+                            log.error(e.getMessage());
+                            key.cancel();
+                            key.channel().close();
+                            ((SocketChannel)key.channel()).socket().close();
+                        }
                         it.remove();
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
+                try {
+                    socketChannel.close();
+                    socketChannel.socket().close();
+                    stop();
+                } catch (IOException ex) {
+                    log.error(ex.getMessage());
+                }
             }
         }
     }
 
     public void stop() {
+        log.warn("HeartBeatsClient[{}] stopped.", meetingID);
         this.stopped = true;
     }
 
     private void doConnect() throws IOException {
+        String host = Config.getInstance().getHeartBeatsServerHost();
+        int port = Config.getInstance().getHeartBeatsServerPort();
         if (socketChannel.connect(new InetSocketAddress(host, port))) {
             socketChannel.register(selector, SelectionKey.OP_READ);
         } else {
@@ -112,13 +125,9 @@ public class HeartBeatsClient implements Runnable {
     public static void main(String[] args) throws InterruptedException {
         Config config = Config.getInstance();
         config.setUseLocal(true);
-        String server = config.getHeartBeatsServerHost();
-        int port = config.getHeartBeatsServerPort();
-        HeartBeatsClient heartBeatsClient = new HeartBeatsClient("123", "aa", server, port);
+        HeartBeatsClient heartBeatsClient = new HeartBeatsClient("123", "aa");
         Thread thread = new Thread(heartBeatsClient);
         thread.start();
-
         thread.join();
-
     }
 }
