@@ -38,26 +38,31 @@ public class Config {
     public static final String DEFAULT_KAFKA_SERVER_PORT = "9092";
     public static final String HEARTBEATS_SERVER_PORT_KEY = "heartbeats.server.port";
     public static final String DEFAULT_HEARTBEATS_SERVER_PORT_VALUE = "8888";
-    public static final String DEAULT_PROPERTIES_PATH = "app.properties";
+    public static final String DEFAULT_PROPERTIES_PATH = "app.properties";
 
     private Properties properties;
 
     private static final Config INSTANCE = new Config();
 
     private Config() {
-        load(DEAULT_PROPERTIES_PATH);
     }
 
     public static Config getInstance() {
+        INSTANCE.load(DEFAULT_PROPERTIES_PATH);
         return INSTANCE;
     }
 
-    public void load(String src) {
+    public static Config getInstance(String src) {
+        INSTANCE.load(src);
+        return INSTANCE;
+    }
+
+    private void load(String src) {
         properties = new Properties();
         try {
             URL url = Config.class.getClassLoader().getResource(src);
             if (url != null) {
-                properties.load(new FileInputStream(url.getPath()));
+                properties.load(url.openStream());
             } else {
                 log.warn("File app.properties not found! Use default settings.");
             }

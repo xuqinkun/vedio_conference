@@ -14,6 +14,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException {
         Config config = Config.getInstance();
+
         new HeartBeatsServer(config.getHeartBeatsServerPort()).start();
         SpringApplication.run(Application.class, args);
     }

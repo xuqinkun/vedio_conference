@@ -43,7 +43,7 @@ public class Program extends Application {
     }
 
     private boolean parseParameters() {
-        Config config = Config.getInstance();
+        Config config = null;
 
         List<String> params = getParameters().getRaw();
         boolean debugMode = params.size() > 0 && params.get(0).equalsIgnoreCase("-d");
@@ -56,8 +56,10 @@ public class Program extends Application {
                 System.exit(1);
             } else {
                 String propertyPath = params.get(index + 1);
-                config.load(propertyPath);
+                config = Config.getInstance(propertyPath);
             }
+        } else {
+            config = Config.getInstance();
         }
         if (params.contains(useLocalServerKey)) {
             config.setUseLocal(true);
