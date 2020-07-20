@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MeetingRoomInitTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
+    public static final Config config = Config.getInstance();
     private final SessionManager sessionManager = SessionManager.getInstance();
     private final ScheduledThreadPoolExecutor exec = ThreadPoolUtil.getScheduledExecutor(5, "MeetingRoomStart");
 
@@ -83,9 +84,9 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         if (videoRecordTask == null) {
             String username = sessionManager.getCurrentUser().getName();
             String meetingId = sessionManager.getCurrentMeeting().getUuid();
-            String outputStream = Config.getVideoOutputStream(meetingId, username);
+            String outputStream = config.getVideoOutputStream(meetingId, username);
             videoRecordTask = new VideoRecordTask(outputStream);
-            exec.scheduleAtFixedRate(videoRecordTask, 0, Config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
+            exec.scheduleAtFixedRate(videoRecordTask, 0, config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
         }
     }
 
@@ -103,11 +104,11 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         exec.schedule((Runnable) DeviceManager::initGrabber, 0, TimeUnit.MILLISECONDS);
         // Initialize video recorder
         exec.schedule(() -> {
-            DeviceManager.initVideoRecorder(Config.getVideoOutputStream(meetingId, username));
+            DeviceManager.initVideoRecorder(config.getVideoOutputStream(meetingId, username));
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio recorder
         exec.schedule(() -> {
-            DeviceManager.initAudioRecorder(Config.getAudioOutputStream(meetingId, username));
+            DeviceManager.initAudioRecorder(config.getAudioOutputStream(meetingId, username));
         }, 0, TimeUnit.MILLISECONDS);
         // Initialize audio target
         exec.schedule(DeviceManager::initAudioTarget, 0, TimeUnit.MILLISECONDS);
@@ -165,7 +166,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
             stackPane.setStyle(normalStyle);
         }
 
-        String portrait = user.getPortraitSrc() == null ? Config.getDefaultPortraitSrc() : user.getPortraitSrc();
+        String portrait = user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
         Image image = new Image(portrait);
         ImageView localView = new ImageView(image);
         localView.setFitWidth(stackPane.getPrefWidth() - 7);
@@ -210,7 +211,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     private void startAudioPlayer(String meetingId, String userName) {
         AudioPlayerService audioPlayerService;
         if (!audioPlayerServiceMap.containsKey(userName)) {
-            audioPlayerService = new AudioPlayerService(Config.getAudioOutputStream(meetingId, userName));
+            audioPlayerService = new AudioPlayerService(config.getAudioOutputStream(meetingId, userName));
             audioPlayerServiceMap.put(userName, audioPlayerService);
         } else {
             audioPlayerService = audioPlayerServiceMap.get(userName);
@@ -225,7 +226,7 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     private void startVideoPlayer(ImageView localView, String meetingId, String userName) {
         VideoPlayerService videoPlayerService;
         if (!videoPullServiceMap.containsKey(userName)) {
-            videoPlayerService = new VideoPlayerService(Config.getVideoOutputStream(meetingId, userName),
+            videoPlayerService = new VideoPlayerService(config.getVideoOutputStream(meetingId, userName),
                     localView, globalView, userName);
             videoPullServiceMap.put(userName, videoPlayerService);
         } else {

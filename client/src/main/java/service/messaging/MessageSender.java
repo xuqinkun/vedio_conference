@@ -19,7 +19,7 @@ public class MessageSender {
 
     private MessageSender() {
         Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Config.getKafkaServer());
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Config.getInstance().getKafkaServer());
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         producer = new KafkaProducer<>(props, new StringSerializer(), new JsonSerializer<>());
     }

@@ -29,7 +29,7 @@ public class AudioSwitchTask extends Task<Boolean> {
             if (audioRecordService == null) {
                 String username = sessionManager.getCurrentUser().getName();
                 String uuid = sessionManager.getCurrentMeeting().getUuid();
-                String outputStream = Config.getAudioOutputStream(uuid, username);
+                String outputStream = Config.getInstance().getAudioOutputStream(uuid, username);
                 audioRecordService = new AudioRecordService(outputStream);
                 audioRecordService.start();
             } else if (!audioRecordService.isRunning()) {

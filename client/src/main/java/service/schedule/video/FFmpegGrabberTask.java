@@ -12,6 +12,7 @@ import util.ImageUtil;
 
 public class FFmpegGrabberTask extends Grabber {
     private static final Logger LOG = LoggerFactory.getLogger(FFmpegGrabberTask.class);
+    public static final Config config = Config.getInstance();
 
     private SlowTaskHolder<FrameGrabber> grabberHolder;
 
@@ -19,7 +20,7 @@ public class FFmpegGrabberTask extends Grabber {
 
     public FFmpegGrabberTask() {
         try {
-            grabberHolder = DeviceManager.getFFmpegFrameGrabber(Config.getCaptureDevice());
+            grabberHolder = DeviceManager.getFFmpegFrameGrabber(config.getCaptureDevice());
             grabber = grabberHolder.getContent();
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();

@@ -14,7 +14,7 @@ public class OpenCVGrabberTask extends Grabber {
     private FrameGrabber grabber;
 
     public OpenCVGrabberTask() {
-        openCVFrameGrabber = DeviceManager.getOpenCVFrameGrabber(Config.getCaptureDevice());
+        openCVFrameGrabber = DeviceManager.getOpenCVFrameGrabber(Config.getInstance().getCaptureDevice());
         grabber = openCVFrameGrabber.getContent();
     }
 

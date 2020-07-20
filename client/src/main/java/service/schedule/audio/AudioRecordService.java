@@ -18,6 +18,8 @@ import java.nio.ShortBuffer;
 
 public class AudioRecordService extends ScheduledService<ShortBuffer> {
     private static final Logger LOG = LoggerFactory.getLogger(AudioRecordService.class);
+    public static final Config config = Config.getInstance();
+
     private int audioChannels;
     private TargetDataLine targetDataLine;
     private byte[] audioBytes;
@@ -27,8 +29,8 @@ public class AudioRecordService extends ScheduledService<ShortBuffer> {
     int sampleRate;
 
     public AudioRecordService(String outputStream) {
-        this.sampleRate = Config.getAudioSampleRate();
-        this.audioChannels = Config.getAudioChannels();
+        this.sampleRate = config.getAudioSampleRate();
+        this.audioChannels = config.getAudioChannels();
         int audioBufferSize = sampleRate * audioChannels;
         this.audioBytes = new byte[audioBufferSize];
         audioRecorderHolder = DeviceManager.getAudioRecorder(outputStream);
@@ -51,7 +53,7 @@ public class AudioRecordService extends ScheduledService<ShortBuffer> {
             }
         });
         setDelay(Duration.millis(0));
-        setPeriod(Duration.millis(1000.0 / Config.getRecorderFrameRate()));
+        setPeriod(Duration.millis(1000.0 / config.getRecorderFrameRate()));
     }
 
     @Override

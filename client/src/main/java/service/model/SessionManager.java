@@ -11,6 +11,7 @@ import java.util.Map;
 public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
+    public static final Config config = Config.getInstance();
 
     private volatile User currentUser;
 
@@ -93,6 +94,6 @@ public class SessionManager {
 
     public String getPortraitSrc(String username) {
         User user = userCache.get(username);
-        return user == null || user.getPortraitSrc() == null ? Config.getDefaultPortraitSrc() : user.getPortraitSrc();
+        return user == null || user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
     }
 }

@@ -9,7 +9,7 @@ import static util.Config.*;
 public abstract class Grabber extends Task<Image> {
 
     public static Grabber createDefault() {
-        int captureType = Config.getCaptureType();
+        int captureType = Config.getInstance().getCaptureType();
         switch (captureType) {
             case WEBCAM:
                 return new WebcamGrabberTask();

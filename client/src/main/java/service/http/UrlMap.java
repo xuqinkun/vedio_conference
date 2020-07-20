@@ -1,14 +1,12 @@
 package service.http;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import util.Config;
 
 public class UrlMap {
 
-    private static final Logger log = LoggerFactory.getLogger(UrlMap.class);
+    public static final Config config = Config.getInstance();
 
-    private static String baseUrl = String.format("http://%s:%s/", Config.getServerHost(), Config.getServerPort());
+    private static String baseUrl = String.format("http://%s:%s/", config.getServerHost(), config.getServerPort());
 
     public static String getLoginUrl() {
         return baseUrl + "login";

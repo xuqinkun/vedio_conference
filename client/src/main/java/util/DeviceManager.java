@@ -25,6 +25,7 @@ import static util.Config.WEBCAM;
 public class DeviceManager {
 
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
+    public static final Config config = Config.getInstance();
 
     private static Map<String, SlowTaskHolder<FFmpegFrameGrabber>> videoGrabberMap = new HashMap<>();
 
@@ -50,7 +51,7 @@ public class DeviceManager {
 
     public static void initGrabber() {
         try {
-            int captureType = Config.getCaptureType();
+            int captureType = config.getCaptureType();
             if (captureType == WEBCAM) {
                 SlowTaskHolder<Webcam> webcamHolder = getWebcam();
                 if (!webcamHolder.isStarted()) {
@@ -63,9 +64,9 @@ public class DeviceManager {
                     }
                 }
             } else if (captureType == OPENCV_GRABBER) {
-                getOpenCVFrameGrabber(Config.getCaptureDevice());
+                getOpenCVFrameGrabber(config.getCaptureDevice());
             } else {
-                getFFmpegFrameGrabber(Config.getCaptureDevice());
+                getFFmpegFrameGrabber(config.getCaptureDevice());
             }
         } catch (Exception e) {
             log.error(e.getCause().toString());
@@ -76,8 +77,8 @@ public class DeviceManager {
         if (frameGrabberHolder == null) {
             log.warn("Initialize OpenCVFrameGrabber");
             FrameGrabber grabber = new OpenCVFrameGrabber(captureDevice);
-            grabber.setImageHeight(Config.getCaptureImageHeight());
-            grabber.setImageWidth(Config.getCaptureImageWidth());
+            grabber.setImageHeight(config.getCaptureImageHeight());
+            grabber.setImageWidth(config.getCaptureImageWidth());
             frameGrabberHolder = new SlowTaskHolder<>(grabber, String.format("OpenCvFrameGrabber[%s]", captureDevice));
             frameGrabberHolder.submit(false);
         }
@@ -102,8 +103,8 @@ public class DeviceManager {
 
     public synchronized static SlowTaskHolder<TargetDataLine> getTargetDataLineHolder() {
         if (targetDataLineHolder == null) {
-            AudioFormat audioFormat = new AudioFormat(Config.getAudioSampleRate(), Config.getAudioSampleSize(),
-                    Config.getAudioChannels(), true, false);
+            AudioFormat audioFormat = new AudioFormat(config.getAudioSampleRate(), config.getAudioSampleSize(),
+                    config.getAudioChannels(), true, false);
             DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
             try {
                 TargetDataLine targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
@@ -120,8 +121,8 @@ public class DeviceManager {
     private static SlowTaskHolder<SourceDataLine> sourceDataLineHolder;
 
     public synchronized static SlowTaskHolder<SourceDataLine> getSourceDataLineHolder() {
-        AudioFormat audioFormat = new AudioFormat(Config.getAudioSampleRate(), Config.getAudioSampleSize(),
-                Config.getAudioChannels(), true, false);
+        AudioFormat audioFormat = new AudioFormat(config.getAudioSampleRate(), config.getAudioSampleSize(),
+                config.getAudioChannels(), true, false);
         if (sourceDataLineHolder == null) {
             DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
             try {
@@ -142,17 +143,17 @@ public class DeviceManager {
         if (videoRecorderHolder == null) {
             log.debug("Create video recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream,
-                    Config.getCaptureImageWidth(), Config.getCaptureImageHeight());
+                    config.getCaptureImageWidth(), config.getCaptureImageHeight());
             recorder.setInterleaved(true);
             // Related to clarity 18 is good, 28 is bad.
             recorder.setVideoOption("crf", "18");
-            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
+            recorder.setGopSize(config.getRecorderFrameRate() * 2);
             // H264 causes high latency
             recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
             recorder.setVideoBitrate(2000000);
             recorder.setVideoOption("tune", "zerolatency");
             recorder.setFormat("flv");
-            recorder.setFrameRate(Config.getRecorderFrameRate());
+            recorder.setFrameRate(config.getRecorderFrameRate());
             recorder.setVideoOption("preset", "ultrafast");
             // Max bytes for reading video frame
             recorder.setOption("probesize", "1024");
@@ -168,16 +169,16 @@ public class DeviceManager {
     public synchronized static SlowTaskHolder<FFmpegFrameRecorder> getAudioRecorder(String outStream) {
         if (audioRecorderHolder == null) {
             log.debug("Create audio recorder [out={}]", outStream);
-            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, Config.getAudioChannels());
+            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, config.getAudioChannels());
             recorder.setInterleaved(true);
             recorder.setFormat("flv");
             recorder.setVideoOption("preset", "ultrafast");
             recorder.setVideoOption("tune", "zerolatency");
-            recorder.setGopSize(Config.getRecorderFrameRate() * 2);
-            recorder.setFrameRate(Config.getRecorderFrameRate());
-            recorder.setSampleRate(Config.getAudioSampleRate());
+            recorder.setGopSize(config.getRecorderFrameRate() * 2);
+            recorder.setFrameRate(config.getRecorderFrameRate());
+            recorder.setSampleRate(config.getAudioSampleRate());
             recorder.setAudioOption("crf", "0");
-            recorder.setAudioBitrate(Config.getAudioBitrate());
+            recorder.setAudioBitrate(config.getAudioBitrate());
             recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
             // High quality, high latency
 //            recorder.setAudioQuality(0);
@@ -195,8 +196,8 @@ public class DeviceManager {
         if (frameGrabberHolder == null) {
             log.warn("Initialize FFmpegFrameGrabber");
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
-            grabber.setImageWidth(Config.getCaptureImageWidth());
-            grabber.setImageHeight(Config.getCaptureImageHeight());
+            grabber.setImageWidth(config.getCaptureImageWidth());
+            grabber.setImageHeight(config.getCaptureImageHeight());
             frameGrabberHolder = new SlowTaskHolder<>(grabber, String.format("FFmpegFrameGrabber[%s]", deviceNumber));
             frameGrabberHolder.submit(false);
         }
@@ -206,7 +207,7 @@ public class DeviceManager {
     public synchronized static SlowTaskHolder<Webcam> getWebcam() {
         if (webcamHolder == null) {
             Webcam webcam = Webcam.getDefault();
-            webcam.setViewSize(new Dimension(Config.getCaptureImageWidth(), Config.getCaptureImageHeight()));
+            webcam.setViewSize(new Dimension(config.getCaptureImageWidth(), config.getCaptureImageHeight()));
             webcamHolder = new SlowTaskHolder<>(webcam, "WebCam");
         }
         return webcamHolder;
@@ -250,9 +251,9 @@ public class DeviceManager {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
             grabber.setOption("fflags", "nobuffer");
             grabber.setFormat("flv");
-            grabber.setSampleRate(Config.getAudioSampleRate());
-            grabber.setFrameRate(Config.getRecorderFrameRate());
-            grabber.setAudioChannels(Config.getAudioChannels());
+            grabber.setSampleRate(config.getAudioSampleRate());
+            grabber.setFrameRate(config.getRecorderFrameRate());
+            grabber.setAudioChannels(config.getAudioChannels());
             grabber.setAudioOption("crf", "0");
             grabber.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
             grabber.setOption("probesize", "1024");

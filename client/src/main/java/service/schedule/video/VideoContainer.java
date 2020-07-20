@@ -26,7 +26,7 @@ public class VideoContainer {
     private VideoContainer() {
         imageQueue = new LinkedBlockingQueue<>();
         frameQueue = new LinkedBlockingQueue<>();
-        useWebcam = Config.getCaptureType() == WEBCAM;
+        useWebcam = Config.getInstance().getCaptureType() == WEBCAM;
     }
 
     public static VideoContainer getInstance() {

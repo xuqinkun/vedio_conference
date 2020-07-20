@@ -4,8 +4,6 @@ import common.bean.StateType;
 import common.bean.UserState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.model.Message;
-import service.model.MessageType;
 import util.Config;
 
 import java.io.IOException;
@@ -20,11 +18,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static service.model.MessageType.IMAGE;
-import static service.model.MessageType.TEXT;
-
-public class AsyncClient implements Runnable {
-    private static final Logger log = LoggerFactory.getLogger(AsyncClient.class);
+public class HeartBeatsClient implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(HeartBeatsClient.class);
 
     private String host;
     private int port;
@@ -36,7 +31,7 @@ public class AsyncClient implements Runnable {
     private long lastRead;
     private long lastWrite;
 
-    public AsyncClient(String host, int port) {
+    public HeartBeatsClient(String host, int port) {
         this.host = host == null ? "127.0.0.1" : host;
         this.port = port;
         try {
@@ -119,37 +114,25 @@ public class AsyncClient implements Runnable {
                     System.exit(1);
                 }
             }
-            if (sc.isConnected() && key.isReadable()) {
-                doRead(sc);
-            }
+//            if (sc.isConnected() && key.isReadable()) {
+//                doRead(sc);
+//            }
         }
     }
 
-    private void doRead(SocketChannel sc) throws IOException {
-        if (sc.isConnected()) {
-            Message message = Message.fromChannel(sc);
-            if (message == null) {
-                System.out.println("Read message failed");
-                return;
-            }
-            MessageType type = message.getMsgType();
-            if (type == TEXT) {
-                System.out.println("From " + sc.getRemoteAddress());
-                System.out.println(new String(message.getData()));
-            } else if (type == IMAGE) {
-                System.out.println("Read image take:" +
-                        (System.currentTimeMillis() - lastRead) + "ms");
-                lastRead = System.currentTimeMillis();
-            }
-        }
-    }
+//    private void doRead(SocketChannel sc) throws IOException {
+//        if (sc.isConnected()) {
+//
+//        }
+//    }
 
     public static void main(String[] args) throws InterruptedException {
-        AsyncClient asyncClient = new AsyncClient(Config.getHeartBeatsServerHost(), Config.getHeartBeatsServerPort());
-        Thread thread = new Thread(asyncClient);
+        Config config = Config.getInstance();
+        HeartBeatsClient heartBeatsClient = new HeartBeatsClient(config.getHeartBeatsServerHost(), config.getHeartBeatsServerPort());
+        Thread thread = new Thread(heartBeatsClient);
         thread.start();
 
-        asyncClient.addMessage(new UserState("123", "test", StateType.RUNNING));
+        heartBeatsClient.addMessage(new UserState("123", "test", StateType.RUNNING));
 
         thread.join();
 

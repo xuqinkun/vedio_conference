@@ -63,6 +63,8 @@ public class HeartBeatsServer extends Thread {
                         } catch (IOException e) {
                             log.warn(e.getMessage());
                             key.cancel();
+                            key.channel().close();
+                            ((SocketChannel)key.channel()).socket().close();
                         }
                         it.remove();
                     }

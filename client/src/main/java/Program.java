@@ -4,7 +4,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import service.model.SessionManager;
-import service.schedule.layout.LayoutInitTask;
+import util.Config;
 import util.DeviceManager;
 
 import java.util.List;
@@ -27,8 +27,8 @@ public class Program extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        List<String> params = getParameters().getRaw();
-        boolean debugMode = params.size() > 0 && params.get(0).equalsIgnoreCase("-d");
+        boolean debugMode = parseParameters();
+
         primaryStage.setTitle("Meeting");
         Parent root;
         SessionManager.getInstance().setDebugMode(debugMode);
@@ -40,5 +40,32 @@ public class Program extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(true);
         primaryStage.show();
+    }
+
+    private boolean parseParameters() {
+        Config config = Config.getInstance();
+
+        List<String> params = getParameters().getRaw();
+        boolean debugMode = params.size() > 0 && params.get(0).equalsIgnoreCase("-d");
+        String propertyKey = "-p";
+        String useLocalServerKey = "-l";
+        if (params.contains(propertyKey)) {
+            int index = params.indexOf(propertyKey);
+            if (params.size() == index + 1) {
+                printUsage();
+                System.exit(1);
+            } else {
+                String propertyPath = params.get(index + 1);
+                config.load(propertyPath);
+            }
+        }
+        if (params.contains(useLocalServerKey)) {
+            config.setUseLocal(true);
+        }
+        return debugMode;
+    }
+
+    private void printUsage() {
+        System.out.println("USAGE: java -jar *.jar [-d(for debug)] [-p property_path]");
     }
 }

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MessageReceiveTask extends Task<Message> {
+    public static final Config config = Config.getInstance();
     private boolean stopped;
 
     private Consumer<String, Message> consumer;
@@ -28,15 +29,15 @@ public class MessageReceiveTask extends Task<Message> {
     }
 
     public ConsumerFactory<String, Message> getConsumerFactory() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Config.getKafkaServer());
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, Config.getKafkaConsumerGroupID());
-        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
-        config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        Map<String, Object> consumerParams = new HashMap<>();
+        consumerParams.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getKafkaServer());
+        consumerParams.put(ConsumerConfig.GROUP_ID_CONFIG, config.getKafkaConsumerGroupID());
+        consumerParams.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        consumerParams.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        consumerParams.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         JsonDeserializer<Message> jsonDeserializer = new JsonDeserializer<>();
-        jsonDeserializer.addTrustedPackages(Config.getKafkaTrustedPackages());
-        return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), jsonDeserializer);
+        jsonDeserializer.addTrustedPackages(config.getKafkaTrustedPackages());
+        return new DefaultKafkaConsumerFactory<>(consumerParams, new StringDeserializer(), jsonDeserializer);
     }
 
     @Override

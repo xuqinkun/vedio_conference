@@ -13,7 +13,8 @@ import java.io.IOException;
 public class Application {
 
     public static void main(String[] args) throws IOException {
-        new HeartBeatsServer(Config.getHeartBeatsServerPort()).start();
+        Config config = Config.getInstance();
+        new HeartBeatsServer(config.getHeartBeatsServerPort()).start();
         SpringApplication.run(Application.class, args);
     }
 }
