@@ -76,7 +76,7 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
                 if (type == USER_ADD) {
                     log.warn("USER_ADD[{}]", layoutChangeMessage.controlID);
                     userListLayout.getChildren().add(layoutChangeMessage.pane);
-                } else if (type == USER_LEAVE){
+                } else if (type == USER_LEAVE) {
                     log.warn("USER_LEAVE[{}]", layoutChangeMessage.controlID);
                     Node node = userListLayout.lookup("#" + layoutChangeMessage.controlID);
                     userListLayout.getChildren().remove(node);
@@ -217,7 +217,12 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
         });
 
         updateValue(new LayoutChangeMessage(USER_ADD, userName, stackPane));
-
+        try {
+            // Waiting for layout loading
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
         log.warn("User[{}] added", user);
         if (!sessionManager.isCurrentUser(userName)) {
