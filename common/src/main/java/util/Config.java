@@ -64,10 +64,12 @@ public class Config {
             if (url != null) {
                 properties.load(url.openStream());
             } else {
+                properties.load(new FileInputStream(src));
                 log.warn("File app.properties not found! Use default settings.");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            System.exit(1);
         }
     }
 
