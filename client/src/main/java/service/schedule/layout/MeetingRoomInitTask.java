@@ -142,7 +142,6 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
             HttpResult<String> result = HttpClientUtil.getInstance().
                     doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
             List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
-            log.warn(userList.toString());
             for (User user : userList) {
                 addUser(user);
             }
