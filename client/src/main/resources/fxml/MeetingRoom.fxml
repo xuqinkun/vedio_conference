@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
-<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="805.0" prefWidth="989.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
+<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
    <children>
       <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="30.0">
          <children>
@@ -22,14 +17,10 @@
          </children>
       </AnchorPane>
       <Separator prefWidth="200.0" />
-      <AnchorPane prefHeight="694.0" prefWidth="989.0">
+      <AnchorPane prefHeight="560.0" prefWidth="1000.0">
          <children>
-            <BorderPane prefHeight="687.0" prefWidth="714.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-               <center>
-                  <ImageView fx:id="globalImageView" fitHeight="464.0" fitWidth="523.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
-               </center>
-            </BorderPane>
-            <VBox fx:id="userListLayout" alignment="TOP_CENTER" prefHeight="770.0" prefWidth="272.0" spacing="5.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <ImageView fx:id="globalImageView" fitHeight="570.0" fitWidth="725.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="0.0" />
+            <VBox fx:id="userListLayout" alignment="TOP_CENTER" maxHeight="570.0" minHeight="-Infinity" prefHeight="500.0" prefWidth="270.0" spacing="5.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="0.0">
                <padding>
                   <Insets bottom="10.0" top="10.0" />
                </padding></VBox>
