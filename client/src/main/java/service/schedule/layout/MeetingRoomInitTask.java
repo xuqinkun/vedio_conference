@@ -1,9 +1,6 @@
 package service.schedule.layout;
 
-import common.bean.HttpResult;
-import common.bean.Meeting;
-import common.bean.MessageType;
-import common.bean.User;
+import common.bean.*;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,11 +15,13 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
+import service.network.HeartBeatsClient;
 import service.schedule.TaskStarter;
 import service.schedule.audio.AudioPlayerService;
 import service.schedule.video.GrabberScheduledService;
 import service.schedule.video.VideoPlayerService;
 import service.schedule.video.VideoRecordTask;
+import sun.plugin2.main.server.HeartbeatThread;
 import util.Config;
 import util.DeviceManager;
 import util.JsonUtil;
@@ -59,23 +58,15 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     }
 
     private void init() {
+        String username = sessionManager.getCurrentUser().getName();
         Meeting currentMeeting = sessionManager.getCurrentMeeting();
-        if (currentMeeting == null) {
-            log.warn("Can't find current meeting info!");
-            /* Only for debug */
-            User user = new User("aa", "a");
-            sessionManager.setCurrentUser(user);
-            Meeting meeting = new Meeting();
-            meeting.setUuid("test");
-            meeting.setOwner(user.getName());
-            sessionManager.setCurrentMeeting(meeting);
-        }
+
         initializeDevice();
-        sessionManager.setActiveLayout(sessionManager.getCurrentUser().getName());
+        sessionManager.setActiveLayout(username);
         /* Display user list */
-        initUserList(sessionManager.getCurrentMeeting());
+        initUserList(currentMeeting);
         /* Listen user change (join or leave)*/
-        listenUserListChange(sessionManager.getCurrentMeeting());
+        listenUserListChange(currentMeeting);
         // Initialize recorder
         initRecorder();
     }

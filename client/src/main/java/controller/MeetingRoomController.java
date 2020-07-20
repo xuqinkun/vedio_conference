@@ -1,5 +1,7 @@
 package controller;
 
+import common.bean.Meeting;
+import common.bean.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +16,8 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.model.SessionManager;
+import service.network.HeartBeatsClient;
 import service.schedule.layout.AudioSwitchTask;
 import service.schedule.layout.MeetingRoomInitTask;
 import service.schedule.layout.VideoSwitchTask;
@@ -52,11 +56,27 @@ public class MeetingRoomController implements Initializable {
     private Stage invitationStage;
     @FXML
     private RadioButton inviteBtn;
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (sessionManager.getCurrentMeeting() == null) {
+            log.warn("Can't find current meeting info!");
+            /* Only for debug */
+            User user = new User("aa", "a");
+            sessionManager.setCurrentUser(user);
+            Meeting meeting = new Meeting();
+            meeting.setUuid("test");
+            meeting.setOwner(user.getName());
+            sessionManager.setCurrentMeeting(meeting);
+        }
+        String username = sessionManager.getCurrentUser().getName();
+        String meetingId = sessionManager.getCurrentMeeting().getUuid();
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         exec.schedule(new MeetingRoomInitTask(userListLayout, globalImageView), 0, TimeUnit.MILLISECONDS);
+        // Start HeartBeats Report
+        HeartBeatsClient client = new HeartBeatsClient(meetingId, username);
+        exec.schedule(client, 0, TimeUnit.MILLISECONDS);
     }
 
     @FXML

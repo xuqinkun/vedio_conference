@@ -2,7 +2,6 @@ package controller;
 
 import common.bean.User;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -10,12 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.WindowEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
-import service.schedule.layout.JoinMeetingTask;
+import service.schedule.layout.JoinMeetingService;
 import util.InputChecker;
 
 import java.net.URL;
@@ -71,7 +69,7 @@ public class JoinMeetingController implements Initializable {
             String userName = userNameInput.getText();
             String meetingID = meetingIDInput.getText();
             String meetingPassword = meetingPasswordInput.getText();
-            new Thread(new JoinMeetingTask(meetingID, userName, meetingPassword, joinMeetingBtn, joinMeetingMessageLabel)).start();
+            new JoinMeetingService(meetingID, userName, meetingPassword, joinMeetingBtn, joinMeetingMessageLabel).start();
         } else {
             joinMeetingBtn.setDisable(false);
         }
