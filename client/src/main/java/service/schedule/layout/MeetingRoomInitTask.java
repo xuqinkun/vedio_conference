@@ -55,6 +55,7 @@ public class MeetingRoomInitTask extends Task<StackPane> {
     private void initListener(Pane userListLayout) {
         valueProperty().addListener((observable, oldValue, stackPane) -> {
             if (stackPane != null) {
+                log.warn("Insert stackPane[{}]", stackPane.getId());
                 userListLayout.getChildren().add(stackPane);
             }
         });
@@ -121,7 +122,6 @@ public class MeetingRoomInitTask extends Task<StackPane> {
             HttpResult<String> result = HttpClientUtil.getInstance().
                     doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
             List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
-            log.warn(userList.toString());
             for (User user : userList) {
                 addUser(user);
             }
@@ -140,8 +140,9 @@ public class MeetingRoomInitTask extends Task<StackPane> {
     }
 
     public void addUser(User user) {
-        sessionManager.addUser(user);
+        log.warn("User[{}] added", user);
 
+        sessionManager.addUser(user);
         String userName = user.getName();
         String activeStyle = "-fx-border-color: #00cc66;-fx-border-width: 3;-fx-border-radius: 5;-fx-background-radius: 5";
         String normalStyle = "-fx-border-color: #9B9EA4;-fx-border-width: 3;-fx-background-color: #424446;-fx-border-radius: 5;-fx-background-radius: 5";
@@ -194,7 +195,6 @@ public class MeetingRoomInitTask extends Task<StackPane> {
         updateValue(stackPane);
 
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
-        log.warn("User[{}] added", user);
         if (!sessionManager.isCurrentUser(userName)) {
             exec.submit(() -> {
                 startVideoPlayer(localView, meetingId, userName);
