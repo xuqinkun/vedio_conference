@@ -3,6 +3,7 @@ package service;
 import common.bean.HttpResult;
 import common.bean.Meeting;
 import common.bean.ResultCode;
+import common.bean.User;
 import dao.MeetingDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,15 +12,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class MeetingService {
     private static final Logger log = LoggerFactory.getLogger(MeetingService.class);
 
+    private MeetingCache meetingCache = MeetingCache.getInstance();
+
     private MeetingDao meetingDao;
 
-    private Map<String, UserCleanService> cleanServiceMap;
+    private Map<String, MeetingCleanService> cleanServiceMap;
 
     @Autowired
     public void setMeetingDao(MeetingDao meetingDao) {
@@ -34,7 +38,7 @@ public class MeetingService {
         }
         try {
             meetingDao.insert(meeting);
-            UserCleanService service = new UserCleanService(meeting.getUuid());
+            MeetingCleanService service = new MeetingCleanService(meeting.getUuid(), this);
             new Thread(service).start();
             cleanServiceMap.put(meeting.getUuid(), service);
             return new HttpResult<>(ResultCode.OK, String.format("Create meeting[%s] succeed!", meeting.getUuid()));
@@ -54,5 +58,18 @@ public class MeetingService {
 
     public void leaveMeeting(String meetingId) {
         cleanServiceMap.get(meetingId).stop();
+    }
+
+    public void endMeeting(String meetingID) {
+        meetingCache.removeMeeting(meetingID);
+        meetingDao.endMeeting(meetingID);
+    }
+
+    public void removeUser(String meetingID, User user) {
+        meetingCache.removeUser(meetingID, user.getName());
+    }
+
+    public List<User> getUserList(String meetingID) {
+        return meetingCache.getUserList(meetingID);
     }
 }

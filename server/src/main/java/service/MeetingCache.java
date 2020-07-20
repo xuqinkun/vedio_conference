@@ -41,7 +41,7 @@ public class MeetingCache {
             Collection<User> users = stringUserMap.values();
             return new ArrayList<>(users);
         }
-        return new ArrayList<>();
+        return null;
     }
 
     public void removeUser(String meetingID, String name) {
@@ -49,5 +49,9 @@ public class MeetingCache {
         if (userMap != null) {
             userMap.remove(name);
         }
+    }
+
+    public void removeMeeting(String meetingID) {
+        meetingUserMap.remove(meetingID);
     }
 }

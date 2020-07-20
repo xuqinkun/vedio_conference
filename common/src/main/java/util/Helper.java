@@ -6,22 +6,20 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Helper {
-    private static int imageWidth = 640*2;
-    private static int imageHeight = 480*2;
 
     private final static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public static int screenSizeWidth() {
-        return imageWidth;
-    }
-
-    public static int screenSizeHeight() {
-        return imageHeight;
-    }
 
     public static String getUuid() {
         String uuid = UUID.randomUUID().toString();
         return uuid.substring(uuid.lastIndexOf("-") + 1);
+    }
+
+    public static String currentDate() {
+        return dateFormat(new Date());
+    }
+
+    public static String dateFormat(long timestamp) {
+        return dateFormat(new Date(timestamp));
     }
 
     public static String dateFormat(Date date) {

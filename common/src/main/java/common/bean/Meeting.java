@@ -1,10 +1,5 @@
 package common.bean;
 
-import util.Helper;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class Meeting {
     private String uuid;
 
