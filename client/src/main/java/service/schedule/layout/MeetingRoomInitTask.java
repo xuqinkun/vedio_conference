@@ -1,6 +1,9 @@
 package service.schedule.layout;
 
-import common.bean.*;
+import common.bean.HttpResult;
+import common.bean.Meeting;
+import common.bean.MessageType;
+import common.bean.User;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,13 +18,11 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.messaging.MessageReceiveTask;
 import service.model.SessionManager;
-import service.network.HeartBeatsClient;
 import service.schedule.TaskStarter;
 import service.schedule.audio.AudioPlayerService;
 import service.schedule.video.GrabberScheduledService;
 import service.schedule.video.VideoPlayerService;
 import service.schedule.video.VideoRecordTask;
-import sun.plugin2.main.server.HeartbeatThread;
 import util.Config;
 import util.DeviceManager;
 import util.JsonUtil;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class MeetingRoomInitTask extends Task<Boolean> {
+public class MeetingRoomInitTask extends Task<StackPane> {
     private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
     public static final Config config = Config.getInstance();
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -41,20 +42,18 @@ public class MeetingRoomInitTask extends Task<Boolean> {
 
     private final Map<String, VideoPlayerService> videoPullServiceMap = new HashMap<>();
     private final Map<String, AudioPlayerService> audioPlayerServiceMap = new HashMap<>();
-    private Pane userListLayout;
 
     private ImageView globalView;
     private StackPane lastClicked;
     private VideoRecordTask videoRecordTask;
 
     public MeetingRoomInitTask(Pane userListLayout, ImageView globalView) {
-        this.userListLayout = userListLayout;
         this.globalView = globalView;
-    }
-
-    @Override
-    protected void updateValue(Boolean value) {
-        super.updateValue(value);
+        valueProperty().addListener((observable, oldValue, stackPane) -> {
+            if (stackPane != null) {
+                userListLayout.getChildren().add(stackPane);
+            }
+        });
     }
 
     private void init() {
@@ -82,9 +81,9 @@ public class MeetingRoomInitTask extends Task<Boolean> {
     }
 
     @Override
-    protected Boolean call() {
+    protected StackPane call() {
         init();
-        return true;
+        return null;
     }
 
     private void initializeDevice() {
@@ -171,7 +170,6 @@ public class MeetingRoomInitTask extends Task<Boolean> {
         StackPane.setAlignment(label, Pos.BOTTOM_CENTER);
 
         stackPane.getChildren().addAll(localView, label);
-        userListLayout.getChildren().add(stackPane);
 
         stackPane.setOnMouseClicked(event -> {
             log.debug("Clicked:{}", stackPane.getId());
@@ -185,6 +183,9 @@ public class MeetingRoomInitTask extends Task<Boolean> {
                 }
             }
         });
+
+        updateValue(stackPane);
+
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
         log.warn("User[{}] added", user);
         if (!sessionManager.isCurrentUser(userName)) {
