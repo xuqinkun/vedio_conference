@@ -74,8 +74,10 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
             if (layoutChangeMessage != null) {
                 MessageType type = layoutChangeMessage.type;
                 if (type == USER_ADD) {
+                    log.warn("USER_ADD[{}]", layoutChangeMessage.controlID);
                     userListLayout.getChildren().add(layoutChangeMessage.pane);
                 } else if (type == USER_LEAVE){
+                    log.warn("USER_LEAVE[{}]", layoutChangeMessage.controlID);
                     Node node = userListLayout.lookup("#" + layoutChangeMessage.controlID);
                     userListLayout.getChildren().remove(node);
                 }
