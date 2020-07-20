@@ -6,11 +6,11 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-max-width: 350; -fx-min-width: 350; -fx-max-height: 600; -fx-min-height: 600; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.JoinMeetingController">
+<VBox fx:id="joinMeetingLayout" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="5.0" style="-fx-max-width: 350; -fx-min-width: 350; -fx-max-height: 600; -fx-min-height: 600; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.JoinMeetingController">
     <children>
-        <VBox prefHeight="200.0" prefWidth="100.0">
+        <VBox prefHeight="401.0" prefWidth="350.0">
             <children>
-                <VBox prefHeight="200.0" prefWidth="100.0">
+                <VBox prefHeight="59.0" prefWidth="350.0">
                     <children>
                         <Label text="Meeting ID">
                             <font>
@@ -30,7 +30,7 @@
                         </TextField>
                     </children>
                     <VBox.margin>
-                        <Insets top="30.0" />
+                        <Insets />
                     </VBox.margin>
                 </VBox>
                 <VBox prefHeight="200.0" prefWidth="100.0">
@@ -106,25 +106,25 @@
                 </VBox>
             </children>
         </VBox>
-        <BorderPane prefHeight="319.0" prefWidth="400.0" />
-        <VBox prefHeight="124.0" prefWidth="350.0">
+      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
+         <children>
+            <Label fx:id="joinMeetingMessageLabel" maxHeight="1.7976931348623157E308" prefHeight="60.0" prefWidth="300.0" textFill="RED" wrapText="true">
+               <font>
+                  <Font name="Arial" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+               </padding>
+            </Label>
+         </children>
+      </VBox>
+        <VBox alignment="CENTER" prefHeight="176.0" prefWidth="350.0">
             <children>
-                <BorderPane prefHeight="200.0" prefWidth="200.0" />
-                <BorderPane prefHeight="200.0" prefWidth="200.0">
-                    <VBox.margin>
-                        <Insets />
-                    </VBox.margin>
-                    <top>
-                        <Button fx:id="joinMeetingBtn" alignment="CENTER" contentDisplay="TOP" disable="true" lineSpacing="10.0" maxHeight="40.0" maxWidth="300.0" minHeight="40.0" minWidth="300.0" mnemonicParsing="false" onAction="#joinMeeting" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: #1972F8; -fx-background-radius: 2;" text="Join Meetings" textAlignment="CENTER" textFill="WHITE" BorderPane.alignment="CENTER">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <BorderPane.margin>
-                                <Insets bottom="20.0" />
-                            </BorderPane.margin>
-                        </Button>
-                    </top>
-                </BorderPane>
+                  <Button fx:id="joinMeetingBtn" alignment="CENTER" contentDisplay="TOP" disable="true" lineSpacing="10.0" maxHeight="40.0" maxWidth="300.0" minHeight="40.0" minWidth="300.0" mnemonicParsing="false" onAction="#joinMeeting" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: #1972F8; -fx-background-radius: 2;" text="Join Meetings" textAlignment="CENTER" textFill="WHITE">
+                      <font>
+                          <Font size="14.0" />
+                      </font>
+                  </Button>
             </children>
         </VBox>
     </children>

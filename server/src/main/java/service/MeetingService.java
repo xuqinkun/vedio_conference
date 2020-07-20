@@ -35,8 +35,8 @@ public class MeetingService {
         try {
             meetingDao.insert(meeting);
             UserCleanService service = new UserCleanService(meeting.getUuid());
-            cleanServiceMap.put(meeting.getUuid(), service);
             new Thread(service).start();
+            cleanServiceMap.put(meeting.getUuid(), service);
             return new HttpResult<>(ResultCode.OK, String.format("Create meeting[%s] succeed!", meeting.getUuid()));
         } catch (Exception e) {
             log.error(e.getMessage());

@@ -50,7 +50,7 @@ public class MeetingController {
 
     @PostMapping("/createMeeting")
     public @ResponseBody
-    HttpResult<String> createMeeting(@RequestBody Meeting meeting, HttpSession session) {
+    HttpResult<String> createMeeting(@RequestBody Meeting meeting, HttpServletRequest request) {
         if (meeting == null || StringUtils.isEmpty(meeting.getOwner())) {
             return new HttpResult<>(ERROR, "Invalid meeting");
         }
@@ -59,7 +59,8 @@ public class MeetingController {
             return new HttpResult<>(ERROR, "Invalid owner[" + meeting.getOwner() + "]");
         }
         HttpResult<String> ret = meetingService.createMeeting(meeting);
-        meetingCache.addUser(meeting.getUuid(), user); // TODO add client info for creator
+        updateUserInfo(request, user);
+        meetingCache.addUser(meeting.getUuid(), user);
         return ret;
     }
 
@@ -78,20 +79,12 @@ public class MeetingController {
         Meeting meeting = context.getMeeting();
         User user = context.getUser();
 
-        String remoteHost = request.getRemoteHost();
-        int remotePort = request.getRemotePort();
-        String userName = user.getName();
-
-        user.setHost(remoteHost);
-        user.setPort(remotePort);
-        user.setTimeStamp(System.currentTimeMillis());
-
-        log.warn("User[{}] join meeting host: {} port: {}", userName, remoteHost, remotePort);
+        updateUserInfo(request, user);
 
         String uuid = meeting.getUuid();
         Meeting oldMeeting = meetingService.findMeeting(uuid);
         if (oldMeeting == null || !oldMeeting.getPassword().equals(meeting.getPassword())) {
-            String errMessage = String.format("Can't find meeting[uuid=%s] or meeting password is wrong\n", uuid);
+            String errMessage = String.format("Can't find meeting[ID=%s] or password is not correct.\n", uuid);
             log.error(errMessage);
             return new HttpResult<>(ERROR, errMessage);
         }
@@ -101,5 +94,17 @@ public class MeetingController {
             meetingCache.addUser(uuid, user);
         }
         return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
+    }
+
+    private void updateUserInfo(HttpServletRequest request, User user) {
+        String remoteHost = request.getRemoteHost();
+        int remotePort = request.getRemotePort();
+        String userName = user.getName();
+
+        user.setHost(remoteHost);
+        user.setPort(remotePort);
+        user.setTimeStamp(System.currentTimeMillis());
+
+        log.warn("User[{}] join meeting host: {} port: {}", userName, remoteHost, remotePort);
     }
 }

@@ -98,15 +98,14 @@ public class HeartBeatsServer extends Thread {
     }
 
     private void handleRead(SocketChannel sc) throws IOException {
-        HeartBeatsPacket heartBeatsPacket = HeartBeatsPacket.deserialize(sc);
-        if (heartBeatsPacket != null && heartBeatsPacket.getState() == UserState.RUNNING) {
-            log.warn("Heart beats: [{}]", heartBeatsPacket);
-            String meetingId = heartBeatsPacket.getMeetingId();
-            String username = heartBeatsPacket.getUsername();
+        HeartBeatsPacket packet = HeartBeatsPacket.deserialize(sc);
+        if (packet != null && packet.getState() == UserState.RUNNING) {
+            log.warn("Heart beats: [{}]", packet);
+            String meetingId = packet.getMeetingId();
+            String username = packet.getUsername();
             User user = meetingCache.getUser(meetingId, username);
             if (user == null) {
-                User newUser = new User(username, System.currentTimeMillis());
-                meetingCache.addUser(meetingId, newUser);
+                log.warn("Invalid heart beats packet[{}], abandon it.", packet);
             } else {
                 User cacheUser = meetingCache.getUser(meetingId, username);
                 cacheUser.setTimeStamp(System.currentTimeMillis());
