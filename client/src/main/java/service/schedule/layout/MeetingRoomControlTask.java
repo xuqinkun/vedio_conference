@@ -73,12 +73,13 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         valueProperty().addListener((observable, oldValue, layoutChangeMessage) -> {
             if (layoutChangeMessage != null) {
                 MessageType type = layoutChangeMessage.type;
-                if (type == USER_ADD) {
-                    log.warn("USER_ADD[{}]", layoutChangeMessage.controlID);
+                String controlID = layoutChangeMessage.controlID;
+                if (type == USER_ADD && !controlID.equals(sessionManager.getCurrentUser().getName())) {
+                    log.warn("USER_ADD[{}]", controlID);
                     userListLayout.getChildren().add(layoutChangeMessage.pane);
                 } else if (type == USER_LEAVE) {
-                    log.warn("USER_LEAVE[{}]", layoutChangeMessage.controlID);
-                    Node node = userListLayout.lookup("#" + layoutChangeMessage.controlID);
+                    log.warn("USER_LEAVE[{}]", controlID);
+                    Node node = userListLayout.lookup("#" + controlID);
                     userListLayout.getChildren().remove(node);
                 }
             }

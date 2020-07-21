@@ -109,14 +109,16 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void leaveMeeting(ActionEvent event) {
-        if (sessionManager.isMeetingOwner()) {
-            // Ask for end meeting else leave meeting, set meeting host before leaving
-            try {
+        try {
+            if (sessionManager.isMeetingOwner()) {
+                // Ask for end meeting else leave meeting, set meeting host before leaving
                 String content = "You can appoint a host before leaving or end meeting directly.";
                 showDialog(content);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                showDialog("Are you sure to leave.");
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         controlTask.stopMeeting();
         exec.remove(controlTask);
@@ -124,7 +126,7 @@ public class MeetingRoomController implements Initializable {
     }
 
     private void showDialog(String content) throws IOException {
-        Stage mainStage = (Stage)rootLayout.getScene().getWindow();
+        Stage mainStage = (Stage) rootLayout.getScene().getWindow();
         Parent dialog = FXMLLoader.load(getClass().getResource("/fxml/Dialog.fxml"));
         Label titleLabel = (Label) dialog.lookup("#titleLabel");
         Label contentLabel = (Label) dialog.lookup("#contentLabel");
@@ -136,7 +138,7 @@ public class MeetingRoomController implements Initializable {
         dialogStage.setScene(new Scene(dialog));
         dialogStage.initOwner(mainStage);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
-        confirmBtn.setOnMouseClicked(event ->  {
+        confirmBtn.setOnMouseClicked(event -> {
             new LeaveMeetingService(rootLayout).start();
         });
         cancelBtn.setOnMouseClicked((event) -> {

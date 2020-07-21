@@ -79,7 +79,6 @@ public class MeetingService {
         } else {
             kafkaService.sendMessage(meetingId, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
             meetingCache.removeUser(meetingId, userName);
-            log.warn("You leave meeting[{}]", meetingId);
             return new HttpResult<>(OK, String.format("You leave meeting[%s]", meetingId));
         }
     }
