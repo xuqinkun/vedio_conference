@@ -64,6 +64,14 @@ public class JoinMeetingService extends Service<HttpResult<String>> {
         Stage joinStage = (Stage) joinMeetingBtn.getScene().getWindow();
         Stage mainStage = (Stage) joinStage.getOwner();
 
+        Button leaveMeetingBtn = (Button) roomStage.getScene().getRoot().lookup("#leaveMeetingBtn");
+
+        roomStage.setOnCloseRequest(event -> {
+            log.warn("setOnCloseRequest");
+            leaveMeetingBtn.fire();
+            event.consume();
+        });
+
         mainStage.close();
         joinStage.close();
         roomStage.show();
