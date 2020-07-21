@@ -65,9 +65,6 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
                 // 1. send message
                 Meeting meeting = sessionManager.getCurrentMeeting();
                 User user = sessionManager.getCurrentUser();
-                String uuid = meeting.getUuid();
-                Message message = new Message(MessageType.USER_LEAVE, JsonUtil.toJsonString(user));
-                MessageSender.getInstance().send(uuid, message);
                 // 2. Inform server leave meeting
                 HttpResult<String> response = HttpClientUtil.getInstance().
                         doPost(UrlMap.getLeaveMeetingUrl(), new MeetingContext(user, meeting));
