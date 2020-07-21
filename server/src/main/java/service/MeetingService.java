@@ -112,6 +112,9 @@ public class MeetingService {
             log.error(errMessage);
             return new HttpResult<>(ERROR, errMessage);
         }
+        if (oldMeeting.isEnded()) {
+            return new HttpResult<>(ERROR, String.format("Sorry, meeting[ID=%s] is ended.", uuid));
+        }
         kafkaService.sendMessage(uuid, new Message(USER_ADD, JsonUtil.toJsonString(user)));
         User cacheUser = meetingCache.getUser(uuid, user.getName());
         if (cacheUser == null) {
