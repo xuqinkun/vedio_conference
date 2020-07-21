@@ -46,7 +46,7 @@ public class Program extends Application {
         Config config = null;
 
         List<String> params = getParameters().getRaw();
-        boolean debugMode = params.size() > 0 && params.get(0).equalsIgnoreCase("-d");
+        boolean debugMode = params.contains("-d");
         String propertyKey = "-p";
         String useLocalServerKey = "-l";
         if (params.contains(propertyKey)) {

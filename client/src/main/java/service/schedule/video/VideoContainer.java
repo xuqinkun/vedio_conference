@@ -55,7 +55,7 @@ public class VideoContainer {
                 frame = frameQueue.take();
             }
         } catch (InterruptedException e) {
-            LOG.error(e.getMessage());
+            LOG.error(e.getCause().getMessage());
             frame = null;
         }
         return frame;
