@@ -96,4 +96,8 @@ public class SessionManager {
         User user = userCache.get(username);
         return user == null || user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
     }
+
+    public boolean isMeetingOwner() {
+        return currentMeeting.getOwner().equals(currentUser.getName());
+    }
 }

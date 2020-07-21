@@ -1,12 +1,17 @@
-package controller;
+package common.bean;
 
-import common.bean.Meeting;
-import common.bean.User;
-
-public class JoinMeetingContext {
+public class MeetingContext {
     private User user;
 
     private Meeting meeting;
+
+    public MeetingContext() {
+    }
+
+    public MeetingContext(User user, Meeting meeting) {
+        this.user = user;
+        this.meeting = meeting;
+    }
 
     public User getUser() {
         return user;

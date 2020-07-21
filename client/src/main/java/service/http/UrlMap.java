@@ -27,4 +27,8 @@ public class UrlMap {
     public static String getJoinMeetingUrl() {
         return baseUrl + "joinMeeting";
     }
+
+    public static String getLeaveMeetingUrl() {
+        return baseUrl + "leaveMeeting";
+    }
 }

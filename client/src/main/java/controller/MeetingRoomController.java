@@ -1,29 +1,38 @@
 package controller;
 
-import common.bean.Meeting;
-import common.bean.User;
+import common.bean.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.http.HttpClientUtil;
+import service.http.UrlMap;
+import service.messaging.MessageSender;
 import service.model.SessionManager;
 import service.network.HeartBeatsClient;
 import service.schedule.layout.AudioSwitchTask;
+import service.schedule.layout.LeaveMeetingService;
 import service.schedule.layout.MeetingRoomInitTask;
 import service.schedule.layout.VideoSwitchTask;
+import util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -42,20 +51,24 @@ public class MeetingRoomController implements Initializable {
     private Pane titleBar;
     @FXML
     private RadioButton openChatBtn;
-    private double lastX;
-    private double lastY;
-    private double oldStageX;
-    private double oldStageY;
-    private Stage chatStage;
+    @FXML
+    private Button leaveMeetingBtn;
     @FXML
     private RadioButton videoSwitchBtn;
     @FXML
     private ImageView globalImageView;
     @FXML
     private RadioButton audioSwitchBtn;
-    private Stage invitationStage;
     @FXML
     private RadioButton inviteBtn;
+
+    private double lastX;
+    private double lastY;
+    private double oldStageX;
+    private double oldStageY;
+    private Stage chatStage;
+    private Stage invitationStage;
+
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
@@ -72,6 +85,11 @@ public class MeetingRoomController implements Initializable {
         }
         String username = sessionManager.getCurrentUser().getName();
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
+        if (sessionManager.isMeetingOwner()) {
+            leaveMeetingBtn.setText("End Meeting");
+        } else {
+            leaveMeetingBtn.setText("Leave Meeting");
+        }
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         exec.schedule(new MeetingRoomInitTask(userListLayout, globalImageView), 0, TimeUnit.MILLISECONDS);
         // Start HeartBeats Report
@@ -82,8 +100,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void openOrCloseChat() throws IOException {
         if (openChatBtn.isSelected()) {
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/fxml/ChatRoom.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/ChatRoom.fxml"));
             chatStage = new Stage();
             chatStage.setScene(new Scene(root));
             chatStage.show();
@@ -91,6 +108,44 @@ public class MeetingRoomController implements Initializable {
             chatStage.close();
             chatStage = null;
         }
+    }
+
+    @FXML
+    public void leaveMeeting(ActionEvent event) {
+        if (sessionManager.isMeetingOwner()) {
+            // Ask for end meeting else leave meeting, set meeting host before leaving
+            try {
+                String content = "You can appoint a host before leaving or end meeting directly.";
+                showDialog(content);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+
+    private void showDialog(String content) throws IOException {
+        Stage mainStage = (Stage)rootLayout.getScene().getWindow();
+        Parent dialog = FXMLLoader.load(getClass().getResource("/fxml/Dialog.fxml"));
+        Label titleLabel = (Label) dialog.lookup("#titleLabel");
+        Label contentLabel = (Label) dialog.lookup("#contentLabel");
+        Button cancelBtn = (Button) dialog.lookup("#cancelBtn");
+        Button confirmBtn = (Button) dialog.lookup("#confirmBtn");
+        titleLabel.setText("Leave Meeting");
+        contentLabel.setText(content);
+        Stage dialogStage = new Stage();
+        dialogStage.setScene(new Scene(dialog));
+        dialogStage.initOwner(mainStage);
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        confirmBtn.setOnMouseClicked(event ->  {
+            log.warn("confirm");
+            new LeaveMeetingService(rootLayout).start();
+        });
+        cancelBtn.setOnMouseClicked((event) -> {
+            log.warn("cancel");
+            dialogStage.close();
+        });
+        dialogStage.show();
     }
 
     @FXML

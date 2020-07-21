@@ -1,5 +1,6 @@
 package service.messaging;
 
+import common.bean.Message;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -13,7 +14,7 @@ import java.util.concurrent.Future;
 import static service.model.MessageType.TEXT;
 
 public class MessageSender {
-    private Producer<String, Data> producer;
+    private Producer<String, Message> producer;
 
     private static final MessageSender INSTANCE = new MessageSender();
 
@@ -28,12 +29,7 @@ public class MessageSender {
         return INSTANCE;
     }
 
-    public void send(String topic, Data data) throws ExecutionException, InterruptedException {
-        Future<RecordMetadata> send = producer.send(new ProducerRecord<>(topic, data.getKey(), data));
-        System.out.println(send.get().toString());
-    }
-
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        MessageSender.getInstance().send("test", new Data("1", new Date(), TEXT, "hello".getBytes()));
+    public void send(String topic, Message data) {
+        producer.send(new ProducerRecord<>(topic, data));
     }
 }

@@ -42,7 +42,7 @@
                   <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="End Meeting" textFill="RED" GridPane.columnIndex="8" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+                  <Button fx:id="leaveMeetingBtn" alignment="CENTER" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave Meeting" textFill="RED" GridPane.columnIndex="8" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                </children>
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

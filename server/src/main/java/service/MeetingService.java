@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static common.bean.MessageType.USER_ADD;
-import static common.bean.MessageType.USER_LEAVE;
+import static common.bean.MessageType.*;
 import static common.bean.ResultCode.ERROR;
+import static common.bean.ResultCode.OK;
 
 @Component
 public class MeetingService {
@@ -65,13 +65,34 @@ public class MeetingService {
         return meetingDao.find(uuid);
     }
 
-    public void leaveMeeting(String meetingId) {
-        cleanServiceMap.get(meetingId).stop();
+    public HttpResult<String> leaveMeeting(String meetingId, User user) {
+        Meeting meeting = findMeeting(meetingId);
+        if (meeting == null) {
+            return new HttpResult<>(ResultCode.ERROR, String.format("Invalid meeting[%s]", meetingId));
+        }
+        String userName = user.getName();
+        if (meeting.getOwner().equals(userName)) {
+            kafkaService.sendMessage(meetingId, new Message(END_MEETING, meetingId));
+            endMeeting(meetingId);
+            log.warn("Meeting[{}] is ended", meetingId);
+            return new HttpResult<>(OK, String.format("Meeting[%s] is ended", meetingId));
+        } else {
+            kafkaService.sendMessage(meetingId, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
+            meetingCache.removeUser(meetingId, userName);
+            log.warn("You leave meeting[{}]", meetingId);
+            return new HttpResult<>(OK, String.format("You leave meeting[%s]", meetingId));
+        }
     }
 
     public void endMeeting(String meetingID) {
         meetingCache.removeMeeting(meetingID);
         meetingDao.endMeeting(meetingID);
+        MeetingCleanService cleanService = cleanServiceMap.get(meetingID);
+        if (cleanService == null) {
+            log.error("Can't find meeting[ID={}]", meetingID);
+            return;
+        }
+        cleanService.stop();
     }
 
     public void removeUser(String meetingID, User user) {

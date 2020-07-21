@@ -10,9 +10,7 @@ import service.*;
 import util.JsonUtil;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
-import static common.bean.MessageType.USER_ADD;
 import static common.bean.ResultCode.ERROR;
 
 @RestController
@@ -65,13 +63,22 @@ public class MeetingController {
 
     @RequestMapping(value = "/joinMeeting")
     public @ResponseBody
-    HttpResult<String> joinMeeting(@RequestBody JoinMeetingContext context, HttpServletRequest request) {
+    HttpResult<String> joinMeeting(@RequestBody MeetingContext context, HttpServletRequest request) {
         Meeting meeting = context.getMeeting();
         User user = context.getUser();
 
         updateUserInfo(request, user);
-        log.warn("User[{}] join int meeting[{}]", user.getName(), meeting.getUuid());
+        log.warn("User[{}] join meeting[{}]", user.getName(), meeting.getUuid());
         return meetingService.joinMeeting(meeting, user);
+    }
+
+    @RequestMapping(value = "/leaveMeeting")
+    public @ResponseBody
+    HttpResult<String> leaveMeeting(@RequestBody MeetingContext context, HttpServletRequest request) {
+        Meeting meeting = context.getMeeting();
+        User user = context.getUser();
+        log.warn("User[{}] leave meeting[{}]", user.getName(), meeting.getUuid());
+        return meetingService.leaveMeeting(meeting.getUuid(), user);
     }
 
     private void updateUserInfo(HttpServletRequest request, User user) {

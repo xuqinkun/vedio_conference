@@ -2,6 +2,7 @@ package service.http;
 
 import common.bean.HttpResult;
 import common.bean.Meeting;
+import common.bean.MeetingContext;
 import common.bean.User;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -45,6 +46,7 @@ public class HttpClientUtil {
         }
     }
     private <T> HttpResult<T> post(String url, String data) {
+        log.warn("POST url={} data={}", url, data);
         HttpPost post = new HttpPost(url);
         post.setEntity(new StringEntity(data, "UTF-8"));
         post.setHeader("Content-Type", "application/json;charset=utf8");
@@ -80,11 +82,8 @@ public class HttpClientUtil {
         Meeting meeting = new Meeting();
         meeting.setPassword("123");
         meeting.setUuid(Helper.getUuid());
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("user", user);
-        data.put("meeting", meeting);
-
-        HttpResult<String> httpResult = getInstance().doPost(UrlMap.getJoinMeetingUrl(), data);
+        HttpResult<String> httpResult = getInstance().
+                doPost(UrlMap.getJoinMeetingUrl(), new MeetingContext(user, meeting));
         System.out.println(httpResult);
     }
 }
