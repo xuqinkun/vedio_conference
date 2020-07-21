@@ -74,7 +74,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
             if (layoutChangeMessage != null) {
                 MessageType type = layoutChangeMessage.type;
                 String controlID = layoutChangeMessage.controlID;
-                if (type == USER_ADD && !controlID.equals(sessionManager.getCurrentUser().getName())) {
+                if (type == USER_ADD) {
                     log.warn("USER_ADD[{}]", controlID);
                     userListLayout.getChildren().add(layoutChangeMessage.pane);
                 } else if (type == USER_LEAVE) {

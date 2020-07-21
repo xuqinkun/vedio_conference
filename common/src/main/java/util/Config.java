@@ -12,7 +12,7 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     public static final String PORTRAIT_KEY = "portrait";
-    public static final String DEFAULT_PORTRAIT_SRC = "/fxml/img/orange.png";
+    public static final String DEFAULT_PORTRAIT_SRC = "/fxml/img/panda.png";
     public static final String CAPTURE_DEVICE_KEY = "capture.device";
     public static final String DEFAULT_CAPTURE_DEVICE = "0";
     public static final String KAFKA_CONSUMER_GROUP_ID_KEY = "kafka.consumer.groupID";
