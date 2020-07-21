@@ -214,7 +214,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         updateValue(new LayoutChangeMessage(USER_ADD, userName, stackPane));
         try {
             // Waiting for layout loading
-            Thread.sleep(100);
+            Thread.sleep(400);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
