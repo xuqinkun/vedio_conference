@@ -15,6 +15,7 @@ import javax.sound.sampled.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -140,7 +141,7 @@ public class DeviceManager {
     }
 
     public synchronized static SlowTaskHolder<FFmpegFrameRecorder> getVideoRecorder(String outStream) {
-        if (videoRecorderHolder == null) {
+        if (videoRecorderHolder == null || videoRecorderHolder.isStopped()) {
             log.debug("Create video recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream,
                     config.getCaptureImageWidth(), config.getCaptureImageHeight());
@@ -167,7 +168,7 @@ public class DeviceManager {
     }
 
     public synchronized static SlowTaskHolder<FFmpegFrameRecorder> getAudioRecorder(String outStream) {
-        if (audioRecorderHolder == null) {
+        if (audioRecorderHolder == null || audioRecorderHolder.isStopped()) {
             log.debug("Create audio recorder [out={}]", outStream);
             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outStream, config.getAudioChannels());
             recorder.setInterleaved(true);
@@ -193,7 +194,7 @@ public class DeviceManager {
     }
 
     public synchronized static SlowTaskHolder<FrameGrabber> getFFmpegFrameGrabber(int deviceNumber) throws FrameGrabber.Exception {
-        if (frameGrabberHolder == null) {
+        if (frameGrabberHolder == null || frameGrabberHolder.isStopped()) {
             log.warn("Initialize FFmpegFrameGrabber");
             FrameGrabber grabber = FrameGrabber.createDefault(deviceNumber);
             grabber.setImageWidth(config.getCaptureImageWidth());
@@ -214,7 +215,7 @@ public class DeviceManager {
     }
 
     public synchronized static SlowTaskHolder<FFmpegFrameGrabber> getFFmpegFrameGrabber(String url) {
-        if (videoGrabberMap.get(url) == null) {
+        if (videoGrabberMap.get(url) == null || videoGrabberMap.get(url).isStopped()) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(url);
             grabber.setOption("probesize", "1024");
             // Max duration for analyzing video frame
@@ -241,13 +242,17 @@ public class DeviceManager {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                if (slowTaskHolder.isStopped()) {
+                    log.warn("{} is stopped", slowTaskHolder);
+                    return;
+                }
             }
             slowTaskHolder.submit(false);
         }, 0, TimeUnit.MILLISECONDS);
     }
 
     public static SlowTaskHolder<FFmpegFrameGrabber> getAudioGrabber(String inStream) {
-        if (audioGrabberMap.get(inStream) == null) {
+        if (audioGrabberMap.get(inStream) == null || audioGrabberMap.get(inStream).isStopped()) {
             FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inStream);
             grabber.setOption("fflags", "nobuffer");
             grabber.setFormat("flv");
@@ -265,5 +270,48 @@ public class DeviceManager {
             audioGrabberMap.put(inStream, slowTaskHolder);
         }
         return audioGrabberMap.get(inStream);
+    }
+
+
+    public static void stopDevices(String meetingID) {
+        ExecutorService executorService = ThreadPoolUtil.getExecutorService(4, "StopDevices");
+        executorService.submit(() -> {
+            while (videoRecorderHolder == null || !videoRecorderHolder.isStarted()) {
+                log.debug("Waiting for audioRecorder starting");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            videoRecorderHolder.stop();
+        });
+        executorService.submit(() -> {
+            while (audioRecorderHolder == null || !audioRecorderHolder.isStarted()) {
+                log.debug("Waiting for audioRecorder starting");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            audioRecorderHolder.stop();
+        });
+
+        executorService.submit(() -> {
+            for (String key : videoGrabberMap.keySet()) {
+                if (key.contains(meetingID)) {
+                    videoGrabberMap.remove(key).stop();
+                }
+            }
+        });
+
+       executorService.submit(()->{
+           for (String key : audioGrabberMap.keySet()) {
+               if (key.contains(meetingID)) {
+                   audioGrabberMap.remove(key).stop();
+               }
+           }
+       });
     }
 }

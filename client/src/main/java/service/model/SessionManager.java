@@ -4,6 +4,7 @@ import common.bean.Meeting;
 import common.bean.User;
 import service.schedule.video.GrabberScheduledService;
 import util.Config;
+import util.DeviceManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,5 +100,10 @@ public class SessionManager {
 
     public boolean isMeetingOwner() {
         return currentMeeting.getOwner().equals(currentUser.getName());
+    }
+
+    public void stopMeeting() {
+        DeviceManager.stopDevices(currentMeeting.getUuid());
+        currentMeeting = null;
     }
 }

@@ -1,11 +1,11 @@
 package controller;
 
-import common.bean.*;
+import common.bean.Meeting;
+import common.bean.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -18,21 +18,15 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.http.HttpClientUtil;
-import service.http.UrlMap;
-import service.messaging.MessageSender;
 import service.model.SessionManager;
 import service.network.HeartBeatsClient;
 import service.schedule.layout.AudioSwitchTask;
 import service.schedule.layout.LeaveMeetingService;
-import service.schedule.layout.MeetingRoomInitTask;
+import service.schedule.layout.MeetingRoomControlTask;
 import service.schedule.layout.VideoSwitchTask;
-import util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +65,8 @@ public class MeetingRoomController implements Initializable {
 
     private final SessionManager sessionManager = SessionManager.getInstance();
 
+    private MeetingRoomControlTask controlTask;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (sessionManager.getCurrentMeeting() == null) {
@@ -91,7 +87,8 @@ public class MeetingRoomController implements Initializable {
             leaveMeetingBtn.setText("Leave Meeting");
         }
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-        exec.schedule(new MeetingRoomInitTask(userListLayout, globalImageView), 0, TimeUnit.MILLISECONDS);
+        controlTask = new MeetingRoomControlTask(userListLayout, globalImageView);
+        exec.schedule(controlTask, 0, TimeUnit.MILLISECONDS);
         // Start HeartBeats Report
         HeartBeatsClient client = new HeartBeatsClient(meetingId, username);
         exec.schedule(client, 0, TimeUnit.MILLISECONDS);
@@ -121,6 +118,8 @@ public class MeetingRoomController implements Initializable {
                 e.printStackTrace();
             }
         }
+        controlTask.stopMeeting();
+        exec.remove(controlTask);
         event.consume();
     }
 
@@ -138,11 +137,9 @@ public class MeetingRoomController implements Initializable {
         dialogStage.initOwner(mainStage);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         confirmBtn.setOnMouseClicked(event ->  {
-            log.warn("confirm");
             new LeaveMeetingService(rootLayout).start();
         });
         cancelBtn.setOnMouseClicked((event) -> {
-            log.warn("cancel");
             dialogStage.close();
         });
         dialogStage.show();

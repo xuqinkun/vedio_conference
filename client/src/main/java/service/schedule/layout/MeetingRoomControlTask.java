@@ -50,7 +50,7 @@ class LayoutChangeMessage {
     }
 }
 
-public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
+public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
 
     private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
     public static final Config config = Config.getInstance();
@@ -64,7 +64,7 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
     private StackPane lastClicked;
     private VideoRecordTask videoRecordTask;
 
-    public MeetingRoomInitTask(Pane userListLayout, ImageView globalView) {
+    public MeetingRoomControlTask(Pane userListLayout, ImageView globalView) {
         this.globalView = globalView;
         initListener(userListLayout);
     }
@@ -95,7 +95,7 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
         /* Display user list */
         initUserList(currentMeeting);
         /* Listen user change (join or leave)*/
-        listenUserListChange(currentMeeting);
+        messageListener(currentMeeting);
         // Initialize recorder
         initRecorder();
     }
@@ -108,12 +108,6 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
             videoRecordTask = new VideoRecordTask(outputStream);
             exec.scheduleAtFixedRate(videoRecordTask, 0, config.getRecorderFrameRate(), TimeUnit.MILLISECONDS);
         }
-    }
-
-    @Override
-    protected LayoutChangeMessage call() {
-        init();
-        return null;
     }
 
     private void initializeDevice() {
@@ -150,7 +144,7 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
         }
     }
 
-    private void listenUserListChange(Meeting currentMeeting) {
+    private void messageListener(Meeting currentMeeting) {
         MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
         new Thread(task).start();
         task.valueProperty().addListener((observable, oldValue, msg) -> {
@@ -268,5 +262,22 @@ public class MeetingRoomInitTask extends Task<LayoutChangeMessage> {
         } else {
             videoPlayerService.start();
         }
+    }
+
+    public void stopMeeting() {
+        for (VideoPlayerService service : videoPullServiceMap.values()) {
+            service.cancel();
+        }
+        for (AudioPlayerService service : audioPlayerServiceMap.values()) {
+            service.cancel();
+        }
+        exec.remove(videoRecordTask);
+        exec.shutdownNow();
+    }
+
+    @Override
+    protected LayoutChangeMessage call() {
+        init();
+        return null;
     }
 }

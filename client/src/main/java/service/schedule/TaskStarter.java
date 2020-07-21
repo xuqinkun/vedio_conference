@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import util.DefaultThreadFactory;
 import util.ThreadPoolUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,7 +33,7 @@ public class TaskStarter {
         }
     }
 
-    private static void printException(NoSuchMethodException e) {
+    private static void printException(Exception e) {
         if (e.getCause() != null) {
             LOG.error(e.getClass().toString());
         } else {
@@ -91,6 +92,24 @@ public class TaskStarter {
                     printException(holder.toString(), e);
                 }
             }, 0, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public static <T> void stop(SlowTaskHolder<T> taskHolder) {
+        T content = taskHolder.getContent();
+        try {
+            Method stopMethod = content.getClass().getMethod("stop");
+            if (stopMethod != null) {
+                exec.submit(()->{
+                    try {
+                        stopMethod.invoke(content);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        printException(e);
+                    }
+                });
+            }
+        } catch (NoSuchMethodException e) {
+            printException(e);
         }
     }
 }

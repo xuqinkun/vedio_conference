@@ -12,12 +12,14 @@ public class SlowTaskHolder<T> {
     private T content;
     private volatile AtomicBoolean started;
     private volatile AtomicBoolean submitted;
+    private volatile AtomicBoolean stopped;
     private final String taskName;
 
     public SlowTaskHolder(T content, String taskName) {
         this.content = content;
         started = new AtomicBoolean(false);
         submitted = new AtomicBoolean(false);
+        stopped = new AtomicBoolean(false);
         this.taskName = taskName;
     }
 
@@ -58,5 +60,15 @@ public class SlowTaskHolder<T> {
 
     public String getTaskName() {
         return taskName;
+    }
+
+    public void stop() {
+        log.warn("Stop {}", taskName);
+        TaskStarter.stop(this);
+        stopped.getAndSet(true);
+    }
+
+    public boolean isStopped() {
+        return stopped.get();
     }
 }

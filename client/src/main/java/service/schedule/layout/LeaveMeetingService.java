@@ -6,7 +6,6 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -18,8 +17,6 @@ import service.model.SessionManager;
 import util.JsonUtil;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LeaveMeetingService extends Service<HttpResult<String>> {
 
@@ -40,12 +37,18 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
                 }
             } else {
                 // TODO print response
+                log.warn(response.getMessage());
             }
         });
     }
 
     private void gotoProfile() throws IOException {
         Stage stage = (Stage) mainLayout.getScene().getWindow();
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         stage.close();
         Parent root = FXMLLoader.load(
                 getClass().getResource("/fxml/profile.fxml"));
@@ -71,6 +74,10 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
                 // 3. close layout, stop threads
                 if (response != null) {
                     log.warn(response.getMessage());
+                    if (response.getResult() == ResultCode.OK) {
+                        log.warn("Stop meeting[{}]", meeting.getUuid());
+                        sessionManager.stopMeeting();
+                    }
                     return response;
                 }
                 return new HttpResult<>(ResultCode.ERROR, "Leave meeting failed. Maybe server is down");
