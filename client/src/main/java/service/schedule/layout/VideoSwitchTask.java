@@ -1,6 +1,9 @@
 package service.schedule.layout;
 
 import javafx.concurrent.Task;
+import javafx.scene.Parent;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +24,19 @@ public class VideoSwitchTask extends Task<Boolean> {
 
     private ImageView globalView;
 
-    public VideoSwitchTask(boolean isOpen, ImageView globalView) {
-        this.isOpen = isOpen;
-        this.globalView = globalView;
+    private Parent videoSwitchBtn;
 
+    private Label label;
+
+    private ImageView videoIcon;
+
+    public VideoSwitchTask(boolean videoIsOpen, Parent videoSwitchBtn, ImageView globalView) {
+        this.isOpen = videoIsOpen;
+        this.globalView = globalView;
+        this.videoSwitchBtn = videoSwitchBtn;
+
+        label = (Label) videoSwitchBtn.lookup("#videoBtnLabel");
+        videoIcon = (ImageView) videoSwitchBtn.lookup("#videoIcon");
         exceptionProperty().addListener((observable, oldValue, newValue) -> {
             log.error(newValue.getMessage());
         });
@@ -41,6 +53,8 @@ public class VideoSwitchTask extends Task<Boolean> {
         }
         if (isOpen) {
             log.debug("Open video");
+            videoIcon.setImage(new Image("/fxml/img/video_on.png"));
+            label.setText("Video On");
             if (grabberScheduledService.getState() != State.READY || grabberScheduledService.isRunning()) {
                 grabberScheduledService.restart();
             } else {
@@ -48,6 +62,8 @@ public class VideoSwitchTask extends Task<Boolean> {
             }
         } else {
             log.debug("Close video");
+            videoIcon.setImage(new Image("/fxml/img/video_off.png"));
+            label.setText("Video Off");
             if (grabberScheduledService.isRunning()) {
                 grabberScheduledService.cancel();
             }

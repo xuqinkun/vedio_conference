@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
+<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
    <children>
       <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="30.0">
          <children>
@@ -22,27 +22,53 @@
          </children>
       </AnchorPane>
       <Separator prefWidth="200.0" />
-      <AnchorPane maxHeight="560.0" minHeight="-Infinity" prefHeight="560.0" prefWidth="1000.0">
+      <AnchorPane maxHeight="582.0" minHeight="-Infinity" prefHeight="582.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;">
          <children>
-            <ImageView fx:id="globalImageView" fitHeight="570.0" fitWidth="725.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="0.0" />
+            <ImageView fx:id="globalImageView" fitHeight="560.0" fitWidth="725.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="0.0" />
             <VBox fx:id="userListLayout" alignment="TOP_CENTER" layoutY="-6.0" maxHeight="552.0" minHeight="-Infinity" prefHeight="542.0" prefWidth="270.0" spacing="5.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="19.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="0.0">
                <padding>
                   <Insets bottom="10.0" top="10.0" />
                </padding></VBox>
          </children>
       </AnchorPane>
-      <AnchorPane prefHeight="91.0" prefWidth="999.0">
+      <AnchorPane prefHeight="91.0" prefWidth="999.0" style="-fx-background-color: #ffffff;">
          <children>
-            <GridPane alignment="CENTER" prefHeight="100.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <GridPane fx:id="toolbar" alignment="CENTER" hgap="10.0" prefHeight="90.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <RadioButton fx:id="audioSwitchBtn" mnemonicParsing="false" onAction="#audioSwitch" text="Audio" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
-                  <RadioButton fx:id="videoSwitchBtn" mnemonicParsing="false" onAction="#videoSwitch" prefHeight="16.0" prefWidth="58.0" text="Video" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                   <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
                   <RadioButton fx:id="inviteBtn" mnemonicParsing="false" onAction="#invite" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <Button fx:id="leaveMeetingBtn" alignment="CENTER" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave Meeting" textFill="RED" GridPane.columnIndex="8" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
+                  <VBox fx:id="videoSwitchBtn" alignment="CENTER" onMouseClicked="#videoSwitch" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="1" GridPane.rowSpan="3">
+                     <children>
+                        <ImageView fx:id="videoIcon" fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img/video_off.png" />
+                           </image>
+                        </ImageView>
+                        <Label fx:id="videoBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Video Off">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="audioSwitchBtn" alignment="CENTER" onMouseClicked="#audioSwitch" prefHeight="54.0" prefWidth="86.0" GridPane.rowSpan="3">
+                     <children>
+                        <ImageView fx:id="audioIcon" fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img/audio_off.png" />
+                           </image>
+                        </ImageView>
+                        <Label fx:id="audioBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Audio Off">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
                </children>
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -61,6 +87,9 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
             </GridPane>
          </children>
       </AnchorPane>

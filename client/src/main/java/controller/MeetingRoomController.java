@@ -3,14 +3,17 @@ package controller;
 import common.bean.Meeting;
 import common.bean.User;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -48,13 +51,15 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private Button leaveMeetingBtn;
     @FXML
-    private RadioButton videoSwitchBtn;
+    private Parent videoSwitchBtn;
     @FXML
     private ImageView globalImageView;
     @FXML
-    private RadioButton audioSwitchBtn;
+    private Parent audioSwitchBtn;
     @FXML
     private RadioButton inviteBtn;
+    @FXML
+    private Pane toolbar;
 
     private double lastX;
     private double lastY;
@@ -93,6 +98,18 @@ public class MeetingRoomController implements Initializable {
         // Start HeartBeats Report
         client = new HeartBeatsClient(meetingId, username);
         exec.schedule(client, 0, TimeUnit.MILLISECONDS);
+        initToolbar();
+    }
+
+    private void initToolbar() {
+        for (Node node : toolbar.getChildren()) {
+            node.setOnMouseEntered(event -> {
+                node.setStyle("-fx-background-color: #dad6d6");
+            });
+            node.setOnMouseExited(event -> {
+                node.setStyle("-fx-background-color: #ffffff");
+            });
+        }
     }
 
     @FXML
@@ -172,17 +189,21 @@ public class MeetingRoomController implements Initializable {
         stage.setY(oldStageY + event.getScreenY() - lastY);
     }
 
+    private boolean videoIsOpen = false;
+
     @FXML
-    public void videoSwitch(ActionEvent event) {
-        boolean selected = videoSwitchBtn.isSelected();
-        exec.schedule(new VideoSwitchTask(selected, globalImageView), 0, TimeUnit.MILLISECONDS);
+    public void videoSwitch(MouseEvent event) {
+        videoIsOpen = !videoIsOpen;
+        exec.schedule(new VideoSwitchTask(videoIsOpen, videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 
+    private boolean audioIsOpen = false;
+
     @FXML
-    public void audioSwitch(ActionEvent event) {
-        boolean selected = audioSwitchBtn.isSelected();
-        exec.schedule(new AudioSwitchTask(selected), 0, TimeUnit.MILLISECONDS);
+    public void audioSwitch(MouseEvent event) {
+        audioIsOpen = !audioIsOpen;
+        exec.schedule(new AudioSwitchTask(audioIsOpen, audioSwitchBtn), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 

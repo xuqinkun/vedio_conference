@@ -1,12 +1,16 @@
 package service.schedule.layout;
 
-import common.bean.User;
 import javafx.concurrent.Task;
+import javafx.scene.Parent;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.schedule.audio.AudioRecordService;
 import util.Config;
+
 
 public class AudioSwitchTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(AudioSwitchTask.class);
@@ -17,15 +21,28 @@ public class AudioSwitchTask extends Task<Boolean> {
 
     private static SessionManager sessionManager = SessionManager.getInstance();
 
-    public AudioSwitchTask(boolean isOpen) {
+    private Parent audioSwitchBtn;
+
+    private Label label;
+
+    private ImageView audioIcon;
+
+    public AudioSwitchTask(boolean isOpen, Parent audioSwitchBtn) {
         this.isOpen = isOpen;
+        this.audioSwitchBtn = audioSwitchBtn;
+
+        label = (Label)audioSwitchBtn.lookup("#audioBtnLabel");
+        audioIcon = (ImageView) audioSwitchBtn.lookup("#audioIcon");
     }
 
     @Override
     protected void updateValue(Boolean isOpen) {
         super.updateValue(isOpen);
+        Label label = (Label) audioSwitchBtn.getParent().lookup("#audioBtnLabel");
         if (isOpen) {
             log.debug("Audio open");
+            audioIcon.setImage(new Image("/fxml/img/audio_on.png"));
+            label.setText("Audio On");
             if (audioRecordService == null) {
                 String username = sessionManager.getCurrentUser().getName();
                 String uuid = sessionManager.getCurrentMeeting().getUuid();
@@ -37,6 +54,8 @@ public class AudioSwitchTask extends Task<Boolean> {
             }
         } else {
             log.debug("Audio close");
+            audioIcon.setImage(new Image("/fxml/img/audio_off.png"));
+            label.setText("Audio Off");
             audioRecordService.cancel();
         }
     }
