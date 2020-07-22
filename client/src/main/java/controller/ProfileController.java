@@ -51,7 +51,9 @@ public class ProfileController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        event.consume();
     }
+
     private Stage joinMeetingStage;
 
     @FXML
@@ -73,5 +75,6 @@ public class ProfileController implements Initializable {
         else {
             joinMeetingStage.show();
         }
+        event.consume();
     }
 }

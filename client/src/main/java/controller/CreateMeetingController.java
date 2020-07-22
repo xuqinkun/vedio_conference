@@ -32,7 +32,6 @@ public class CreateMeetingController implements Initializable {
 
     private String meetingType;
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         ObservableList<Node> children = meetingTypeBox.getChildren();

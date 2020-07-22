@@ -31,7 +31,6 @@ public class LoginService extends Service<HttpResult<String>> {
     public LoginService(User user, Button loginBtn, VBox mainLayout, Label loginMessageLabel) {
         this.user = user;
         this.mainLayout = mainLayout;
-
         initListener(loginBtn, loginMessageLabel);
     }
 

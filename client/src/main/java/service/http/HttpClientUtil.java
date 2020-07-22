@@ -18,7 +18,6 @@ import util.Helper;
 import util.JsonUtil;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 public class HttpClientUtil {
 

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.schedule.video.GrabberScheduledService;
+import util.SystemUtil;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -34,8 +35,8 @@ public class VideoSwitchTask extends Task<Boolean> {
         super.updateValue(isOpen);
         GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
         if (grabberScheduledService == null) {
-            log.warn("Please wait for system initializing...");
-            // TODO print a system info
+            String info = "Please wait for system initializing";
+            SystemUtil.showSystemInfo(info).show();
             return;
         }
         if (isOpen) {

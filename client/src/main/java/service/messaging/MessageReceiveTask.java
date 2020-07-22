@@ -41,7 +41,7 @@ public class MessageReceiveTask extends Task<Message> {
     }
 
     @Override
-    protected Message call() throws Exception {
+    protected Message call() {
         while (!stopped) {
             ConsumerRecords<String, Message> records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, Message> record : records) {
