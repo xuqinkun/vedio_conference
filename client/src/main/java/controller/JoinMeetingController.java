@@ -67,7 +67,7 @@ public class JoinMeetingController implements Initializable {
             joinMeetingMessageLabel.setStyle("-fx-text-fill: #0055ff");
             joinMeetingMessageLabel.setText("Waiting for server's response...");
             String userName = userNameInput.getText();
-            String meetingID = meetingIDInput.getText();
+            String meetingID = meetingIDInput.getText().trim();
             String meetingPassword = meetingPasswordInput.getText();
             new JoinMeetingService(meetingID, userName, meetingPassword, joinMeetingBtn, joinMeetingMessageLabel).start();
         } else {

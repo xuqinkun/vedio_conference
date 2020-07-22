@@ -106,7 +106,6 @@ public class MainController implements Initializable {
                 joinStage.setScene(new Scene(root));
                 joinStage.setTitle("Join Meeting");
                 joinStage.setResizable(false);
-//                stage.initStyle(StageStyle.UNDECORATED);
                 joinStage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
                 joinStage.setY(mainLayout.getScene().getWindow().getY());
                 Stage mainStage = (Stage) mainLayout.getScene().getWindow();

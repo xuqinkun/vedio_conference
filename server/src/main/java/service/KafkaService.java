@@ -20,11 +20,6 @@ public class KafkaService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @KafkaListener(topics = "test")
-    public void processMessage(Message content) {
-        log.warn(content.toString());
-    }
-
     public void sendMessage(String topic, Message message) {
         kafkaTemplate.send(topic, message);
     }

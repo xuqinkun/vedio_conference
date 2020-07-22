@@ -112,8 +112,7 @@ public class MeetingRoomController implements Initializable {
         try {
             if (sessionManager.isMeetingOwner()) {
                 // Ask for end meeting else leave meeting, set meeting host before leaving
-                String content = "You can appoint a host before leaving or end meeting directly.";
-                showDialog(content);
+                showDialog("You can appoint a host before leaving or end meeting directly.");
             } else {
                 showDialog("Are you sure to leave.");
             }
@@ -139,6 +138,7 @@ public class MeetingRoomController implements Initializable {
         dialogStage.initOwner(mainStage);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         confirmBtn.setOnMouseClicked(event -> {
+            dialogStage.close();
             new LeaveMeetingService(rootLayout).start();
         });
         cancelBtn.setOnMouseClicked((event) -> {

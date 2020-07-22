@@ -29,7 +29,11 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
         valueProperty().addListener((observable, oldValue, response) -> {
             if (response.getResult() == ResultCode.OK) {
                 try {
-                    gotoProfile();
+                    if (sessionManager.getCurrentUser().isRegistered()) {
+                        gotoProfile("/fxml/Profile.fxml");
+                    } else {
+                        gotoProfile("/fxml/Main.fxml");
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -40,7 +44,7 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
         });
     }
 
-    private void gotoProfile() throws IOException {
+    private void gotoProfile(String fxmlPath) throws IOException {
         Stage stage = (Stage) mainLayout.getScene().getWindow();
         try {
             Thread.sleep(100);
@@ -49,7 +53,7 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
         }
         stage.close();
         Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/profile.fxml"));
+                getClass().getResource(fxmlPath));
         Stage profileStage = new Stage();
         profileStage.setScene(new Scene(root));
         profileStage.show();

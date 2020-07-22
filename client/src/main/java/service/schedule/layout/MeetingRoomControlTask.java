@@ -35,8 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static common.bean.MessageType.USER_ADD;
-import static common.bean.MessageType.USER_LEAVE;
+import static common.bean.MessageType.*;
 
 class LayoutChangeMessage {
     final MessageType type;
@@ -155,6 +154,8 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
             } else if (msg.getType() == USER_LEAVE) {
                 User user = JsonUtil.jsonToObject(msg.getData(), User.class);
                 updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
+            } else if (msg.getType() == END_MEETING) { // TODO end meeting process
+                log.warn("Meeting is end.");
             }
         });
     }
