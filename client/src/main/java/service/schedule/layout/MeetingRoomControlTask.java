@@ -83,7 +83,9 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                 }
             }
         });
-        exceptionProperty().addListener((observable, oldValue, newValue) -> log.error(newValue.getMessage()));
+        exceptionProperty().addListener((observable, oldValue, newValue) -> {
+            log.error(newValue.getMessage());
+        });
     }
 
     private void init() {
@@ -144,10 +146,12 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         }
     }
 
+    private MessageReceiveTask messageReceiveTask;
+
     private void messageListener(Meeting currentMeeting) {
-        MessageReceiveTask task = new MessageReceiveTask(currentMeeting.getUuid());
-        new Thread(task).start();
-        task.valueProperty().addListener((observable, oldValue, msg) -> {
+        messageReceiveTask = new MessageReceiveTask(currentMeeting.getUuid());
+        new Thread(messageReceiveTask).start();
+        messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
             if (msg.getType() == USER_ADD) {
                 User user = JsonUtil.jsonToObject(msg.getData(), User.class);
                 addUser(user);
@@ -229,9 +233,16 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         } else if (sessionManager.isDebugMode()) {
             startAudioPlayer(meetingId, userName);
         }
-        if (sessionManager.getGrabberScheduledService() == null && sessionManager.isCurrentUser(userName)) {
-            GrabberScheduledService grabberScheduledService = new GrabberScheduledService(localView, globalView, userName);
-            sessionManager.setGrabberScheduledService(grabberScheduledService);
+        if (sessionManager.isCurrentUser(userName)) {
+            if (sessionManager.getGrabberScheduledService() == null) {
+                GrabberScheduledService grabberScheduledService = new GrabberScheduledService(localView, globalView, userName);
+                sessionManager.setGrabberScheduledService(grabberScheduledService);
+            } else {
+                GrabberScheduledService service = sessionManager.getGrabberScheduledService();
+                service.setLocalView(localView);
+                service.setGlobalView(globalView);
+                service.setLayoutName(userName);
+            }
         }
     }
 
@@ -273,6 +284,8 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         for (AudioPlayerService service : audioPlayerServiceMap.values()) {
             service.cancel();
         }
+        sessionManager.getGrabberScheduledService().cancel();
+        messageReceiveTask.stop();
         exec.remove(videoRecordTask);
         exec.shutdownNow();
     }

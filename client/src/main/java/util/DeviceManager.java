@@ -275,28 +275,28 @@ public class DeviceManager {
 
     public static void stopDevices(String meetingID) {
         ExecutorService executorService = ThreadPoolUtil.getExecutorService(4, "StopDevices");
-        executorService.submit(() -> {
-            while (videoRecorderHolder == null || !videoRecorderHolder.isStarted()) {
-                log.debug("Waiting for audioRecorder starting");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            videoRecorderHolder.stop();
-        });
-        executorService.submit(() -> {
-            while (audioRecorderHolder == null || !audioRecorderHolder.isStarted()) {
-                log.debug("Waiting for audioRecorder starting");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            audioRecorderHolder.stop();
-        });
+//        executorService.submit(() -> {
+//            while (videoRecorderHolder == null || !videoRecorderHolder.isStarted()) {
+//                log.debug("Waiting for audioRecorder starting");
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            videoRecorderHolder.stop();
+//        });
+//        executorService.submit(() -> {
+//            while (audioRecorderHolder == null || !audioRecorderHolder.isStarted()) {
+//                log.debug("Waiting for audioRecorder starting");
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            audioRecorderHolder.stop();
+//        });
 
         executorService.submit(() -> {
             for (String key : videoGrabberMap.keySet()) {

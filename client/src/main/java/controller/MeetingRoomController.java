@@ -66,6 +66,7 @@ public class MeetingRoomController implements Initializable {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     private MeetingRoomControlTask controlTask;
+    private HeartBeatsClient client;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -90,7 +91,7 @@ public class MeetingRoomController implements Initializable {
         controlTask = new MeetingRoomControlTask(userListLayout, globalImageView);
         exec.schedule(controlTask, 0, TimeUnit.MILLISECONDS);
         // Start HeartBeats Report
-        HeartBeatsClient client = new HeartBeatsClient(meetingId, username);
+        client = new HeartBeatsClient(meetingId, username);
         exec.schedule(client, 0, TimeUnit.MILLISECONDS);
     }
 
@@ -120,6 +121,7 @@ public class MeetingRoomController implements Initializable {
             e.printStackTrace();
         }
         controlTask.stopMeeting();
+        exec.remove(client);
         exec.remove(controlTask);
         event.consume();
     }

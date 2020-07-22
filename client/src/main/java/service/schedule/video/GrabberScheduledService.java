@@ -59,4 +59,16 @@ public class GrabberScheduledService extends ScheduledService<Image> {
     protected Task<Image> createTask() {
         return Grabber.createDefault();
     }
+
+    public void setLayoutName(String layoutName) {
+        this.layoutName = layoutName;
+    }
+
+    public void setLocalView(ImageView localView) {
+        this.localView = localView;
+    }
+
+    public void setGlobalView(ImageView globalView) {
+        this.globalView = globalView;
+    }
 }

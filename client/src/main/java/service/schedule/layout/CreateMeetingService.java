@@ -81,7 +81,6 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
         ((Stage) currentStage.getOwner()).close();
         Button leaveMeetingBtn = (Button) roomStage.getScene().getRoot().lookup("#leaveMeetingBtn");
         roomStage.setOnCloseRequest(event -> {
-            log.warn("setOnCloseRequest");
             leaveMeetingBtn.fire();
             event.consume();
         });
