@@ -120,9 +120,6 @@ public class MeetingRoomController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        controlTask.stopMeeting();
-        exec.remove(client);
-        exec.remove(controlTask);
         event.consume();
     }
 
@@ -142,6 +139,10 @@ public class MeetingRoomController implements Initializable {
         confirmBtn.setOnMouseClicked(event -> {
             dialogStage.close();
             new LeaveMeetingService(rootLayout).start();
+            sessionManager.getGrabberScheduledService().cancel();
+            controlTask.stopMeeting();
+            exec.remove(client);
+            exec.remove(controlTask);
         });
         cancelBtn.setOnMouseClicked((event) -> {
             dialogStage.close();

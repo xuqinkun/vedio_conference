@@ -31,6 +31,7 @@ public class SystemUtil {
         AnchorPane.setBottomAnchor(label, 0.0);
 
         infoStage.initStyle(StageStyle.UNDECORATED);
+        infoStage.setAlwaysOnTop(true);
         infoStage.setScene(new Scene(ap));
 
         new Thread(new AnimationControlTask(ap, infoStage)).start();

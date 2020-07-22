@@ -152,14 +152,16 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         messageReceiveTask = new MessageReceiveTask(currentMeeting.getUuid());
         new Thread(messageReceiveTask).start();
         messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
-            if (msg.getType() == USER_ADD) {
-                User user = JsonUtil.jsonToObject(msg.getData(), User.class);
-                addUser(user);
-            } else if (msg.getType() == USER_LEAVE) {
-                User user = JsonUtil.jsonToObject(msg.getData(), User.class);
-                updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
-            } else if (msg.getType() == END_MEETING) { // TODO end meeting process
-                log.warn("Meeting is end.");
+            if (msg != null) {
+                if (msg.getType() == USER_ADD) {
+                    User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                    addUser(user);
+                } else if (msg.getType() == USER_LEAVE) {
+                    User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                    updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
+                } else if (msg.getType() == END_MEETING) { // TODO end meeting process
+                    log.warn("Meeting is end.");
+                }
             }
         });
     }
@@ -284,7 +286,6 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         for (AudioPlayerService service : audioPlayerServiceMap.values()) {
             service.cancel();
         }
-        sessionManager.getGrabberScheduledService().cancel();
         messageReceiveTask.stop();
         exec.remove(videoRecordTask);
         exec.shutdownNow();

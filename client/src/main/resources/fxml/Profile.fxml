@@ -29,7 +29,13 @@
                                 <Image url="@img/orange.png" />
                             </image>
                         </ImageView>
-                        <Label fx:id="usernameLabel" text="Tom" />
+                        <Label fx:id="usernameLabel">
+                     <font>
+                        <Font name="Arial" size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </padding></Label>
                     </children>
                     <BorderPane.margin>
                         <Insets left="20.0" />
