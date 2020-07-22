@@ -53,7 +53,6 @@ public class CreateMeetingController implements Initializable {
 
     @FXML
     public void createMeeting(ActionEvent event) {
-        log.debug(event.toString());
         Stage stage = (Stage) meetingTypeBox.getScene().getWindow();
         createBtn.setDisable(true);
         new CreateMeetingService(stage, meetingPassword.getText(), meetingType, createBtn).start();

@@ -110,6 +110,12 @@ public class MeetingRoomController implements Initializable {
                 node.setStyle("-fx-background-color: #ffffff");
             });
         }
+        leaveMeetingBtn.setOnMouseEntered(event -> {
+            leaveMeetingBtn.setStyle("-fx-background-color: red;-fx-text-fill: white;-fx-border-radius:5");
+        });
+        leaveMeetingBtn.setOnMouseExited(event -> {
+            leaveMeetingBtn.setStyle("-fx-background-color: white;-fx-border-color:red; -fx-text-fill: red;-fx-border-radius:5");
+        });
     }
 
     @FXML
