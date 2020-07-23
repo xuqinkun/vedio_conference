@@ -8,11 +8,13 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.TextAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -181,7 +183,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         stackPane.setPrefSize(width, height);
         stackPane.setMaxSize(width, height);
         stackPane.setMinSize(width, height);
-        stackPane.setAlignment(Pos.CENTER);
+//        stackPane.setAlignment(Pos.BOTTOM_CENTER);
 
         if (sessionManager.isCurrentUser(userName)) {
             stackPane.setStyle(activeStyle);
@@ -197,13 +199,35 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         localView.setFitHeight(stackPane.getPrefHeight() - 7);
 
         Label label = new Label(user.getName());
-        label.setStyle("-fx-text-fill: white;-fx-background-color: #000000");
-        label.setPrefSize(localView.getFitWidth(), 20);
+        label.setStyle("-fx-text-fill: white;-fx-background-color: #000000;-fx-font-size: 14");
+        label.setPrefSize(localView.getFitWidth() - 25, 25);
         label.setAlignment(Pos.CENTER);
+        label.setTextAlignment(TextAlignment.CENTER);
         label.setOpacity(0.3);
-        StackPane.setAlignment(label, Pos.BOTTOM_CENTER);
 
-        stackPane.getChildren().addAll(localView, label);
+        MenuBar menuBar = new MenuBar();
+        menuBar.setStyle("-fx-background-color: white;-fx-pref-width: 20;-fx-pref-height: 20;-fx-opacity: 0.4");
+
+        Menu menu = new Menu();
+        ImageView img = new ImageView(new Image("/fxml/img/menu.png"));
+        img.setFitHeight(20);
+        img.setFitWidth(20);
+        menu.setGraphic(img);
+
+        MenuItem host = new MenuItem("Appoint as host");
+        MenuItem audioSwitch = new MenuItem("Audio off");
+        MenuItem videoSwitch = new MenuItem("Video off");
+
+        menu.getItems().addAll(host, audioSwitch, videoSwitch);
+        menuBar.getMenus().add(menu);
+
+
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.BOTTOM_CENTER);
+        hBox.getChildren().addAll(label, menuBar);
+
+        stackPane.setAlignment(Pos.BOTTOM_CENTER);
+        stackPane.getChildren().addAll(localView, hBox);
 
         stackPane.setOnMouseClicked(event -> {
             log.debug("Clicked:{}", stackPane.getId());

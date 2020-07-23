@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class Helper {
 
@@ -28,5 +29,34 @@ public class Helper {
 
     public static Date parseDate(String date) throws ParseException {
         return DATE_FORMATTER.parse(date);
+    }
+
+    public static String millisToTime(long time) {
+        int hour = 0;
+        int minute = 0;
+        int second = 0;
+        if (time <= 0) {
+            return "00:00:00";
+        } else {
+            int millisOfHours = (int) TimeUnit.HOURS.toMillis(1);
+            int millisOfMinutes = (int) TimeUnit.MINUTES.toMillis(1);
+            int millisOfSeconds = (int) TimeUnit.SECONDS.toMillis(1);
+            hour = (int) (time / millisOfHours);
+            time = time % millisOfHours;
+            minute = (int) (time / millisOfMinutes);
+            time %= millisOfMinutes;
+            second = (int) (time / millisOfSeconds);
+            return timeFormat(hour) + ":" + timeFormat(minute) + ":" + timeFormat(second);
+        }
+    }
+
+    public static String timeFormat(int num) {
+        String retStr;
+        if (num >= 0 && num < 10) {
+            retStr = "0" + num;
+        } else {
+            retStr = "" + num;
+        }
+        return retStr;
     }
 }
