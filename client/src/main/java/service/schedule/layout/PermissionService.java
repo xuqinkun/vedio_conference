@@ -14,7 +14,6 @@ import util.SystemUtil;
 
 import static common.bean.OperationType.HOST_CHANGE;
 import static common.bean.ResultCode.ERROR;
-import static java.lang.Enum.valueOf;
 
 public class PermissionService extends Service<HttpResult<String>> {
 

@@ -169,7 +169,10 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                 } else if (msg.getType() == HOST_CHANGE) {
                     SystemUtil.showSystemInfo(String.format("Host change to %s", data));
                     hostLabel.setText(data);
-                    sessionManager.getCurrentMeeting().setHost(data);
+                    Meeting meeting = sessionManager.getCurrentMeeting();
+                    String oldHost = meeting.getHost();
+                    meeting.setHost(data);
+                    meeting.getManagers().remove(oldHost);
                 }
             }
         });
