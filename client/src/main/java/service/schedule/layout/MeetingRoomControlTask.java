@@ -198,7 +198,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         Image image = new Image(portrait);
         ImageView userView = new ImageView(image);
         userView.setFitWidth(stackPane.getPrefWidth() - 7);
-        userView.setFitHeight(stackPane.getPrefHeight() - 7);
+        userView.setFitHeight(stackPane.getPrefHeight() - 10);
 
         Label label = new Label(user.getName());
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000;-fx-font-size: 14");
@@ -212,48 +212,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         hBox.getChildren().add(label);
 
         String meetingID = sessionManager.getCurrentMeeting().getUuid();
-        MenuBar menuBar = new MenuBar();
-        menuBar.setId("menuBar_" + userName);
-        menuBar.setStyle("-fx-background-color: white;-fx-pref-width: 20;-fx-pref-height: 20;-fx-opacity: 0.4");
-
-        Menu menu = new Menu();
-        ImageView img = new ImageView(new Image("/fxml/img/menu.png"));
-        img.setFitHeight(20);
-        img.setFitWidth(20);
-        menu.setGraphic(img);
-
-        MenuItem host = new MenuItem("Appoint as host");
-        MenuItem manager = new MenuItem("Appoint as manager");
-        host.setOnAction(event -> {
-            if (!sessionManager.isMeetingHost()) {
-                SystemUtil.showSystemInfo("You are not host. Operation not supported!");
-                return;
-            }
-            if (sessionManager.isMeetingHost(userName)) {
-                SystemUtil.showSystemInfo("You are host already!");
-                return;
-            }
-            new PermissionService(meetingID, userName, HOST_CHANGE).start();
-            event.consume();
-        });
-        manager.setOnAction(event -> {
-            if (!sessionManager.isMeetingManager()) {
-                SystemUtil.showSystemInfo("You are not manager. Operation not supported!");
-                return;
-            }
-            if (!sessionManager.isMeetingManager(userName)) {
-                SystemUtil.showSystemInfo("You are manager already!");
-                return;
-            }
-            new PermissionService(meetingID, userName, MANAGER_ADD).start();
-        });
-        menu.getItems().addAll(host, manager);
-
-        MenuItem audioSwitch = new MenuItem("Audio off");
-        MenuItem videoSwitch = new MenuItem("Video off");
-
-        menu.getItems().addAll(audioSwitch, videoSwitch);
-        menuBar.getMenus().add(menu);
+        MenuBar menuBar = createMenuBar(userName, meetingID);
 
         hBox.getChildren().add(menuBar);
         stackPane.getChildren().add(userView);
@@ -299,6 +258,52 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                 service.setLayoutName(userName);
             }
         }
+    }
+
+    private MenuBar createMenuBar(String userName, String meetingID) {
+        MenuBar menuBar = new MenuBar();
+        menuBar.setId("menuBar_" + userName);
+        menuBar.setStyle("-fx-background-color: white;-fx-pref-width: 20;-fx-pref-height: 20;-fx-opacity: 0.4");
+
+        Menu menu = new Menu();
+        ImageView img = new ImageView(new Image("/fxml/img/menu.png"));
+        img.setFitHeight(20);
+        img.setFitWidth(20);
+        menu.setGraphic(img);
+
+        MenuItem host = new MenuItem("Appoint as host");
+        MenuItem manager = new MenuItem("Appoint as manager");
+        host.setOnAction(event -> {
+            if (!sessionManager.isMeetingHost()) {
+                SystemUtil.showSystemInfo("You are not host. Operation not supported!");
+                return;
+            }
+            if (sessionManager.isMeetingHost(userName)) {
+                SystemUtil.showSystemInfo("You are host already!");
+                return;
+            }
+            new PermissionService(meetingID, userName, HOST_CHANGE).start();
+            event.consume();
+        });
+        manager.setOnAction(event -> {
+            if (!sessionManager.isMeetingManager()) {
+                SystemUtil.showSystemInfo("You are not host. Operation not supported!");
+                return;
+            }
+            if (!sessionManager.isMeetingManager(userName)) {
+                SystemUtil.showSystemInfo("You are manager already!");
+                return;
+            }
+            new PermissionService(meetingID, userName, MANAGER_ADD).start();
+        });
+        menu.getItems().addAll(host, manager);
+
+        MenuItem audioSwitch = new MenuItem("Audio on");
+        MenuItem videoSwitch = new MenuItem("Video on");
+
+        menu.getItems().addAll(audioSwitch, videoSwitch);
+        menuBar.getMenus().add(menu);
+        return menuBar;
     }
 
     private void startAudioPlayer(String meetingId, String userName) {
