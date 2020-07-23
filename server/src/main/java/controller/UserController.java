@@ -29,15 +29,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/index")
-    public String index(HttpSession session) {
-        String key = "s";
-        if (session.getAttribute(key) == null) {
-            session.setAttribute(key, "sb " + new Date());
-        }
-        return "hello " + session.getAttribute(key);
-    }
-
     @PostMapping("/login")
     public @ResponseBody
     ResponseEntity<HttpResult<String>> login(@RequestBody User user, HttpSession session) {
@@ -49,7 +40,7 @@ public class UserController {
             }
             if (session.getAttribute(user.getName()) != null) {
                 log.debug("User[{}] has login before!", user.getName());
-                return new ResponseEntity<>(new HttpResult<>(OK, user.getName() + " has login before!"), HttpStatus.OK);
+                return new ResponseEntity<>(new HttpResult<>(ERROR, user.getName() + " has login before!"), HttpStatus.OK);
             }
             HttpResult<String> result = userService.login(user);
             if (result.getResult() == OK) {
