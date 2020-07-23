@@ -2,7 +2,7 @@ package service.schedule.layout;
 
 import common.bean.HttpResult;
 import common.bean.Meeting;
-import common.bean.MessageType;
+import common.bean.OperationType;
 import common.bean.User;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -26,10 +26,7 @@ import service.schedule.audio.AudioPlayerService;
 import service.schedule.video.GrabberScheduledService;
 import service.schedule.video.VideoPlayerService;
 import service.schedule.video.VideoRecordTask;
-import util.Config;
-import util.DeviceManager;
-import util.JsonUtil;
-import util.ThreadPoolUtil;
+import util.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,14 +34,14 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static common.bean.MessageType.*;
+import static common.bean.OperationType.*;
 
 class LayoutChangeMessage {
-    final MessageType type;
+    final OperationType type;
     final String controlID;
     final StackPane pane;
 
-    public LayoutChangeMessage(MessageType type, String controlID, StackPane pane) {
+    public LayoutChangeMessage(OperationType type, String controlID, StackPane pane) {
         this.type = type;
         this.controlID = controlID;
         this.pane = pane;
@@ -61,11 +58,13 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
     private final Map<String, VideoPlayerService> videoPullServiceMap = new HashMap<>();
     private final Map<String, AudioPlayerService> audioPlayerServiceMap = new HashMap<>();
 
+    private Label hostLabel;
     private ImageView globalView;
     private StackPane lastClicked;
     private VideoRecordTask videoRecordTask;
 
-    public MeetingRoomControlTask(Pane userListLayout, ImageView globalView) {
+    public MeetingRoomControlTask(Label hostLabel, Pane userListLayout, ImageView globalView) {
+        this.hostLabel = hostLabel;
         this.globalView = globalView;
         initListener(userListLayout);
     }
@@ -73,7 +72,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
     private void initListener(Pane userListLayout) {
         valueProperty().addListener((observable, oldValue, layoutChangeMessage) -> {
             if (layoutChangeMessage != null) {
-                MessageType type = layoutChangeMessage.type;
+                OperationType type = layoutChangeMessage.type;
                 String controlID = layoutChangeMessage.controlID;
                 if (type == USER_ADD) {
                     log.warn("USER_ADD[{}]", controlID);
@@ -136,7 +135,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
 
     private void initUserList(Meeting currentMeeting) {
         User currentUser = sessionManager.getCurrentUser();
-        if (currentMeeting.getOwner().equals(currentUser.getName())) { // Is meeting owner
+        if (currentMeeting.getHost().equals(currentUser.getName())) { // Is meeting owner
             addUser(currentUser);
         } else { // None meeting owner
             HttpResult<String> result = HttpClientUtil.getInstance().
@@ -155,14 +154,17 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         new Thread(messageReceiveTask).start();
         messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
             if (msg != null) {
+                String data = msg.getData();
                 if (msg.getType() == USER_ADD) {
-                    User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                    User user = JsonUtil.jsonToObject(data, User.class);
                     addUser(user);
                 } else if (msg.getType() == USER_LEAVE) {
-                    User user = JsonUtil.jsonToObject(msg.getData(), User.class);
+                    User user = JsonUtil.jsonToObject(data, User.class);
                     updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
                 } else if (msg.getType() == END_MEETING) { // TODO end meeting process
                     log.warn("Meeting is end.");
+                } else if (msg.getType() == HOST_CHANGE) {
+                    hostLabel.setText(data);
                 }
             }
         });
@@ -183,7 +185,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         stackPane.setPrefSize(width, height);
         stackPane.setMaxSize(width, height);
         stackPane.setMinSize(width, height);
-//        stackPane.setAlignment(Pos.BOTTOM_CENTER);
+        stackPane.setAlignment(Pos.BOTTOM_CENTER);
 
         if (sessionManager.isCurrentUser(userName)) {
             stackPane.setStyle(activeStyle);
@@ -194,18 +196,24 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
 
         String portrait = user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
         Image image = new Image(portrait);
-        ImageView localView = new ImageView(image);
-        localView.setFitWidth(stackPane.getPrefWidth() - 7);
-        localView.setFitHeight(stackPane.getPrefHeight() - 7);
+        ImageView userView = new ImageView(image);
+        userView.setFitWidth(stackPane.getPrefWidth() - 7);
+        userView.setFitHeight(stackPane.getPrefHeight() - 7);
 
         Label label = new Label(user.getName());
         label.setStyle("-fx-text-fill: white;-fx-background-color: #000000;-fx-font-size: 14");
-        label.setPrefSize(localView.getFitWidth() - 25, 25);
+        label.setPrefSize(userView.getFitWidth() - 25, 25);
         label.setAlignment(Pos.CENTER);
         label.setTextAlignment(TextAlignment.CENTER);
         label.setOpacity(0.3);
 
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.BOTTOM_CENTER);
+        hBox.getChildren().add(label);
+
+        String meetingID = sessionManager.getCurrentMeeting().getUuid();
         MenuBar menuBar = new MenuBar();
+        menuBar.setId("menuBar_" + userName);
         menuBar.setStyle("-fx-background-color: white;-fx-pref-width: 20;-fx-pref-height: 20;-fx-opacity: 0.4");
 
         Menu menu = new Menu();
@@ -215,19 +223,41 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         menu.setGraphic(img);
 
         MenuItem host = new MenuItem("Appoint as host");
+        MenuItem manager = new MenuItem("Appoint as manager");
+        host.setOnAction(event -> {
+            if (!sessionManager.isMeetingHost()) {
+                SystemUtil.showSystemInfo("You are not host. Operation not supported!");
+                return;
+            }
+            if (sessionManager.isMeetingHost(userName)) {
+                SystemUtil.showSystemInfo("You are host already!");
+                return;
+            }
+            new PermissionService(meetingID, userName, HOST_CHANGE).start();
+            event.consume();
+        });
+        manager.setOnAction(event -> {
+            if (!sessionManager.isMeetingManager()) {
+                SystemUtil.showSystemInfo("You are not manager. Operation not supported!");
+                return;
+            }
+            if (!sessionManager.isMeetingManager(userName)) {
+                SystemUtil.showSystemInfo("You are manager already!");
+                return;
+            }
+            new PermissionService(meetingID, userName, MANAGER_ADD).start();
+        });
+        menu.getItems().addAll(host, manager);
+
         MenuItem audioSwitch = new MenuItem("Audio off");
         MenuItem videoSwitch = new MenuItem("Video off");
 
-        menu.getItems().addAll(host, audioSwitch, videoSwitch);
+        menu.getItems().addAll(audioSwitch, videoSwitch);
         menuBar.getMenus().add(menu);
 
-
-        HBox hBox = new HBox();
-        hBox.setAlignment(Pos.BOTTOM_CENTER);
-        hBox.getChildren().addAll(label, menuBar);
-
-        stackPane.setAlignment(Pos.BOTTOM_CENTER);
-        stackPane.getChildren().addAll(localView, hBox);
+        hBox.getChildren().add(menuBar);
+        stackPane.getChildren().add(userView);
+        stackPane.getChildren().add(hBox);
 
         stackPane.setOnMouseClicked(event -> {
             log.debug("Clicked:{}", stackPane.getId());
@@ -249,23 +279,22 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        String meetingId = sessionManager.getCurrentMeeting().getUuid();
         log.warn("User[{}] added", user);
         if (!sessionManager.isCurrentUser(userName)) {
             exec.submit(() -> {
-                startVideoPlayer(localView, meetingId, userName);
-                startAudioPlayer(meetingId, userName);
+                startVideoPlayer(userView, meetingID, userName);
+                startAudioPlayer(meetingID, userName);
             });
         } else if (sessionManager.isDebugMode()) {
-            startAudioPlayer(meetingId, userName);
+            startAudioPlayer(meetingID, userName);
         }
         if (sessionManager.isCurrentUser(userName)) {
             if (sessionManager.getGrabberScheduledService() == null) {
-                GrabberScheduledService grabberScheduledService = new GrabberScheduledService(localView, globalView, userName);
+                GrabberScheduledService grabberScheduledService = new GrabberScheduledService(userView, globalView, userName);
                 sessionManager.setGrabberScheduledService(grabberScheduledService);
             } else {
                 GrabberScheduledService service = sessionManager.getGrabberScheduledService();
-                service.setLocalView(localView);
+                service.setLocalView(userView);
                 service.setGlobalView(globalView);
                 service.setLayoutName(userName);
             }

@@ -1,0 +1,6 @@
+package common.bean;
+
+public enum OperationType {
+    USER_ADD, USER_LEAVE, END_MEETING, HOST_CHANGE, MANAGER_ADD,
+    MANAGER_REMOVE, VIDEO_ON, VIDEO_OFF, AUDIO_ON, AUDIO_OFF;
+}

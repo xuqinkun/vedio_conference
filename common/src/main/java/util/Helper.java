@@ -32,9 +32,9 @@ public class Helper {
     }
 
     public static String millisToTime(long time) {
-        int hour = 0;
-        int minute = 0;
-        int second = 0;
+        int hour;
+        int minute;
+        int second;
         if (time <= 0) {
             return "00:00:00";
         } else {

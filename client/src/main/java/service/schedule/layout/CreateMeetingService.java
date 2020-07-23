@@ -17,6 +17,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
 import util.Helper;
+import util.SystemUtil;
 
 import java.io.IOException;
 import java.util.Date;
@@ -45,6 +46,7 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
                 }
             } else {
                 createBtn.setDisable(false);
+                SystemUtil.showSystemInfo("Create meeting failed.");
             }
         });
     }
@@ -58,7 +60,8 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
                 String time = Helper.dateFormat(date);
                 Meeting meeting = new Meeting(Helper.getUuid(), password, meetingType, time, time, true, false);
                 String username = SessionManager.getInstance().getCurrentUser().getName();
-                meeting.setOwner(username);
+                meeting.setHost(username);
+                meeting.setCreator(username);
                 HttpResult<String> response = HttpClientUtil.getInstance().doPost(UrlMap.getCreateMeetingUrl(), meeting);
                 if (response != null && response.getResult() == ResultCode.OK) {
                     log.warn("Create meeting[{}] succeed", meeting);

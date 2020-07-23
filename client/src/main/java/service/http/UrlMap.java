@@ -1,5 +1,6 @@
 package service.http;
 
+import common.bean.OperationType;
 import util.Config;
 
 public class UrlMap {
@@ -30,5 +31,9 @@ public class UrlMap {
 
     public static String getLeaveMeetingUrl() {
         return baseUrl + "leaveMeeting";
+    }
+
+    public static String getPermissionUrl(OperationType operationType) {
+        return baseUrl + operationType.toString().toLowerCase();
     }
 }

@@ -8,7 +8,6 @@ import util.DeviceManager;
 import util.SystemUtil;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,15 +30,12 @@ public class SessionManager {
 
     private Map<String, User> userCache = new HashMap<>();
 
-    private Set<String> managers = new HashSet<>();
-
     public Meeting getCurrentMeeting() {
         return currentMeeting;
     }
 
     public void setCurrentMeeting(Meeting currentMeeting) {
         this.currentMeeting = currentMeeting;
-        managers.add(currentMeeting.getOwner());
     }
 
     public static SessionManager getInstance() {
@@ -106,8 +102,8 @@ public class SessionManager {
         return user == null || user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
     }
 
-    public boolean isMeetingOwner() {
-        return currentMeeting.getOwner().equals(currentUser.getName());
+    public boolean isMeetingHost() {
+        return currentMeeting.getHost().equals(currentUser.getName());
     }
 
     public void stopMeeting() {
@@ -118,10 +114,12 @@ public class SessionManager {
     public boolean hasPermission(String operation, boolean showInfo) {
         String meetingType = currentMeeting.getMeetingType();
         String userName = currentUser.getName();
-        if (meetingType.equals(PERSONAL.getValue())) {
+        if (meetingType == null) {
+            return true;
+        } else if (meetingType.equals(PERSONAL.getValue())) {
             return true;
         } else if (meetingType.equals(BUSINESS.getValue())) {
-            if (managers.contains(userName)) {
+            if (isMeetingManager()) {
                 return true;
             } else {
                 if (showInfo)
@@ -137,11 +135,20 @@ public class SessionManager {
         return false;
     }
 
-    public void addManager(String username) {
-        managers.add(username);
+    public Set<String> getManagers() {
+        return currentMeeting.getManagers();
     }
 
-    public Set<String> getManagers() {
-        return managers;
+    public boolean isMeetingManager() {
+        String userName = currentUser.getName();
+        return currentMeeting.getHost().equals(userName) || getManagers().contains(userName);
+    }
+
+    public boolean isMeetingHost(String userName) {
+        return userName.equals(currentMeeting.getHost());
+    }
+
+    public boolean isMeetingManager(String userName) {
+        return getManagers().contains(userName);
     }
 }

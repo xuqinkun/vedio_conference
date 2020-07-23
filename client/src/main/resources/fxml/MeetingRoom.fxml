@@ -10,15 +10,46 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
+<VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="681.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
    <children>
-      <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="30.0" style="-fx-border-color: #dadada;">
+      <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="3.0" prefWidth="996.0" style="-fx-border-color: #dadada;">
          <children>
-            <Label fx:id="hostLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="2.0">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
+            <HBox layoutX="6.0" layoutY="6.0" prefHeight="30.0" prefWidth="286.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="Host:" wrapText="true">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </Label>
+                  <Label fx:id="meetingHostLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" wrapText="true">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="Meeting Type:" wrapText="true">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </Label>
+                  <Label fx:id="meetingTypeLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" wrapText="true">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                     </padding>
+                  </Label>
+               </children>
+            </HBox>
             <Label fx:id="timeLabel" style="-fx-border-color: #dadada;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="0.0">
                <font>
                   <Font size="14.0" />
@@ -32,7 +63,7 @@
             <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
          </padding>
          <VBox.margin>
-            <Insets bottom="4.0" left="2.0" right="2.0" top="4.0" />
+            <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
          </VBox.margin>
       </AnchorPane>
       <AnchorPane maxHeight="582.0" minHeight="-Infinity" prefHeight="582.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;">
@@ -48,23 +79,32 @@
          <children>
             <GridPane fx:id="toolbar" alignment="CENTER" hgap="10.0" prefHeight="90.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <RadioButton mnemonicParsing="false" text="Screen Share" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER" />
-                  <RadioButton fx:id="inviteBtn" mnemonicParsing="false" onAction="#invite" text="Invite" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                  <RadioButton mnemonicParsing="false" text="Manager" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                  <RadioButton mnemonicParsing="false" text="Record" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
-                  <RadioButton fx:id="openChatBtn" mnemonicParsing="false" onAction="#openOrCloseChat" text="Chat" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="3" />
                   <Button fx:id="leaveMeetingBtn" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave Meeting" textFill="RED" GridPane.columnIndex="7" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER">
                      <font>
                         <Font size="14.0" />
                      </font></Button>
-                  <VBox fx:id="videoSwitchBtn" alignment="CENTER" onMouseClicked="#videoSwitch" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="1" GridPane.rowSpan="3">
+                  <VBox fx:id="inviteBtn" alignment="CENTER" onMouseClicked="#invite" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="2" GridPane.rowSpan="3">
                      <children>
-                        <ImageView fx:id="videoIcon" fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@img/video_off.png" />
+                              <Image url="@img/invitation.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="videoBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Video Off">
+                        <Label fx:id="videoBtnLabel1" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Invite">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="managerBtn" alignment="CENTER" onMouseClicked="#openManager" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
+                     <children>
+                        <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img/managers.png" />
+                           </image>
+                        </ImageView>
+                        <Label fx:id="videoBtnLabel11" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Manager">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -79,6 +119,34 @@
                            </image>
                         </ImageView>
                         <Label fx:id="audioBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Audio Off">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="videoSwitchBtn" alignment="CENTER" onMouseClicked="#videoSwitch" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="1" GridPane.rowSpan="3">
+                     <children>
+                        <ImageView fx:id="videoIcon" fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img/video_off.png" />
+                           </image>
+                        </ImageView>
+                        <Label fx:id="videoBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Video Off">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="chatBtn" alignment="CENTER" onMouseClicked="#openOrCloseChat" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="4" GridPane.rowSpan="3">
+                     <children>
+                        <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img/chat.png" />
+                           </image>
+                        </ImageView>
+                        <Label fx:id="videoBtnLabel111" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Chat">
                            <font>
                               <Font size="14.0" />
                            </font>

@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static common.bean.MessageType.*;
+import static common.bean.OperationType.*;
 import static common.bean.ResultCode.ERROR;
 import static common.bean.ResultCode.OK;
 
@@ -40,12 +40,16 @@ public class MeetingService {
         cleanServiceMap = new HashMap<>();
     }
 
-    public HttpResult<String> createMeeting(Meeting meeting) {
+    public HttpResult<String> createMeeting(Meeting meeting, User user) {
         if (meeting == null || StringUtils.isEmpty(meeting.getUuid())) {
             log.warn("Meeting is null");
             return new HttpResult<>(ResultCode.ERROR, "Invalid meeting");
         }
         try {
+            // Must add user first
+            meetingCache.addUser(meeting.getUuid(), user);
+            // Add creator to managers
+            meeting.getManagers().add(user.getName());
             meetingDao.insert(meeting);
             MeetingCleanService service = new MeetingCleanService(meeting.getUuid(), this);
             new Thread(service).start();
@@ -71,7 +75,7 @@ public class MeetingService {
             return new HttpResult<>(ResultCode.ERROR, String.format("Invalid meeting[%s]", meetingId));
         }
         String userName = user.getName();
-        if (meeting.getOwner().equals(userName)) {
+        if (meeting.getHost().equals(userName)) {
             kafkaService.sendMessage(meetingId, new Message(END_MEETING, meetingId));
             endMeeting(meetingId);
             log.warn("Meeting[{}] is ended", meetingId);
@@ -99,8 +103,11 @@ public class MeetingService {
         kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
     }
 
-    public List<User> getUserList(String meetingID) {
-        return meetingCache.getUserList(meetingID);
+    public HttpResult<String> getUserList(String uuid) {
+        if (uuid == null || meetingCache.getUserList(uuid) == null) {
+            return new HttpResult<>(ERROR, "[]");
+        }
+        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingCache.getUserList(uuid)));
     }
 
     public HttpResult<String> joinMeeting(Meeting meeting, User user) {
@@ -120,5 +127,20 @@ public class MeetingService {
             meetingCache.addUser(uuid, user);
         }
         return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
+    }
+
+    public HttpResult<String> changeHost(String meetingId, String hostName) {
+        Meeting oldMeeting = findMeeting(meetingId);
+        if (oldMeeting == null) {
+            String errMsg = String.format("Can't find meeting[ID=%s]", meetingId);
+            log.error(errMsg);
+            return new HttpResult<>(ERROR, errMsg);
+        }
+        String oldHost = oldMeeting.getHost();
+        oldMeeting.getManagers().remove(oldHost);
+        oldMeeting.setHost(hostName);
+        meetingDao.changeHost(meetingId, oldMeeting);
+        kafkaService.sendMessage(meetingId, new Message(HOST_CHANGE, hostName));
+        return new HttpResult<>(OK, String.format("Meeting[ID=%s] host is changed to %s", meetingId, hostName));
     }
 }

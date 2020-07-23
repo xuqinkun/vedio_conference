@@ -34,4 +34,11 @@ public class MeetingDao {
         update.set("endTime", Helper.currentDate());
         mongoTemplate.updateFirst(new Query(where("uuid").is(uuid)), update, Meeting.class);
     }
+
+    public void changeHost(String meetingId, Meeting meeting) {
+        Update update = new Update();
+        update.set("host", meeting.getHost());
+        update.set("managers", meeting.getManagers());
+        mongoTemplate.updateFirst(new Query(where("uuid").is(meetingId)), update, Meeting.class);
+    }
 }

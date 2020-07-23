@@ -22,8 +22,6 @@ public class MeetingController {
 
     private UserService userService;
 
-    private MeetingCache meetingCache = MeetingCache.getInstance();
-
     @Autowired
     public void setMeetingService(MeetingService meetingService) {
         this.meetingService = meetingService;
@@ -37,17 +35,15 @@ public class MeetingController {
     @PostMapping("/createMeeting")
     public @ResponseBody
     HttpResult<String> createMeeting(@RequestBody Meeting meeting, HttpServletRequest request) {
-        if (meeting == null || StringUtils.isEmpty(meeting.getOwner())) {
+        if (meeting == null || StringUtils.isEmpty(meeting.getHost())) {
             return new HttpResult<>(ERROR, "Invalid meeting");
         }
-        User user = userService.findOne(meeting.getOwner());
+        User user = userService.findOne(meeting.getHost());
         if (user == null) {
-            return new HttpResult<>(ERROR, "Invalid owner[" + meeting.getOwner() + "]");
+            return new HttpResult<>(ERROR, "Invalid owner[" + meeting.getHost() + "]");
         }
+        HttpResult<String> ret = meetingService.createMeeting(meeting, user);
         log.warn("{} created meeting[ID={}]", user.getName(), meeting.getUuid());
-        // Must add user first
-        meetingCache.addUser(meeting.getUuid(), user);
-        HttpResult<String> ret = meetingService.createMeeting(meeting);
         updateUserInfo(request, user);
         return ret;
     }
@@ -55,10 +51,7 @@ public class MeetingController {
     @PostMapping("/getUserList")
     public @ResponseBody
     HttpResult<String> getUserList(@RequestBody String uuid) {
-        if (uuid == null || meetingCache.getUserList(uuid) == null) {
-            return new HttpResult<>(ERROR, "[]");
-        }
-        return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(meetingCache.getUserList(uuid)));
+        return meetingService.getUserList(uuid);
     }
 
     @RequestMapping(value = "/joinMeeting")
@@ -91,5 +84,17 @@ public class MeetingController {
         user.setTimeStamp(System.currentTimeMillis());
 
         log.warn("User[{}] join meeting host: {} port: {}", userName, remoteHost, remotePort);
+    }
+
+    @PostMapping("/host_change")
+    public @ResponseBody
+    HttpResult<String> changeHost(@RequestBody PermissionContext context) {
+        String meetingID = context.getMeetingID();
+        String hostName = context.getUserName();
+        if (StringUtils.isEmpty(meetingID) || StringUtils.isEmpty(hostName)) {
+            log.warn("MeetingId or hostName is null");
+            return new HttpResult<>(ERROR, "MeetingId or hostName is null");
+        }
+        return meetingService.changeHost(meetingID, hostName);
     }
 }

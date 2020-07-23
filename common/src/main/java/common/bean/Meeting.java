@@ -1,5 +1,8 @@
 package common.bean;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Meeting {
     private String uuid;
 
@@ -17,7 +20,11 @@ public class Meeting {
 
     private String meetingType;
 
-    private String owner;
+    private String creator;
+
+    private String host;
+
+    private Set<String> managers;
 
     public Meeting() {
     }
@@ -97,12 +104,31 @@ public class Meeting {
         this.meetingType = meetingType;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getHost() {
+        return host;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Set<String> getManagers() {
+        if (managers == null) {
+            managers = new HashSet<>();
+        }
+        return managers;
+    }
+
+    public void setManagers(Set<String> managers) {
+        this.managers = managers;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
     @Override
@@ -116,7 +142,8 @@ public class Meeting {
                 ", started=" + started +
                 ", ended=" + ended +
                 ", meetingType='" + meetingType + '\'' +
-                ", owner='" + owner + '\'' +
+                ", host='" + host + '\'' +
+                ", creator='" + creator + '\'' +
                 '}';
     }
 }

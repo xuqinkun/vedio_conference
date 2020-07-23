@@ -1,9 +1,6 @@
 package service.http;
 
-import common.bean.HttpResult;
-import common.bean.Meeting;
-import common.bean.MeetingContext;
-import common.bean.User;
+import common.bean.*;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

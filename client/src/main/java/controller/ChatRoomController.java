@@ -63,6 +63,7 @@ public class ChatRoomController implements Initializable {
     public void sendMessage(MouseEvent event) {
         send();
         sendMessageLabel.requestFocus();
+        event.consume();
     }
 
     @FXML

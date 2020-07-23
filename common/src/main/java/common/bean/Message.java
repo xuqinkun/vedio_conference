@@ -3,27 +3,27 @@ package common.bean;
 import util.JsonUtil;
 
 public class Message {
-    private MessageType type;
+    private OperationType type;
     private String data;
 
     public Message() {
     }
 
-    public Message(MessageType type, String data) {
+    public Message(OperationType type, String data) {
         this.type = type;
         this.data = data;
     }
 
-    public Message(MessageType type, Object data) {
+    public Message(OperationType type, Object data) {
         this.type = type;
         this.data = JsonUtil.toJsonString(data);
     }
 
-    public MessageType getType() {
+    public OperationType getType() {
         return type;
     }
 
-    public void setType(MessageType type) {
+    public void setType(OperationType type) {
         this.type = type;
     }
 

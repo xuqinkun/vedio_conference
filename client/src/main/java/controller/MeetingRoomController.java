@@ -11,7 +11,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -43,8 +42,6 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private Pane titleBar;
     @FXML
-    private RadioButton openChatBtn;
-    @FXML
     private Button leaveMeetingBtn;
     @FXML
     private Parent videoSwitchBtn;
@@ -53,11 +50,11 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private Parent audioSwitchBtn;
     @FXML
-    private RadioButton inviteBtn;
-    @FXML
     private Pane toolbar;
     @FXML
-    private Label hostLabel;
+    private Label meetingHostLabel;
+    @FXML
+    private Label meetingTypeLabel;
     @FXML
     private Label timeLabel;
     private double lastX;
@@ -81,23 +78,34 @@ public class MeetingRoomController implements Initializable {
             sessionManager.setCurrentUser(user);
             Meeting meeting = new Meeting();
             meeting.setUuid("test");
-            meeting.setOwner(user.getName());
+            meeting.setHost(user.getName());
             sessionManager.setCurrentMeeting(meeting);
         }
         String username = sessionManager.getCurrentUser().getName();
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
-        if (sessionManager.isMeetingOwner()) {
+        if (sessionManager.isMeetingHost()) {
             leaveMeetingBtn.setText("End Meeting");
         } else {
             leaveMeetingBtn.setText("Leave Meeting");
         }
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
-        controlTask = new MeetingRoomControlTask(userListLayout, globalImageView);
+        controlTask = new MeetingRoomControlTask(meetingHostLabel, userListLayout, globalImageView);
         exec.schedule(controlTask, 0, TimeUnit.MILLISECONDS);
         // Start HeartBeats Report
         client = new HeartBeatsClient(meetingId, username);
         exec.schedule(client, 0, TimeUnit.MILLISECONDS);
         initToolbar();
+        initStatusBar();
+    }
+
+    private void initStatusBar() {
+        // Status bar
+        Meeting currentMeeting = sessionManager.getCurrentMeeting();
+        meetingHostLabel.setText(currentMeeting.getHost());
+        meetingTypeLabel.setText(currentMeeting.getMeetingType());
+        timeCounterService = new TimeCounterService(timeLabel);
+        timeCounterService.setPeriod(Duration.seconds(1));
+        timeCounterService.start();
     }
 
     private void initToolbar() {
@@ -115,17 +123,14 @@ public class MeetingRoomController implements Initializable {
         leaveMeetingBtn.setOnMouseExited(event -> {
             leaveMeetingBtn.setStyle("-fx-background-color: white;-fx-border-color:red; -fx-text-fill: red;-fx-border-radius:5");
         });
-        // Status bar
-        Meeting currentMeeting = sessionManager.getCurrentMeeting();
-        hostLabel.setText("Host: " + currentMeeting.getOwner() + "\tMeeting type: " + currentMeeting.getMeetingType());
-        timeCounterService = new TimeCounterService(timeLabel);
-        timeCounterService.setPeriod(Duration.seconds(1));
-        timeCounterService.start();
     }
 
+    private boolean openChat;
+
     @FXML
-    public void openOrCloseChat() throws IOException {
-        if (openChatBtn.isSelected()) {
+    public void openOrCloseChat(MouseEvent event) throws IOException {
+        openChat = !openChat;
+        if (openChat) {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/ChatRoom.fxml"));
             chatStage = new Stage();
             chatStage.setScene(new Scene(root));
@@ -134,12 +139,19 @@ public class MeetingRoomController implements Initializable {
             chatStage.close();
             chatStage = null;
         }
+        event.consume();
+    }
+
+    @FXML
+    public void openManager(MouseEvent event) {
+
+        event.consume();
     }
 
     @FXML
     public void leaveMeeting(ActionEvent event) {
         try {
-            if (sessionManager.isMeetingOwner()) {
+            if (sessionManager.isMeetingHost()) {
                 // Ask for end meeting else leave meeting, set meeting host before leaving
                 showDialog("You can appoint a host before leaving or end meeting directly.");
             } else {
@@ -220,7 +232,7 @@ public class MeetingRoomController implements Initializable {
     }
 
     @FXML
-    public void invite(ActionEvent event) throws IOException {
+    public void invite(MouseEvent event) throws IOException {
         if (invitationStage == null) {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/Invitation.fxml"));
             invitationStage = new Stage();
@@ -235,7 +247,6 @@ public class MeetingRoomController implements Initializable {
         invitationStage.setOnCloseRequest(event1 -> {
             Label infoLabel = (Label) invitationStage.getScene().getRoot().getChildrenUnmodifiable().get(2);
             infoLabel.setText("");
-            inviteBtn.setSelected(false);
         });
         event.consume();
     }

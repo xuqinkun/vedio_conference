@@ -29,7 +29,7 @@ public class MeetingCleanService implements Runnable {
     @Override
     public void run() {
         while (!stopped) {
-            List<User> userList = meetingService.getUserList(meetingID);
+            List<User> userList = MeetingCache.getInstance().getUserList(meetingID);
             if(userList == null) {
                 log.warn("Meeting[{}] ended. Stop cleaning.", meetingID);
                 return;
