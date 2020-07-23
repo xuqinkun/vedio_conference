@@ -18,7 +18,6 @@ public class Program extends Application {
         new Thread(DeviceManager::initGrabber).start();
         new Thread(DeviceManager::initAudioPlayer).start();
         new Thread(DeviceManager::initAudioTarget).start();
-//        new Thread(new LayoutInitTask()).start();
     }
 
     public static void main(String[] args) {

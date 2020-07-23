@@ -3,7 +3,6 @@ package controller;
 import common.bean.Meeting;
 import common.bean.User;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -13,20 +12,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.network.HeartBeatsClient;
-import service.schedule.layout.AudioSwitchTask;
-import service.schedule.layout.LeaveMeetingService;
-import service.schedule.layout.MeetingRoomControlTask;
-import service.schedule.layout.VideoSwitchTask;
+import service.schedule.layout.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,7 +35,7 @@ public class MeetingRoomController implements Initializable {
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
 
     private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
-
+    private final SessionManager sessionManager = SessionManager.getInstance();
     @FXML
     private Pane rootLayout;
     @FXML
@@ -60,18 +56,21 @@ public class MeetingRoomController implements Initializable {
     private RadioButton inviteBtn;
     @FXML
     private Pane toolbar;
-
+    @FXML
+    private Label hostLabel;
+    @FXML
+    private Label timeLabel;
     private double lastX;
     private double lastY;
     private double oldStageX;
     private double oldStageY;
     private Stage chatStage;
     private Stage invitationStage;
-
-    private final SessionManager sessionManager = SessionManager.getInstance();
-
     private MeetingRoomControlTask controlTask;
     private HeartBeatsClient client;
+    private TimeCounterService timeCounterService;
+    private boolean videoIsOpen = false;
+    private boolean audioIsOpen = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -116,6 +115,11 @@ public class MeetingRoomController implements Initializable {
         leaveMeetingBtn.setOnMouseExited(event -> {
             leaveMeetingBtn.setStyle("-fx-background-color: white;-fx-border-color:red; -fx-text-fill: red;-fx-border-radius:5");
         });
+        // Status bar
+        hostLabel.setText("Host: " + sessionManager.getCurrentMeeting().getOwner());
+        timeCounterService = new TimeCounterService(timeLabel);
+        timeCounterService.setPeriod(Duration.seconds(1));
+        timeCounterService.start();
     }
 
     @FXML
@@ -166,6 +170,7 @@ public class MeetingRoomController implements Initializable {
             controlTask.stopMeeting();
             exec.remove(client);
             exec.remove(controlTask);
+            timeCounterService.cancel();
         });
         cancelBtn.setOnMouseClicked((event) -> {
             dialogStage.close();
@@ -195,16 +200,12 @@ public class MeetingRoomController implements Initializable {
         stage.setY(oldStageY + event.getScreenY() - lastY);
     }
 
-    private boolean videoIsOpen = false;
-
     @FXML
     public void videoSwitch(MouseEvent event) {
         videoIsOpen = !videoIsOpen;
         exec.schedule(new VideoSwitchTask(videoIsOpen, videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
-
-    private boolean audioIsOpen = false;
 
     @FXML
     public void audioSwitch(MouseEvent event) {

@@ -12,16 +12,29 @@
 
 <VBox id="root" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetingRoomController">
    <children>
-      <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="30.0">
+      <AnchorPane fx:id="titleBar" onMouseDragEntered="#mouseDragEnter" onMouseDragged="#mouseDrag" onMousePressed="#mousePress" prefHeight="30.0" style="-fx-border-color: #dadada;">
          <children>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="30.0" text="Meeting" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <Label fx:id="hostLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="2.0">
                <font>
                   <Font size="14.0" />
                </font>
             </Label>
+            <Label fx:id="timeLabel" style="-fx-border-color: #dadada;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </padding>
+            </Label>
          </children>
+         <padding>
+            <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+         </padding>
+         <VBox.margin>
+            <Insets bottom="4.0" left="2.0" right="2.0" top="4.0" />
+         </VBox.margin>
       </AnchorPane>
-      <Separator prefWidth="200.0" />
       <AnchorPane maxHeight="582.0" minHeight="-Infinity" prefHeight="582.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;">
          <children>
             <ImageView fx:id="globalImageView" fitHeight="560.0" fitWidth="725.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="0.0" />
