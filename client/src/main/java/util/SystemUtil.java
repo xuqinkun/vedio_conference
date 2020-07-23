@@ -4,7 +4,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import service.schedule.layout.AnimationControlTask;
@@ -33,7 +32,7 @@ public class SystemUtil {
         infoStage.initStyle(StageStyle.UNDECORATED);
         infoStage.setAlwaysOnTop(true);
         infoStage.setScene(new Scene(ap));
-
+        infoStage.show();
         new Thread(new AnimationControlTask(ap, infoStage)).start();
 
         return infoStage;

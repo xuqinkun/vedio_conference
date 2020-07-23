@@ -5,9 +5,14 @@ import common.bean.User;
 import service.schedule.video.GrabberScheduledService;
 import util.Config;
 import util.DeviceManager;
+import util.SystemUtil;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import static common.bean.MeetingType.*;
 
 public class SessionManager {
 
@@ -26,12 +31,15 @@ public class SessionManager {
 
     private Map<String, User> userCache = new HashMap<>();
 
+    private Set<String> managers = new HashSet<>();
+
     public Meeting getCurrentMeeting() {
         return currentMeeting;
     }
 
     public void setCurrentMeeting(Meeting currentMeeting) {
         this.currentMeeting = currentMeeting;
+        managers.add(currentMeeting.getOwner());
     }
 
     public static SessionManager getInstance() {
@@ -105,5 +113,35 @@ public class SessionManager {
     public void stopMeeting() {
         DeviceManager.stopDevices(currentMeeting.getUuid());
         currentMeeting = null;
+    }
+
+    public boolean hasPermission(String operation, boolean showInfo) {
+        String meetingType = currentMeeting.getMeetingType();
+        String userName = currentUser.getName();
+        if (meetingType.equals(PERSONAL.getValue())) {
+            return true;
+        } else if (meetingType.equals(BUSINESS.getValue())) {
+            if (managers.contains(userName)) {
+                return true;
+            } else {
+                if (showInfo)
+                    SystemUtil.showSystemInfo(String.format("Sorry! You don't have the %s permission. " +
+                            "Please ask managers to assign the permission.", operation));
+                return false;
+            }
+        } else if (meetingType.equals(SPEECH.getValue())) {
+            if (showInfo)
+                SystemUtil.showSystemInfo(String.format("Sorry! Current meeting type is speech, host have the %s permission only.", operation));
+            return false;
+        }
+        return false;
+    }
+
+    public void addManager(String username) {
+        managers.add(username);
+    }
+
+    public Set<String> getManagers() {
+        return managers;
     }
 }

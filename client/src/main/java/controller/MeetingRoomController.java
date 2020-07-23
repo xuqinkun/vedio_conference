@@ -116,7 +116,8 @@ public class MeetingRoomController implements Initializable {
             leaveMeetingBtn.setStyle("-fx-background-color: white;-fx-border-color:red; -fx-text-fill: red;-fx-border-radius:5");
         });
         // Status bar
-        hostLabel.setText("Host: " + sessionManager.getCurrentMeeting().getOwner());
+        Meeting currentMeeting = sessionManager.getCurrentMeeting();
+        hostLabel.setText("Host: " + currentMeeting.getOwner() + "\tMeeting type: " + currentMeeting.getMeetingType());
         timeCounterService = new TimeCounterService(timeLabel);
         timeCounterService.setPeriod(Duration.seconds(1));
         timeCounterService.start();
@@ -202,15 +203,19 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void videoSwitch(MouseEvent event) {
-        videoIsOpen = !videoIsOpen;
-        exec.schedule(new VideoSwitchTask(videoIsOpen, videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
+        if (sessionManager.hasPermission("video call", true)) {
+            videoIsOpen = !videoIsOpen;
+            exec.schedule(new VideoSwitchTask(videoIsOpen, videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
+        }
         event.consume();
     }
 
     @FXML
     public void audioSwitch(MouseEvent event) {
-        audioIsOpen = !audioIsOpen;
-        exec.schedule(new AudioSwitchTask(audioIsOpen, audioSwitchBtn), 0, TimeUnit.MILLISECONDS);
+        if (sessionManager.hasPermission("audio call", true)) {
+            audioIsOpen = !audioIsOpen;
+            exec.schedule(new AudioSwitchTask(audioIsOpen, audioSwitchBtn), 0, TimeUnit.MILLISECONDS);
+        }
         event.consume();
     }
 

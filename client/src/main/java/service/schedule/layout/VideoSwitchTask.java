@@ -48,7 +48,7 @@ public class VideoSwitchTask extends Task<Boolean> {
         GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
         if (grabberScheduledService == null) {
             String info = "Please wait for system initializing";
-            SystemUtil.showSystemInfo(info).show();
+            SystemUtil.showSystemInfo(info);
             return;
         }
         if (isOpen) {
