@@ -8,7 +8,10 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -164,7 +167,9 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                 } else if (msg.getType() == END_MEETING) { // TODO end meeting process
                     log.warn("Meeting is end.");
                 } else if (msg.getType() == HOST_CHANGE) {
+                    SystemUtil.showSystemInfo(String.format("Host change to %s", data));
                     hostLabel.setText(data);
+                    sessionManager.getCurrentMeeting().setHost(data);
                 }
             }
         });
