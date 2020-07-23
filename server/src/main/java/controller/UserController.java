@@ -56,6 +56,13 @@ public class UserController {
         }
     }
 
+    @PostMapping("/logout")
+    public HttpResult<String> logout(@RequestBody String userName, HttpSession session) {
+        session.removeAttribute(userName);
+        log.warn("User[{}] logout!", userName);
+        return new HttpResult<>(OK, String.format("User[%s] logout succeed!", userName));
+    }
+
     @PostMapping("/register")
     public @ResponseBody
     ResponseEntity<HttpResult<String>> register(@RequestBody User user) {

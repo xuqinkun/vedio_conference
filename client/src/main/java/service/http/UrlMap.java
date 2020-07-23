@@ -13,6 +13,10 @@ public class UrlMap {
         return baseUrl + "login";
     }
 
+    public static String getLogoutUrl() {
+        return baseUrl + "logout";
+    }
+
     public static String getRegisterUrl() {
         return baseUrl + "register";
     }

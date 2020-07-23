@@ -1,11 +1,13 @@
 package controller;
 
 import common.bean.User;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,6 +15,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import service.model.SessionManager;
+import service.schedule.layout.LogoutService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,6 +29,9 @@ public class ProfileController implements Initializable {
     @FXML
     private ImageView portrait;
 
+    @FXML
+    private Button logoutBtn;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         User currentUser = SessionManager.getInstance().getCurrentUser();
@@ -35,6 +41,12 @@ public class ProfileController implements Initializable {
                 portrait.setImage(new Image(currentUser.getPortraitSrc()));
             }
         }
+        logoutBtn.setOnMouseEntered(event -> {
+            logoutBtn.setStyle("-fx-text-fill: white;-fx-background-color: red");
+        });
+        logoutBtn.setOnMouseExited(event -> {
+            logoutBtn.setStyle("-fx-text-fill: red;-fx-background-color: white;-fx-border-color: red");
+        });
     }
 
     @FXML
@@ -75,6 +87,14 @@ public class ProfileController implements Initializable {
         else {
             joinMeetingStage.show();
         }
+        event.consume();
+    }
+
+
+    @FXML
+    public void logout(ActionEvent event) {
+        logoutBtn.setDisable(true);
+        new LogoutService(logoutBtn).start();
         event.consume();
     }
 }

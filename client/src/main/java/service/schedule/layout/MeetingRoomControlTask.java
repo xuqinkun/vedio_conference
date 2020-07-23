@@ -167,6 +167,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                 } else if (msg.getType() == END_MEETING) { // TODO end meeting process
                     log.warn("Meeting is end.");
                 } else if (msg.getType() == HOST_CHANGE) {
+                    log.warn("Host change to {}", data);
                     SystemUtil.showSystemInfo(String.format("Host change to %s", data));
                     hostLabel.setText(data);
                     Meeting meeting = sessionManager.getCurrentMeeting();

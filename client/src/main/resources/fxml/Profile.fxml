@@ -11,38 +11,36 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-max-width: 350; -fx-min-width: 350; -fx-max-height: 600; -fx-min-height: 600; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ProfileController">
     <children>
-        <BorderPane prefHeight="46.0" prefWidth="350.0">
-            <center>
-                <Label text="WeMeeting" BorderPane.alignment="CENTER">
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Label>
-            </center>
-        </BorderPane>
-        <BorderPane prefHeight="46.0" prefWidth="350.0">
-            <left>
-                <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                    <children>
-                        <ImageView fx:id="portrait" fitHeight="45.0" fitWidth="79.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@img/orange.png" />
-                            </image>
-                        </ImageView>
-                        <Label fx:id="usernameLabel">
-                     <font>
-                        <Font name="Arial" size="14.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                     </padding></Label>
-                    </children>
-                    <BorderPane.margin>
-                        <Insets left="20.0" />
-                    </BorderPane.margin>
-                </HBox>
-            </left>
-        </BorderPane>
+          <Label alignment="CENTER" prefHeight="20.0" prefWidth="354.0" text="WeMeeting" wrapText="true">
+              <font>
+                  <Font size="14.0" />
+              </font>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+          </Label>
+      <AnchorPane prefHeight="37.0" prefWidth="350.0">
+         <children>
+                  <ImageView fx:id="portrait" fitHeight="45.0" fitWidth="79.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="10.0">
+                      <image>
+                          <Image url="@img/orange.png" />
+                      </image>
+                  </ImageView>
+                  <Label fx:id="usernameLabel" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="20.0">
+               <font>
+                  <Font name="Arial" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </padding>
+            </Label>
+            <Button fx:id="logoutBtn" maxHeight="30.0" mnemonicParsing="false" onAction="#logout" prefHeight="30.0" style="-fx-background-color: white; -fx-border-color: red;" text="Log out" textFill="RED" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+         </children>
+      </AnchorPane>
         <HBox prefHeight="85.0" prefWidth="350.0">
             <children>
                 <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
