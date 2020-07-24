@@ -153,7 +153,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
     private MessageReceiveTask messageReceiveTask;
 
     private void messageListener(Meeting currentMeeting) {
-        messageReceiveTask = new MessageReceiveTask(currentMeeting.getUuid());
+        messageReceiveTask = new MessageReceiveTask(currentMeeting.getUuid(), sessionManager.getCurrentUser().getName());
         new Thread(messageReceiveTask).start();
         messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
             if (msg != null) {
@@ -163,7 +163,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                     addUser(user);
                 } else if (msg.getType() == USER_LEAVE) {
                     User user = JsonUtil.jsonToObject(data, User.class);
-                    updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
+                    this.updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
                 } else if (msg.getType() == END_MEETING) { // TODO end meeting process
                     log.warn("Meeting is end.");
                 } else if (msg.getType() == HOST_CHANGE) {

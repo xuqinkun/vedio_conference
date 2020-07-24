@@ -61,7 +61,9 @@ public class MeetingController {
         User user = context.getUser();
 
         updateUserInfo(request, user);
-        log.warn("User[{}] join meeting[{}]", user.getName(), meeting.getUuid());
+
+        log.warn("User[{}] join meeting[ID={}] host: {} port: {}", meeting.getUuid(),
+                user.getName(), user.getHost(), user.getPort());
         return meetingService.joinMeeting(meeting, user);
     }
 
@@ -77,13 +79,9 @@ public class MeetingController {
     private void updateUserInfo(HttpServletRequest request, User user) {
         String remoteHost = request.getRemoteHost();
         int remotePort = request.getRemotePort();
-        String userName = user.getName();
-
         user.setHost(remoteHost);
         user.setPort(remotePort);
         user.setTimeStamp(System.currentTimeMillis());
-
-        log.warn("User[{}] join meeting host: {} port: {}", userName, remoteHost, remotePort);
     }
 
     @PostMapping("/host_change")
