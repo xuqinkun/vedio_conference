@@ -44,6 +44,7 @@ public class MessageReceiveService extends Service<Message> {
     private Consumer<String, Message> consumer;
 
     public MessageReceiveService(String topic, Label hostLabel, String groupName, MeetingRoomControlTask task) {
+        log.warn("Listen on topic[{}], group[{}]", topic, groupName);
         this.groupName = groupName;
         this.hostLabel = hostLabel;
         consumer = getConsumerFactory().createConsumer();
@@ -119,6 +120,7 @@ public class MessageReceiveService extends Service<Message> {
                     ConsumerRecords<String, Message> records = consumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, Message> record : records) {
                         Message msg = record.value();
+                        log.warn(msg.toString());
                         updateValue(msg);
                     }
                 }

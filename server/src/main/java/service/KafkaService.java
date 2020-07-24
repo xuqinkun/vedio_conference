@@ -21,6 +21,7 @@ public class KafkaService {
     }
 
     public void sendMessage(String topic, Message message) {
+        log.warn("Send message[{}] to topic[{}]", message, topic);
         kafkaTemplate.send(topic, message);
     }
 }

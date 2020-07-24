@@ -107,7 +107,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         /* Display user list */
         initUserList(currentMeeting);
         /* Listen user change (join or leave)*/
-        messageListener(currentMeeting, username);
+        messageListener(currentMeeting.getUuid(), username);
         // Initialize recorder
         initRecorder();
     }
@@ -160,8 +160,8 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
 
     private MessageReceiveService personalReceiveTask;
 
-    private void messageListener(Meeting currentMeeting, String userName) {
-        globalReceiveService = new MessageReceiveService(currentMeeting.getUuid(), hostLabel, userName + "_global", this);
+    private void messageListener(String meetingId, String userName) {
+        globalReceiveService = new MessageReceiveService(meetingId, hostLabel, userName + "_global", this);
         personalReceiveTask = new MessageReceiveService(userName, hostLabel, userName + "_local", this);
         globalReceiveService.start();
         personalReceiveTask.start();

@@ -63,8 +63,8 @@ public class MeetingController {
 
         updateUserInfo(request, user);
 
-        log.warn("User[{}] join meeting[ID={}] host: {} port: {}", meeting.getUuid(),
-                user.getName(), user.getHost(), user.getPort());
+        log.warn("User[{}] join meeting[ID={}] host: {} port: {}", user.getName(),
+                meeting.getUuid() , user.getHost(), user.getPort());
         return meetingService.joinMeeting(meeting, user);
     }
 
