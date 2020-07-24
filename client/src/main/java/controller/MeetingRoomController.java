@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.network.HeartBeatsClient;
 import service.schedule.layout.*;
+import service.schedule.video.GrabberScheduledService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -177,13 +178,19 @@ public class MeetingRoomController implements Initializable {
         confirmBtn.setOnMouseClicked(event -> {
             dialogStage.close();
             new LeaveMeetingService(rootLayout).start();
-            sessionManager.getGrabberScheduledService().cancel();
+            GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
+            if (grabberScheduledService != null) {
+                grabberScheduledService.cancel();
+            }
             controlTask.stopMeeting();
             exec.remove(client);
             exec.remove(controlTask);
             timeCounterService.cancel();
             managerNumRefreshService.cancel();
-            sessionManager.getRefreshService().cancel();
+            ManagerLayoutRefreshService refreshService = sessionManager.getRefreshService();
+            if (refreshService != null) {
+                refreshService.cancel();
+            }
         });
         cancelBtn.setOnMouseClicked((event) -> {
             dialogStage.close();

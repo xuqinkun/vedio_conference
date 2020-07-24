@@ -160,7 +160,7 @@ public class SessionManager {
         return getManagers().contains(userName);
     }
 
-    private ManagerLayoutRefreshService refreshService;
+    private volatile ManagerLayoutRefreshService refreshService;
 
     public void setManagerLayoutRefreshService(ManagerLayoutRefreshService refreshService) {
         this.refreshService = refreshService;

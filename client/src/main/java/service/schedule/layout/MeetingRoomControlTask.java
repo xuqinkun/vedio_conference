@@ -320,7 +320,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
             }
         });
         videoSwitch.setOnAction(event -> {
-            if (audioSwitch.getText().contains("on")) {
+            if (videoSwitch.getText().contains("on")) {
                 videoSwitch.setText("Video off");
                 new PermissionService(meetingID, userName, VIDEO_ON).start();
             } else {

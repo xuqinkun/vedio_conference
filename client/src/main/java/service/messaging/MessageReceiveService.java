@@ -65,8 +65,9 @@ public class MessageReceiveService extends ScheduledService<Message> {
                 } else if (op == USER_REMOVE) {
                     User user = JsonUtil.jsonToObject(data, User.class);
                     task.addSignal(new LayoutChangeSignal(USER_REMOVE, user.getName(), null));
-                } else if (op == END_MEETING) { // TODO end meeting process
-                    log.warn("Meeting is end.");
+                } else if (op == END_MEETING) {
+                    log.warn("Meeting is end");
+                    SystemUtil.showSystemInfo("Meeting is end");
                 } else if (op == HOST_CHANGE) {
                     log.warn("Host change to {}", data);
                     SystemUtil.showSystemInfo(String.format("Host change to %s", data));
