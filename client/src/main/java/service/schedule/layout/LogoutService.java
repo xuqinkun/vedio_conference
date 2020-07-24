@@ -17,6 +17,8 @@ import service.model.SessionManager;
 
 import java.io.IOException;
 
+import static common.bean.ResultCode.OK;
+
 public class LogoutService extends Service<HttpResult<String>> {
 
     private static final Logger log = LoggerFactory.getLogger(LogoutService.class);
@@ -30,7 +32,7 @@ public class LogoutService extends Service<HttpResult<String>> {
 
     private void initListener(Button loginBtn) {
         valueProperty().addListener((observable, oldValue, response) -> {
-            if (response.getResult() == ResultCode.OK) {
+            if (response.getResult() == OK) {
                 try {
                     gotoMainLayout();
                 } catch (IOException e) {
@@ -66,6 +68,9 @@ public class LogoutService extends Service<HttpResult<String>> {
                     log.error(errMsg);
                     return new HttpResult<>(ResultCode.ERROR, errMsg);
                 } else {
+                    if (result.getResult() == OK) {
+                        SessionManager.getInstance().setCurrentUser(null);
+                    }
                     log.warn(result.toString());
                 }
                 return result;

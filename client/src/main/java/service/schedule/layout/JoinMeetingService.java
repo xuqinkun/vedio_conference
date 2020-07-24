@@ -1,9 +1,6 @@
 package service.schedule.layout;
 
-import common.bean.HttpResult;
-import common.bean.Meeting;
-import common.bean.ResultCode;
-import common.bean.User;
+import common.bean.*;
 import controller.JoinMeetingController;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -82,20 +79,21 @@ public class JoinMeetingService extends Service<HttpResult<String>> {
         return new Task<HttpResult<String>>() {
             @Override
             protected HttpResult<String> call() {
-                User user = SessionManager.getInstance().getCurrentUser();
-                user.setName(userName);
+                SessionManager sessionManager = SessionManager.getInstance();
+                User user = sessionManager.getCurrentUser();
+                if (user == null) {
+                    sessionManager.setCurrentUser(new User(userName, false));
+                }
                 Meeting meeting = new Meeting();
                 meeting.setUuid(meetingID);
                 meeting.setPassword(meetingPassword);
-                Map<String, Object> data = new HashMap<>();
-                data.put("user", user);
-                data.put("meeting", meeting);
-                HttpResult<String> response = HttpClientUtil.getInstance().doPost(UrlMap.getJoinMeetingUrl(), data);
+                HttpResult<String> response = HttpClientUtil.getInstance().
+                        doPost(UrlMap.getJoinMeetingUrl(), new MeetingContext(user, meeting));
                 if (response != null) {
                     String resultMessage = response.getMessage();
                     if (response.getResult() == ResultCode.OK) {
                         Meeting oldMeeting = JsonUtil.jsonToObject(resultMessage, Meeting.class);
-                        SessionManager.getInstance().setCurrentMeeting(oldMeeting);
+                        sessionManager.setCurrentMeeting(oldMeeting);
                     } else {
                         log.error("Join meeting failed.{}", resultMessage);
                     }
