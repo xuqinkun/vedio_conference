@@ -164,8 +164,10 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                     meeting.setHost(data);
                     meeting.getManagers().remove(oldHost);
                 } else if (op == MANAGER_ADD) {
+                    log.warn("Appoint {} as manager", data);
                     meeting.getManagers().add(data);
                 } else if (op == MANAGER_REMOVE) {
+                    log.warn("Remove manager[{}]", data);
                     meeting.getManagers().remove(data);
                 }
             }

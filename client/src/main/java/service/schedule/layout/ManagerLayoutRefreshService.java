@@ -59,15 +59,15 @@ public class ManagerLayoutRefreshService extends ScheduledService<LayoutChangeSi
             protected LayoutChangeSignal call() throws Exception {
                 Set<String> managers = sessionManager.getManagers();
                 managerAddScan(managers);
-                managerRemoveScan(managers);
+                managerRemoveScan();
                 return null;
             }
 
-            private void managerRemoveScan(Set<String> managers) {
+            private void managerRemoveScan() {
                 List<Node> children = managerBox.getChildren();
                 for (Node child : children) {
                     String controlId = child.getId();
-                    if (!managers.contains(controlId)) {
+                    if (!sessionManager.getManagers().contains(controlId)) {
                         updateValue(new LayoutChangeSignal(MANAGER_REMOVE, controlId, null));
                     }
                 }
@@ -81,65 +81,67 @@ public class ManagerLayoutRefreshService extends ScheduledService<LayoutChangeSi
                 if (!nodeIds.contains(host)) {
                     updateValue(new LayoutChangeSignal(MANAGER_ADD, host, createManagerItem(host)));
                 }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 for (String userName : managers) {
                     if (nodeIds.contains(userName))
                         continue;
                     AnchorPane ap = createManagerItem(userName);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     updateValue(new LayoutChangeSignal(MANAGER_ADD, userName, ap));
                 }
             }
-        };
-    }
 
-    private AnchorPane createManagerItem(String userName) {
-        AnchorPane ap = new AnchorPane();
-        ap.setStyle("-fx-border-color: #dadada");
-        ap.setId(userName);
-        ap.setPadding(new Insets(2));
+            private AnchorPane createManagerItem(String userName) {
+                AnchorPane ap = new AnchorPane();
+                ap.setStyle("-fx-border-color: #dadada");
+                ap.setId(userName);
+                ap.setPadding(new Insets(2));
 
-        Label label;
-        if (sessionManager.isMeetingHost(userName)) {
-            label = new Label(userName + " (Host)");
-        } else {
-            label = new Label(userName + " (Manager)");
-        }
-        label.setPrefSize(230, 30);
+                Label label;
+                if (sessionManager.isMeetingHost(userName)) {
+                    label = new Label(userName + " (Host)");
+                } else {
+                    label = new Label(userName + " (Manager)");
+                }
+                label.setPrefSize(230, 30);
 
-        Button removeBtn = new Button("Remove");
-        String normalStyle = "-fx-background-color: white;-fx-border-color:red; -fx-text-fill: red";
-        String activeStyle = "-fx-background-color: red;-fx-text-fill: white";
-        removeBtn.setStyle(normalStyle);
-        removeBtn.setOnMouseEntered(event -> {
-            removeBtn.setStyle(activeStyle);
-        });
-        removeBtn.setOnMouseExited(event -> {
-            removeBtn.setStyle(normalStyle);
-        });
-        removeBtn.setOnAction(event -> {
-            if (sessionManager.isMeetingHost(userName)) {
-                SystemUtil.showSystemInfo("You can't remove yourself from manager members! " +
-                        "If you insist, appoint another one as host.");
-            } else {
-                Meeting meeting = sessionManager.getCurrentMeeting();
-                meeting.getManagers().remove(userName);
-                new PermissionService(meeting.getUuid(), userName, MANAGER_REMOVE).start();
+                Button removeBtn = new Button("Remove");
+                String normalStyle = "-fx-background-color: white;-fx-border-color:red; -fx-text-fill: red";
+                String activeStyle = "-fx-background-color: red;-fx-text-fill: white";
+                removeBtn.setStyle(normalStyle);
+                removeBtn.setOnMouseEntered(event -> {
+                    removeBtn.setStyle(activeStyle);
+                });
+                removeBtn.setOnMouseExited(event -> {
+                    removeBtn.setStyle(normalStyle);
+                });
+                removeBtn.setOnAction(event -> {
+                    if (sessionManager.isMeetingHost(userName)) {
+                        SystemUtil.showSystemInfo("You can't remove yourself from manager members! " +
+                                "If you insist, appoint another one as host.");
+                    } else {
+                        Meeting meeting = sessionManager.getCurrentMeeting();
+                        meeting.getManagers().remove(userName);
+                        updateValue(new LayoutChangeSignal(MANAGER_REMOVE, userName, null));
+                        new PermissionService(meeting.getUuid(), userName, MANAGER_REMOVE).start();
+                    }
+                });
+
+                ap.getChildren().addAll(label, removeBtn);
+
+                AnchorPane.setLeftAnchor(label, 5.0);
+                AnchorPane.setBottomAnchor(label, 2.0);
+                AnchorPane.setTopAnchor(label, 2.0);
+                AnchorPane.setRightAnchor(removeBtn, 10.0);
+                AnchorPane.setBottomAnchor(removeBtn, 2.0);
+                AnchorPane.setTopAnchor(removeBtn, 2.0);
+                return ap;
             }
-        });
+        };
 
-        ap.getChildren().addAll(label, removeBtn);
-
-        AnchorPane.setLeftAnchor(label, 5.0);
-        AnchorPane.setBottomAnchor(label, 2.0);
-        AnchorPane.setTopAnchor(label, 2.0);
-        AnchorPane.setRightAnchor(removeBtn, 10.0);
-        AnchorPane.setBottomAnchor(removeBtn, 2.0);
-        AnchorPane.setTopAnchor(removeBtn, 2.0);
-        return ap;
     }
 }
 
