@@ -8,16 +8,16 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -63,6 +63,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
     private void initListener(Pane userListLayout) {
         valueProperty().addListener((observable, oldValue, layoutChangeSignal) -> {
             if (layoutChangeSignal != null) {
+                Parent root = userListLayout.getScene().getRoot();
                 OperationType type = layoutChangeSignal.getOp();
                 String controlID = layoutChangeSignal.getControlID();
                 if (type == USER_ADD) {
@@ -72,6 +73,18 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                     log.warn("USER_LEAVE[{}]", controlID);
                     Node node = userListLayout.lookup("#" + controlID);
                     userListLayout.getChildren().remove(node);
+                } else if (type == VIDEO_OFF) {
+                    Label videoBtnLabel = (Label) root.lookup("#videoBtnLabel");
+                    if (videoBtnLabel.getText().contains("On")) {
+                        Button videoSwitchBtn = (Button) root.lookup("#videoSwitchBtn");
+                        videoSwitchBtn.fire();
+                    }
+                } else if (type == AUDIO_OFF) {
+                    Label videoBtnLabel = (Label) root.lookup("#audioBtnLabel");
+                    if (videoBtnLabel.getText().contains("On")) {
+                        Button audioSwitchBtn = (Button) root.lookup("#audioSwitchBtn");
+                        audioSwitchBtn.fire();
+                    }
                 }
             }
         });
@@ -169,6 +182,20 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                 } else if (op == MANAGER_REMOVE) {
                     log.warn("Remove manager[{}]", data);
                     meeting.getManagers().remove(data);
+                } else if (op == VIDEO_ON) {
+                    SystemUtil.showSystemInfo("You are allowed to open video");
+                    sessionManager.setVideoCallAllowed(true);
+                } else if (op == VIDEO_OFF) {
+                    SystemUtil.showSystemInfo("You are forbidden to open video");
+                    sessionManager.setVideoCallAllowed(false);
+                    updateValue(new LayoutChangeSignal(VIDEO_OFF, data, null));
+                } else if (op == AUDIO_ON) {
+                    SystemUtil.showSystemInfo("You are allowed to open audio");
+                    sessionManager.setAudioCallAllowed(true);
+                } else if (op == AUDIO_OFF) {
+                    SystemUtil.showSystemInfo("You are forbidden to open audio");
+                    sessionManager.setAudioCallAllowed(false);
+                    updateValue(new LayoutChangeSignal(AUDIO_OFF, data, null));
                 }
             }
         });
@@ -304,6 +331,25 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
 
         MenuItem audioSwitch = new MenuItem("Audio on");
         MenuItem videoSwitch = new MenuItem("Video on");
+
+        audioSwitch.setOnAction(event -> {
+            if (audioSwitch.getText().contains("on")) {
+                audioSwitch.setText("Audio off");
+                new PermissionService(meetingID, userName, AUDIO_ON).start();
+            } else {
+                audioSwitch.setText("Audio on");
+                new PermissionService(meetingID, userName, AUDIO_OFF).start();
+            }
+        });
+        videoSwitch.setOnAction(event -> {
+            if (audioSwitch.getText().contains("on")) {
+                audioSwitch.setText("Video off");
+                new PermissionService(meetingID, userName, VIDEO_ON).start();
+            } else {
+                audioSwitch.setText("Video on");
+                new PermissionService(meetingID, userName, VIDEO_OFF).start();
+            }
+        });
 
         menu.getItems().addAll(audioSwitch, videoSwitch);
         menuBar.getMenus().add(menu);

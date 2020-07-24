@@ -1,6 +1,7 @@
 package service.model;
 
 import common.bean.Meeting;
+import common.bean.OperationType;
 import common.bean.User;
 import service.schedule.layout.ManagerLayoutRefreshService;
 import service.schedule.video.GrabberScheduledService;
@@ -13,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static common.bean.MeetingType.*;
+import static common.bean.OperationType.AUDIO_ON;
+import static common.bean.OperationType.VIDEO_ON;
 
 public class SessionManager {
 
@@ -112,9 +115,8 @@ public class SessionManager {
         currentMeeting = null;
     }
 
-    public boolean hasPermission(String operation, boolean showInfo) {
+    public boolean hasPermission(OperationType operation, boolean showInfo) {
         String meetingType = currentMeeting.getMeetingType();
-        String userName = currentUser.getName();
         if (meetingType == null) {
             return true;
         } else if (meetingType.equals(PERSONAL.getValue())) {
@@ -122,15 +124,20 @@ public class SessionManager {
         } else if (meetingType.equals(BUSINESS.getValue())) {
             if (isMeetingManager()) {
                 return true;
+            } else if (operation == AUDIO_ON && isAudioCallAllowed()) {
+                return true;
+            } else if (operation == VIDEO_ON && isVideoCallAllowed()) {
+                return true;
             } else {
                 if (showInfo)
                     SystemUtil.showSystemInfo(String.format("Sorry! You don't have the %s permission. " +
-                            "Please ask managers to assign the permission.", operation));
+                            "Please ask managers to assign the permission.", operation.toString().toLowerCase()));
                 return false;
             }
         } else if (meetingType.equals(SPEECH.getValue())) {
             if (showInfo)
-                SystemUtil.showSystemInfo(String.format("Sorry! Current meeting type is speech, host have the %s permission only.", operation));
+                SystemUtil.showSystemInfo(String.format("Sorry! Current meeting type is speech, host have the %s permission only.",
+                        operation.toString().toLowerCase()));
             return false;
         }
         return false;
@@ -161,5 +168,24 @@ public class SessionManager {
 
     public ManagerLayoutRefreshService getRefreshService() {
         return refreshService;
+    }
+
+    private boolean videoCallAllowed = false;
+    private boolean audioCallAllowed = false;
+
+    public void setVideoCallAllowed(boolean videoCallAllowed) {
+        this.videoCallAllowed = videoCallAllowed;
+    }
+
+    public void setAudioCallAllowed(boolean audioCallAllowed) {
+        this.audioCallAllowed = audioCallAllowed;
+    }
+
+    public boolean isVideoCallAllowed() {
+        return videoCallAllowed;
+    }
+
+    public boolean isAudioCallAllowed() {
+        return audioCallAllowed;
     }
 }

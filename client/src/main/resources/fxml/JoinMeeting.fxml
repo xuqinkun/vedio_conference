@@ -73,7 +73,7 @@
                   </TextField>
                </children>
             </VBox>
-                <VBox prefHeight="200.0" prefWidth="100.0">
+                <VBox prefHeight="200.0" prefWidth="100.0" visible="false">
                     <children>
                         <Label text="Settings">
                             <font>

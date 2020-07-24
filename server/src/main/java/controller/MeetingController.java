@@ -98,12 +98,18 @@ public class MeetingController {
         }
         if (op == HOST_CHANGE) {
             return meetingService.changeHost(meetingID, userName);
-        }
-        else if (op == MANAGER_ADD) {
+        } else if (op == MANAGER_ADD) {
             return meetingService.addManger(meetingID, userName);
-        }
-        else if (op == MANAGER_REMOVE) {
+        } else if (op == MANAGER_REMOVE) {
             return meetingService.removeManager(meetingID, userName);
+        } else if (op == VIDEO_ON) {
+            return meetingService.openVideoPermission(meetingID, userName);
+        } else if (op == VIDEO_OFF) {
+            return meetingService.forbidVideoPermission(meetingID, userName);
+        } else if (op == AUDIO_ON) {
+            return meetingService.openAudioPermission(meetingID, userName);
+        } else if (op == AUDIO_OFF) {
+            return meetingService.forbidAudioPermission(meetingID, userName);
         }
         return new HttpResult<>(ERROR, "Operation is not supported!");
     }

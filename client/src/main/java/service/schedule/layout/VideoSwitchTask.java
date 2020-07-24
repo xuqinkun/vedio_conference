@@ -13,10 +13,10 @@ import util.SystemUtil;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import static common.bean.OperationType.VIDEO_ON;
+
 public class VideoSwitchTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(VideoSwitchTask.class);
-
-    private final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
 
     private static SessionManager sessionManager = SessionManager.getInstance();
 
@@ -45,13 +45,16 @@ public class VideoSwitchTask extends Task<Boolean> {
     @Override
     protected void updateValue(Boolean isOpen) {
         super.updateValue(isOpen);
-        GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
-        if (grabberScheduledService == null) {
-            String info = "Please wait for system initializing";
-            SystemUtil.showSystemInfo(info);
-            return;
-        }
         if (isOpen) {
+            if (!sessionManager.hasPermission(VIDEO_ON, true)) {
+                return;
+            }
+            GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
+            if (grabberScheduledService == null) {
+                String info = "Please wait for system initializing";
+                SystemUtil.showSystemInfo(info);
+                return;
+            }
             log.debug("Open video");
             videoIcon.setImage(new Image("/fxml/img/video_on.png"));
             label.setText("Video On");
@@ -61,6 +64,10 @@ public class VideoSwitchTask extends Task<Boolean> {
                 grabberScheduledService.start();
             }
         } else {
+            GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
+            if (grabberScheduledService == null) {
+                return;
+            }
             log.debug("Close video");
             videoIcon.setImage(new Image("/fxml/img/video_off.png"));
             label.setText("Video Off");

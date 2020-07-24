@@ -11,6 +11,8 @@ import service.model.SessionManager;
 import service.schedule.audio.AudioRecordService;
 import util.Config;
 
+import static common.bean.OperationType.AUDIO_ON;
+
 
 public class AudioSwitchTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(AudioSwitchTask.class);
@@ -40,6 +42,9 @@ public class AudioSwitchTask extends Task<Boolean> {
         super.updateValue(isOpen);
         Label label = (Label) audioSwitchBtn.getParent().lookup("#audioBtnLabel");
         if (isOpen) {
+            if (!sessionManager.hasPermission(AUDIO_ON, true)) {
+                return;
+            }
             log.debug("Audio open");
             audioIcon.setImage(new Image("/fxml/img/audio_on.png"));
             label.setText("Audio On");
