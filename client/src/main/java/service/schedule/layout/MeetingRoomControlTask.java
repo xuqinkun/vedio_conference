@@ -300,12 +300,12 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
             event.consume();
         });
         manager.setOnAction(event -> {
-            if (!sessionManager.isMeetingManager()) {
+            if (!sessionManager.isMeetingHost()) {
                 SystemUtil.showSystemInfo("You are not host. Operation not supported!");
                 return;
             }
-            if (!sessionManager.isMeetingManager(userName)) {
-                SystemUtil.showSystemInfo("You are manager already!");
+            if (sessionManager.isMeetingManager(userName)) {
+                SystemUtil.showSystemInfo(String.format("%s is manager already!", userName));
                 return;
             }
             new PermissionService(meetingID, userName, MANAGER_ADD).start();
