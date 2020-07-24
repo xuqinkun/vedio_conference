@@ -5,14 +5,15 @@ public class PermissionContext {
 
     private String userName;
 
-    private String operation;
+    private OperationType op;
 
     public PermissionContext() {
     }
 
-    public PermissionContext(String meetingID, String userName) {
+    public PermissionContext(String meetingID, String userName, OperationType op) {
         this.meetingID = meetingID;
         this.userName = userName;
+        this.op = op;
     }
 
     public String getMeetingID() {
@@ -29,5 +30,9 @@ public class PermissionContext {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public OperationType getOp() {
+        return op;
     }
 }

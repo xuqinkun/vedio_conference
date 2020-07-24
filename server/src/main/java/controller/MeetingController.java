@@ -11,6 +11,8 @@ import util.JsonUtil;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static common.bean.OperationType.HOST_CHANGE;
+import static common.bean.OperationType.MANAGER_ADD;
 import static common.bean.ResultCode.ERROR;
 
 @RestController
@@ -84,15 +86,23 @@ public class MeetingController {
         user.setTimeStamp(System.currentTimeMillis());
     }
 
-    @PostMapping("/host_change")
+    @PostMapping("/permissionControl")
     public @ResponseBody
-    HttpResult<String> changeHost(@RequestBody PermissionContext context) {
+    HttpResult<String> permissionControl(@RequestBody PermissionContext context) {
         String meetingID = context.getMeetingID();
-        String hostName = context.getUserName();
-        if (StringUtils.isEmpty(meetingID) || StringUtils.isEmpty(hostName)) {
-            log.warn("MeetingId or hostName is null");
-            return new HttpResult<>(ERROR, "MeetingId or hostName is null");
+        String userName = context.getUserName();
+        OperationType op = context.getOp();
+
+        if (StringUtils.isEmpty(meetingID) || StringUtils.isEmpty(userName)) {
+            log.warn("MeetingId or username is null");
+            return new HttpResult<>(ERROR, "MeetingId or username is null");
         }
-        return meetingService.changeHost(meetingID, hostName);
+        if (op == HOST_CHANGE) {
+            return meetingService.changeHost(meetingID, userName);
+        }
+        else if (op == MANAGER_ADD) {
+            return meetingService.addManger(meetingID, userName);
+        }
+        return new HttpResult<>(ERROR, "Operation is not supported!");
     }
 }

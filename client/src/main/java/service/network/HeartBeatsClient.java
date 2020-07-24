@@ -112,10 +112,10 @@ public class HeartBeatsClient implements Runnable {
             SocketChannel sc = (SocketChannel) key.channel();
             if (key.isConnectable()) {
                 if (sc.finishConnect()) {
-                    log.warn("Connect[{}] succeed!", sc.getRemoteAddress());
+                    log.warn("Connection to {} established!", sc.getRemoteAddress());
                     sc.register(selector, SelectionKey.OP_READ);
                 } else {
-                    log.warn("Connect[{}] failed!", sc.getRemoteAddress());
+                    log.warn("Failed to establish connection with {}!", sc.getRemoteAddress());
                     System.exit(1);
                 }
             }

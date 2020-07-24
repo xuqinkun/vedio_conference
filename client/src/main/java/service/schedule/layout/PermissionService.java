@@ -13,6 +13,7 @@ import service.http.UrlMap;
 import util.SystemUtil;
 
 import static common.bean.OperationType.HOST_CHANGE;
+import static common.bean.OperationType.MANAGER_ADD;
 import static common.bean.ResultCode.ERROR;
 
 public class PermissionService extends Service<HttpResult<String>> {
@@ -40,11 +41,9 @@ public class PermissionService extends Service<HttpResult<String>> {
         return new Task<HttpResult<String>>() {
             @Override
             protected HttpResult<String> call() throws Exception {
-                HttpResult<String> response = null;
-                if (operationType == HOST_CHANGE) {
-                    String url = UrlMap.getPermissionUrl(operationType);
-                    response = HttpClientUtil.getInstance().doPost(url, new PermissionContext(meetingId, username));
-                }
+                String url = UrlMap.getPermissionControlUrl();
+                PermissionContext context = new PermissionContext(meetingId, username, operationType);
+                HttpResult<String> response = HttpClientUtil.getInstance().doPost(url, context);
                 if (response == null)
                     response = new HttpResult<>(ERROR, "Request failed. Server is down.");
                 log.warn(response.getMessage());

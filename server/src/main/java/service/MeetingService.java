@@ -10,8 +10,8 @@ import org.springframework.util.StringUtils;
 import util.JsonUtil;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static common.bean.OperationType.*;
 import static common.bean.ResultCode.ERROR;
@@ -69,21 +69,21 @@ public class MeetingService {
         return meetingDao.find(uuid);
     }
 
-    public HttpResult<String> leaveMeeting(String meetingId, User user) {
-        Meeting meeting = findMeeting(meetingId);
+    public HttpResult<String> leaveMeeting(String meetingID, User user) {
+        Meeting meeting = findMeeting(meetingID);
         if (meeting == null) {
-            return new HttpResult<>(ResultCode.ERROR, String.format("Invalid meeting[%s]", meetingId));
+            return new HttpResult<>(ResultCode.ERROR, String.format("Invalid meeting[%s]", meetingID));
         }
         String userName = user.getName();
         if (meeting.getHost().equals(userName)) {
-            kafkaService.sendMessage(meetingId, new Message(END_MEETING, meetingId));
-            endMeeting(meetingId);
-            log.warn("Meeting[{}] is ended", meetingId);
-            return new HttpResult<>(OK, String.format("Meeting[%s] is ended", meetingId));
+            kafkaService.sendMessage(meetingID, new Message(END_MEETING, meetingID));
+            endMeeting(meetingID);
+            log.warn("Meeting[{}] is ended", meetingID);
+            return new HttpResult<>(OK, String.format("Meeting[%s] is ended", meetingID));
         } else {
-            kafkaService.sendMessage(meetingId, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
-            meetingCache.removeUser(meetingId, userName);
-            return new HttpResult<>(OK, String.format("You leave meeting[%s]", meetingId));
+            kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
+            meetingCache.removeUser(meetingID, userName);
+            return new HttpResult<>(OK, String.format("You leave meeting[%s]", meetingID));
         }
     }
 
@@ -129,18 +129,35 @@ public class MeetingService {
         return new HttpResult<>(ResultCode.OK, JsonUtil.toJsonString(oldMeeting));
     }
 
-    public HttpResult<String> changeHost(String meetingId, String hostName) {
-        Meeting oldMeeting = findMeeting(meetingId);
+    public HttpResult<String> changeHost(String meetingID, String userName) {
+        Meeting oldMeeting = findMeeting(meetingID);
         if (oldMeeting == null) {
-            String errMsg = String.format("Can't find meeting[ID=%s]", meetingId);
+            String errMsg = String.format("Can't find meeting[ID=%s]", meetingID);
             log.error(errMsg);
             return new HttpResult<>(ERROR, errMsg);
         }
         String oldHost = oldMeeting.getHost();
         oldMeeting.getManagers().remove(oldHost);
-        oldMeeting.setHost(hostName);
-        meetingDao.changeHost(meetingId, oldMeeting);
-        kafkaService.sendMessage(meetingId, new Message(HOST_CHANGE, hostName));
-        return new HttpResult<>(OK, String.format("Meeting[ID=%s] host is changed to %s", meetingId, hostName));
+        oldMeeting.setHost(userName);
+        meetingDao.updateHost(meetingID, oldMeeting);
+        kafkaService.sendMessage(meetingID, new Message(HOST_CHANGE, userName));
+        return new HttpResult<>(OK, String.format("Meeting[ID=%s] host is changed to %s", meetingID, userName));
+    }
+
+    public HttpResult<String> addManger(String meetingID, String userName) {
+        Meeting oldMeeting = findMeeting(meetingID);
+        if (oldMeeting == null) {
+            String errMsg = String.format("Can't find meeting[ID=%s]", meetingID);
+            log.error(errMsg);
+            return new HttpResult<>(ERROR, errMsg);
+        }
+        Set<String> managers = oldMeeting.getManagers();
+        if (managers.contains(userName)) {
+            return new HttpResult<>(ERROR, String.format("User[%s] is manager already!", userName));
+        }
+        managers.add(userName);
+        meetingDao.updateManagers(meetingID, managers);
+        kafkaService.sendMessage(meetingID, new Message(MANAGER_ADD, userName));
+        return new HttpResult<>(OK, String.format("User[%s] is manager now!", userName));
     }
 }

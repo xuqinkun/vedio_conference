@@ -158,15 +158,16 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
             if (msg != null) {
                 String data = msg.getData();
-                if (msg.getType() == USER_ADD) {
+                OperationType op = msg.getType();
+                if (op == USER_ADD) {
                     User user = JsonUtil.jsonToObject(data, User.class);
                     addUser(user);
-                } else if (msg.getType() == USER_LEAVE) {
+                } else if (op == USER_LEAVE) {
                     User user = JsonUtil.jsonToObject(data, User.class);
                     this.updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
-                } else if (msg.getType() == END_MEETING) { // TODO end meeting process
+                } else if (op == END_MEETING) { // TODO end meeting process
                     log.warn("Meeting is end.");
-                } else if (msg.getType() == HOST_CHANGE) {
+                } else if (op == HOST_CHANGE) {
                     log.warn("Host change to {}", data);
                     SystemUtil.showSystemInfo(String.format("Host change to %s", data));
                     hostLabel.setText(data);
@@ -174,6 +175,10 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
                     String oldHost = meeting.getHost();
                     meeting.setHost(data);
                     meeting.getManagers().remove(oldHost);
+                } else if (op == MANAGER_ADD) {
+                    log.warn("{} is manager now", data);
+                    SystemUtil.showSystemInfo(String.format("%s is manager now", data));
+                    sessionManager.getCurrentMeeting().getManagers().add(data);
                 }
             }
         });

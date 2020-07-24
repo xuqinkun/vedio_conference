@@ -40,4 +40,8 @@ public class UrlMap {
     public static String getPermissionUrl(OperationType operationType) {
         return baseUrl + operationType.toString().toLowerCase();
     }
+
+    public static String getPermissionControlUrl() {
+        return baseUrl + "permissionControl";
+    }
 }
