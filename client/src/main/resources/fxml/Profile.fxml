@@ -112,7 +112,7 @@
         </Separator>
         <VBox prefHeight="438.0" prefWidth="350.0">
             <children>
-                <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: #dad6d6;">
+                <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: #dad6d6;" visible="false">
                     <children>
                         <VBox prefHeight="100.0" prefWidth="206.0">
                             <children>

@@ -11,16 +11,12 @@ import service.model.SessionManager;
 import service.schedule.video.GrabberScheduledService;
 import util.SystemUtil;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 import static common.bean.OperationType.VIDEO_ON;
 
 public class VideoSwitchTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(VideoSwitchTask.class);
 
     private static SessionManager sessionManager = SessionManager.getInstance();
-
-    private boolean isOpen;
 
     private ImageView globalView;
 
@@ -30,8 +26,7 @@ public class VideoSwitchTask extends Task<Boolean> {
 
     private ImageView videoIcon;
 
-    public VideoSwitchTask(boolean videoIsOpen, Parent videoSwitchBtn, ImageView globalView) {
-        this.isOpen = videoIsOpen;
+    public VideoSwitchTask(Parent videoSwitchBtn, ImageView globalView) {
         this.globalView = globalView;
         this.videoSwitchBtn = videoSwitchBtn;
 
@@ -79,6 +74,6 @@ public class VideoSwitchTask extends Task<Boolean> {
 
     @Override
     protected Boolean call() {
-        return isOpen;
+        return label.getText().contains("Off");
     }
 }

@@ -175,23 +175,23 @@ public class MeetingService {
         return new HttpResult<>(OK, String.format("User[%s] is removed from manager members!", userName));
     }
 
-    public HttpResult<String> openVideoPermission(String meetingID, String userName) {
-        kafkaService.sendMessage(meetingID, new Message(VIDEO_ON, userName));
+    public HttpResult<String> openVideoPermission(String userName) {
+        kafkaService.sendMessage(userName, new Message(VIDEO_ON, userName));
         return new HttpResult<>(OK, String.format("User[%s] is allowed to open video", userName));
     }
 
-    public HttpResult<String> forbidVideoPermission(String meetingID, String userName) {
-        kafkaService.sendMessage(meetingID, new Message(VIDEO_OFF, userName));
+    public HttpResult<String> forbidVideoPermission(String userName) {
+        kafkaService.sendMessage(userName, new Message(VIDEO_OFF, userName));
         return new HttpResult<>(OK, String.format("User[%s] is forbidden to open video", userName));
     }
 
-    public HttpResult<String> openAudioPermission(String meetingID, String userName) {
-        kafkaService.sendMessage(meetingID, new Message(AUDIO_ON, userName));
+    public HttpResult<String> openAudioPermission(String userName) {
+        kafkaService.sendMessage(userName, new Message(AUDIO_ON, userName));
         return new HttpResult<>(OK, String.format("User[%s] is allowed to open audio", userName));
     }
 
-    public HttpResult<String> forbidAudioPermission(String meetingID, String userName) {
-        kafkaService.sendMessage(meetingID, new Message(AUDIO_OFF, userName));
+    public HttpResult<String> forbidAudioPermission(String userName) {
+        kafkaService.sendMessage(userName, new Message(AUDIO_OFF, userName));
         return new HttpResult<>(OK, String.format("User[%s] is forbidden to open audio", userName));
     }
 }

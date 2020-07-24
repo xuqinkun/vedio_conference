@@ -29,8 +29,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static common.bean.OperationType.AUDIO_ON;
-
 public class MeetingRoomController implements Initializable {
 
     private static final Logger log = LoggerFactory.getLogger(JoinMeetingController.class);
@@ -70,8 +68,6 @@ public class MeetingRoomController implements Initializable {
     private MeetingRoomControlTask controlTask;
     private HeartBeatsClient client;
     private TimeCounterService timeCounterService;
-    private boolean videoIsOpen = false;
-    private boolean audioIsOpen = false;
     private ManagerNumRefreshService managerNumRefreshService;
 
     @Override
@@ -219,15 +215,13 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void videoSwitch(MouseEvent event) {
-        videoIsOpen = !videoIsOpen;
-        exec.schedule(new VideoSwitchTask(videoIsOpen, videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
+        exec.schedule(new VideoSwitchTask(videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 
     @FXML
     public void audioSwitch(MouseEvent event) {
-        audioIsOpen = !audioIsOpen;
-        exec.schedule(new AudioSwitchTask(audioIsOpen, audioSwitchBtn), 0, TimeUnit.MILLISECONDS);
+        exec.schedule(new AudioSwitchTask(audioSwitchBtn), 0, TimeUnit.MILLISECONDS);
         event.consume();
     }
 

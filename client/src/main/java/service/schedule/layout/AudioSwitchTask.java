@@ -17,8 +17,6 @@ import static common.bean.OperationType.AUDIO_ON;
 public class AudioSwitchTask extends Task<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(AudioSwitchTask.class);
 
-    private boolean isOpen;
-
     private static AudioRecordService audioRecordService;
 
     private static SessionManager sessionManager = SessionManager.getInstance();
@@ -29,10 +27,8 @@ public class AudioSwitchTask extends Task<Boolean> {
 
     private ImageView audioIcon;
 
-    public AudioSwitchTask(boolean isOpen, Parent audioSwitchBtn) {
-        this.isOpen = isOpen;
+    public AudioSwitchTask(Parent audioSwitchBtn) {
         this.audioSwitchBtn = audioSwitchBtn;
-
         label = (Label)audioSwitchBtn.lookup("#audioBtnLabel");
         audioIcon = (ImageView) audioSwitchBtn.lookup("#audioIcon");
     }
@@ -67,6 +63,6 @@ public class AudioSwitchTask extends Task<Boolean> {
 
     @Override
     protected Boolean call() {
-        return isOpen;
+        return label.getText().contains("Off");
     }
 }

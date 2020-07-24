@@ -103,13 +103,13 @@ public class MeetingController {
         } else if (op == MANAGER_REMOVE) {
             return meetingService.removeManager(meetingID, userName);
         } else if (op == VIDEO_ON) {
-            return meetingService.openVideoPermission(meetingID, userName);
+            return meetingService.openVideoPermission(userName);
         } else if (op == VIDEO_OFF) {
-            return meetingService.forbidVideoPermission(meetingID, userName);
+            return meetingService.forbidVideoPermission(userName);
         } else if (op == AUDIO_ON) {
-            return meetingService.openAudioPermission(meetingID, userName);
+            return meetingService.openAudioPermission(userName);
         } else if (op == AUDIO_OFF) {
-            return meetingService.forbidAudioPermission(meetingID, userName);
+            return meetingService.forbidAudioPermission(userName);
         }
         return new HttpResult<>(ERROR, "Operation is not supported!");
     }

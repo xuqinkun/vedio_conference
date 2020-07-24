@@ -9,20 +9,22 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
-import service.messaging.MessageReceiveTask;
+import service.messaging.MessageReceiveService;
 import service.model.SessionManager;
 import service.schedule.TaskStarter;
 import service.schedule.audio.AudioPlayerService;
@@ -64,6 +66,8 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         valueProperty().addListener((observable, oldValue, layoutChangeSignal) -> {
             if (layoutChangeSignal != null) {
                 Parent root = userListLayout.getScene().getRoot();
+                ImageView globalImageView = (ImageView) root.lookup("#globalImageView");
+
                 OperationType type = layoutChangeSignal.getOp();
                 String controlID = layoutChangeSignal.getControlID();
                 if (type == USER_ADD) {
@@ -76,14 +80,15 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                 } else if (type == VIDEO_OFF) {
                     Label videoBtnLabel = (Label) root.lookup("#videoBtnLabel");
                     if (videoBtnLabel.getText().contains("On")) {
-                        Button videoSwitchBtn = (Button) root.lookup("#videoSwitchBtn");
-                        videoSwitchBtn.fire();
+                        VBox videoSwitchBtn = (VBox) root.lookup("#videoSwitchBtn");
+                        new VideoSwitchTask(videoSwitchBtn, globalImageView);
                     }
                 } else if (type == AUDIO_OFF) {
                     Label videoBtnLabel = (Label) root.lookup("#audioBtnLabel");
+                    // Close audio call if it is opening
                     if (videoBtnLabel.getText().contains("On")) {
-                        Button audioSwitchBtn = (Button) root.lookup("#audioSwitchBtn");
-                        audioSwitchBtn.fire();
+                        VBox audioSwitchBtn = (VBox) root.lookup("#audioSwitchBtn");
+                        new AudioSwitchTask(audioSwitchBtn);
                     }
                 }
             }
@@ -102,7 +107,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         /* Display user list */
         initUserList(currentMeeting);
         /* Listen user change (join or leave)*/
-        messageListener(currentMeeting);
+        messageListener(currentMeeting, username);
         // Initialize recorder
         initRecorder();
     }
@@ -151,54 +156,15 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         }
     }
 
-    private MessageReceiveTask messageReceiveTask;
+    private MessageReceiveService globalReceiveService;
 
-    private void messageListener(Meeting currentMeeting) {
-        messageReceiveTask = new MessageReceiveTask(currentMeeting.getUuid(), sessionManager.getCurrentUser().getName());
-        new Thread(messageReceiveTask).start();
-        messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
-            if (msg != null) {
-                String data = msg.getData();
-                Meeting meeting = sessionManager.getCurrentMeeting();
-                OperationType op = msg.getType();
-                if (op == USER_ADD) {
-                    User user = JsonUtil.jsonToObject(data, User.class);
-                    addUser(user);
-                } else if (op == USER_REMOVE) {
-                    User user = JsonUtil.jsonToObject(data, User.class);
-                    this.updateValue(new LayoutChangeSignal(USER_REMOVE, user.getName(), null));
-                } else if (op == END_MEETING) { // TODO end meeting process
-                    log.warn("Meeting is end.");
-                } else if (op == HOST_CHANGE) {
-                    log.warn("Host change to {}", data);
-                    SystemUtil.showSystemInfo(String.format("Host change to %s", data));
-                    hostLabel.setText(data);
-                    String oldHost = meeting.getHost();
-                    meeting.setHost(data);
-                    meeting.getManagers().remove(oldHost);
-                } else if (op == MANAGER_ADD) {
-                    log.warn("Appoint {} as manager", data);
-                    meeting.getManagers().add(data);
-                } else if (op == MANAGER_REMOVE) {
-                    log.warn("Remove manager[{}]", data);
-                    meeting.getManagers().remove(data);
-                } else if (op == VIDEO_ON) {
-                    SystemUtil.showSystemInfo("You are allowed to open video");
-                    sessionManager.setVideoCallAllowed(true);
-                } else if (op == VIDEO_OFF) {
-                    SystemUtil.showSystemInfo("You are forbidden to open video");
-                    sessionManager.setVideoCallAllowed(false);
-                    updateValue(new LayoutChangeSignal(VIDEO_OFF, data, null));
-                } else if (op == AUDIO_ON) {
-                    SystemUtil.showSystemInfo("You are allowed to open audio");
-                    sessionManager.setAudioCallAllowed(true);
-                } else if (op == AUDIO_OFF) {
-                    SystemUtil.showSystemInfo("You are forbidden to open audio");
-                    sessionManager.setAudioCallAllowed(false);
-                    updateValue(new LayoutChangeSignal(AUDIO_OFF, data, null));
-                }
-            }
-        });
+    private MessageReceiveService personalReceiveTask;
+
+    private void messageListener(Meeting currentMeeting, String userName) {
+        globalReceiveService = new MessageReceiveService(currentMeeting.getUuid(), hostLabel, sessionManager.getCurrentUser().getName(), this);
+        personalReceiveTask = new MessageReceiveService(userName, hostLabel, sessionManager.getCurrentUser().getName(), this);
+        globalReceiveService.start();
+        personalReceiveTask.start();
     }
 
     public void addUser(User user) {
@@ -394,7 +360,8 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         for (AudioPlayerService service : audioPlayerServiceMap.values()) {
             service.cancel();
         }
-        messageReceiveTask.stop();
+        globalReceiveService.cancel();
+        personalReceiveTask.cancel();
         exec.remove(videoRecordTask);
         exec.shutdownNow();
     }
@@ -403,5 +370,9 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
     protected LayoutChangeSignal call() {
         init();
         return null;
+    }
+
+    public void addSignal(LayoutChangeSignal layoutChangeSignal) {
+        updateValue(layoutChangeSignal);
     }
 }
