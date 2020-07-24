@@ -46,6 +46,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
 
     private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
     public static final Config config = Config.getInstance();
+    public static final String USERVIEW_ID_SUFFIX = "_view";
     private final SessionManager sessionManager = SessionManager.getInstance();
     private final ScheduledThreadPoolExecutor exec = ThreadPoolUtil.getScheduledExecutor(5, "MeetingRoomStart");
 
@@ -91,6 +92,9 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                         VBox audioSwitchBtn = (VBox) root.lookup("#audioSwitchBtn");
                         new AudioSwitchService(audioSwitchBtn).start();
                     }
+                } else if (type == VIDEO_CLOSE) {
+                    ImageView userView = (ImageView) root.lookup(controlID + USERVIEW_ID_SUFFIX);
+                    userView.setImage(new Image(Config.getInstance().getDefaultPortraitSrc()));
                 }
             }
         });
@@ -146,13 +150,13 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
     private void initUserList(Meeting currentMeeting) {
         User currentUser = sessionManager.getCurrentUser();
         if (currentMeeting.getHost().equals(currentUser.getName())) { // Is meeting owner
-            addUser(currentUser);
+            createUserLayout(currentUser);
         } else { // None meeting owner
             HttpResult<String> result = HttpClientUtil.getInstance().
                     doPost(UrlMap.getUserListUrl(), currentMeeting.getUuid());
             List<User> userList = JsonUtil.jsonToList(result.getMessage(), User.class);
             for (User user : userList) {
-                addUser(user);
+                createUserLayout(user);
             }
         }
     }
@@ -171,7 +175,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         personalReceiveTask.start();
     }
 
-    public void addUser(User user) {
+    public void createUserLayout(User user) {
         sessionManager.addUser(user);
 
         String userName = user.getName();
@@ -198,6 +202,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         String portrait = user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
         Image image = new Image(portrait);
         ImageView userView = new ImageView(image);
+        userView.setId(userName + USERVIEW_ID_SUFFIX);
         userView.setFitWidth(stackPane.getPrefWidth() - 7);
         userView.setFitHeight(stackPane.getPrefHeight() - 10);
 

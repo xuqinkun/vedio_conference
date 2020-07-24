@@ -1,5 +1,6 @@
 package service.schedule.layout;
 
+import common.bean.Message;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.Parent;
@@ -8,10 +9,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.messaging.MessageSender;
 import service.model.SessionManager;
 import service.schedule.video.GrabberScheduledService;
 import util.SystemUtil;
 
+import static common.bean.OperationType.VIDEO_CLOSE;
 import static common.bean.OperationType.VIDEO_ON;
 
 public class VideoSwitchService extends Service<Boolean> {
@@ -66,6 +69,9 @@ public class VideoSwitchService extends Service<Boolean> {
             if (grabberScheduledService.isRunning()) {
                 grabberScheduledService.cancel();
             }
+            String meetingId = sessionManager.getCurrentMeeting().getUuid();
+            String userName = sessionManager.getCurrentUser().getName();
+            MessageSender.getInstance().send(meetingId, new Message(VIDEO_CLOSE, userName));
         }
     }
 

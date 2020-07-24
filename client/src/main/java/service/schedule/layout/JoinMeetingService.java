@@ -57,11 +57,13 @@ public class JoinMeetingService extends Service<HttpResult<String>> {
         Parent root = FXMLLoader.load(
                 getClass().getResource("/fxml/MeetingRoom.fxml"));
         Stage roomStage = new Stage();
+        String username = SessionManager.getInstance().getCurrentUser().getName();
+        roomStage.setTitle(username  + "'s meeting");
         roomStage.setScene(new Scene(root));
         Stage joinStage = (Stage) joinMeetingBtn.getScene().getWindow();
         Stage mainStage = (Stage) joinStage.getOwner();
 
-        Button leaveMeetingBtn = (Button) roomStage.getScene().getRoot().lookup("#leaveMeetingBtn");
+        Button leaveMeetingBtn = (Button) root.lookup("#leaveMeetingBtn");
 
         roomStage.setOnCloseRequest(event -> {
             log.warn("setOnCloseRequest");

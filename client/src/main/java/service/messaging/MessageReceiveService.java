@@ -61,7 +61,7 @@ public class MessageReceiveService extends ScheduledService<Message> {
                 OperationType op = msg.getType();
                 if (op == USER_ADD) {
                     User user = JsonUtil.jsonToObject(data, User.class);
-                    task.addUser(user);
+                    task.createUserLayout(user);
                 } else if (op == USER_REMOVE) {
                     User user = JsonUtil.jsonToObject(data, User.class);
                     task.addSignal(new LayoutChangeSignal(USER_REMOVE, user.getName(), null));
@@ -94,6 +94,8 @@ public class MessageReceiveService extends ScheduledService<Message> {
                     SystemUtil.showSystemInfo("You are forbidden to open audio");
                     sessionManager.setAudioCallAllowed(false);
                     task.addSignal(new LayoutChangeSignal(AUDIO_OFF, data, null));
+                } else if (op == VIDEO_CLOSE) {
+                    task.addSignal(new LayoutChangeSignal(VIDEO_CLOSE, data, null));
                 }
             }
         });
