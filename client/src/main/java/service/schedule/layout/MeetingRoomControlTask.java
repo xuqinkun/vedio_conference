@@ -20,6 +20,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
@@ -163,6 +164,9 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
     private void messageListener(String meetingId, String userName) {
         globalReceiveService = new MessageReceiveService(meetingId, hostLabel, userName + "_global", this);
         personalReceiveTask = new MessageReceiveService(userName, hostLabel, userName + "_local", this);
+
+        globalReceiveService.setPeriod(Duration.millis(100));
+        personalReceiveTask.setPeriod(Duration.millis(100));
         globalReceiveService.start();
         personalReceiveTask.start();
     }
@@ -309,10 +313,10 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         });
         videoSwitch.setOnAction(event -> {
             if (audioSwitch.getText().contains("on")) {
-                audioSwitch.setText("Video off");
+                videoSwitch.setText("Video off");
                 new PermissionService(meetingID, userName, VIDEO_ON).start();
             } else {
-                audioSwitch.setText("Video on");
+                videoSwitch.setText("Video on");
                 new PermissionService(meetingID, userName, VIDEO_OFF).start();
             }
         });

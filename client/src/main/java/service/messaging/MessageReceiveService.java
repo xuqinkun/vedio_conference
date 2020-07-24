@@ -4,7 +4,7 @@ import common.bean.Meeting;
 import common.bean.Message;
 import common.bean.OperationType;
 import common.bean.User;
-import javafx.concurrent.Service;
+import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -31,7 +31,7 @@ import java.util.Map;
 
 import static common.bean.OperationType.*;
 
-public class MessageReceiveService extends Service<Message> {
+public class MessageReceiveService extends ScheduledService<Message> {
 
     private static final Logger log = LoggerFactory.getLogger(MessageReceiveService.class);
 
@@ -116,13 +116,11 @@ public class MessageReceiveService extends Service<Message> {
         return new Task<Message>() {
             @Override
             protected Message call() throws Exception {
-                while (!cancel()) {
-                    ConsumerRecords<String, Message> records = consumer.poll(Duration.ofMillis(100));
-                    for (ConsumerRecord<String, Message> record : records) {
-                        Message msg = record.value();
-                        log.warn(msg.toString());
-                        updateValue(msg);
-                    }
+                ConsumerRecords<String, Message> records = consumer.poll(Duration.ofMillis(100));
+                for (ConsumerRecord<String, Message> record : records) {
+                    Message msg = record.value();
+                    log.warn(msg.toString());
+                    updateValue(msg);
                 }
                 return null;
             }
