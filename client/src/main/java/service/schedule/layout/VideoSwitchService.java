@@ -1,5 +1,6 @@
 package service.schedule.layout;
 
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -13,33 +14,29 @@ import util.SystemUtil;
 
 import static common.bean.OperationType.VIDEO_ON;
 
-public class VideoSwitchTask extends Task<Boolean> {
-    private static final Logger log = LoggerFactory.getLogger(VideoSwitchTask.class);
+public class VideoSwitchService extends Service<Boolean> {
+    private static final Logger log = LoggerFactory.getLogger(VideoSwitchService.class);
 
     private static SessionManager sessionManager = SessionManager.getInstance();
-
-    private ImageView globalView;
-
-    private Parent videoSwitchBtn;
 
     private Label label;
 
     private ImageView videoIcon;
 
-    public VideoSwitchTask(Parent videoSwitchBtn, ImageView globalView) {
-        this.globalView = globalView;
-        this.videoSwitchBtn = videoSwitchBtn;
-
+    public VideoSwitchService(Parent videoSwitchBtn, ImageView globalView) {
         label = (Label) videoSwitchBtn.lookup("#videoBtnLabel");
         videoIcon = (ImageView) videoSwitchBtn.lookup("#videoIcon");
+
         exceptionProperty().addListener((observable, oldValue, newValue) -> {
             log.error(newValue.getMessage());
         });
+
+        valueProperty().addListener((observable, oldValue, newValue) -> {
+            updateValue(newValue);
+        });
     }
 
-    @Override
     protected void updateValue(Boolean isOpen) {
-        super.updateValue(isOpen);
         if (isOpen) {
             if (!sessionManager.hasPermission(VIDEO_ON, true)) {
                 return;
@@ -73,7 +70,12 @@ public class VideoSwitchTask extends Task<Boolean> {
     }
 
     @Override
-    protected Boolean call() {
-        return label.getText().contains("Off");
+    protected Task<Boolean> createTask() {
+        return new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return label.getText().contains("Off");
+            }
+        };
     }
 }

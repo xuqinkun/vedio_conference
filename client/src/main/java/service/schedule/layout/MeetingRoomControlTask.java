@@ -82,14 +82,14 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                     Label videoBtnLabel = (Label) root.lookup("#videoBtnLabel");
                     if (videoBtnLabel.getText().contains("On")) {
                         VBox videoSwitchBtn = (VBox) root.lookup("#videoSwitchBtn");
-                        new VideoSwitchTask(videoSwitchBtn, globalImageView);
+                        new VideoSwitchService(videoSwitchBtn, globalImageView).start();
                     }
                 } else if (type == AUDIO_OFF) {
                     Label videoBtnLabel = (Label) root.lookup("#audioBtnLabel");
                     // Close audio call if it is opening
                     if (videoBtnLabel.getText().contains("On")) {
                         VBox audioSwitchBtn = (VBox) root.lookup("#audioSwitchBtn");
-                        new AudioSwitchTask(audioSwitchBtn);
+                        new AudioSwitchService(audioSwitchBtn).start();
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package service.schedule.layout;
 
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -14,8 +15,8 @@ import util.Config;
 import static common.bean.OperationType.AUDIO_ON;
 
 
-public class AudioSwitchTask extends Task<Boolean> {
-    private static final Logger log = LoggerFactory.getLogger(AudioSwitchTask.class);
+public class AudioSwitchService extends Service<Boolean> {
+    private static final Logger log = LoggerFactory.getLogger(AudioSwitchService.class);
 
     private static AudioRecordService audioRecordService;
 
@@ -27,15 +28,17 @@ public class AudioSwitchTask extends Task<Boolean> {
 
     private ImageView audioIcon;
 
-    public AudioSwitchTask(Parent audioSwitchBtn) {
+    public AudioSwitchService(Parent audioSwitchBtn) {
         this.audioSwitchBtn = audioSwitchBtn;
         label = (Label)audioSwitchBtn.lookup("#audioBtnLabel");
         audioIcon = (ImageView) audioSwitchBtn.lookup("#audioIcon");
+
+        valueProperty().addListener((observable, oldValue, newValue) -> {
+            updateValue(newValue);
+        });
     }
 
-    @Override
     protected void updateValue(Boolean isOpen) {
-        super.updateValue(isOpen);
         Label label = (Label) audioSwitchBtn.getParent().lookup("#audioBtnLabel");
         if (isOpen) {
             if (!sessionManager.hasPermission(AUDIO_ON, true)) {
@@ -62,7 +65,12 @@ public class AudioSwitchTask extends Task<Boolean> {
     }
 
     @Override
-    protected Boolean call() {
-        return label.getText().contains("Off");
+    protected Task<Boolean> createTask() {
+        return new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return label.getText().contains("Off");
+            }
+        };
     }
 }

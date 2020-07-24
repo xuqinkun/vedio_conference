@@ -215,13 +215,13 @@ public class MeetingRoomController implements Initializable {
 
     @FXML
     public void videoSwitch(MouseEvent event) {
-        exec.schedule(new VideoSwitchTask(videoSwitchBtn, globalImageView), 0, TimeUnit.MILLISECONDS);
+        new VideoSwitchService(videoSwitchBtn, globalImageView).start();
         event.consume();
     }
 
     @FXML
     public void audioSwitch(MouseEvent event) {
-        exec.schedule(new AudioSwitchTask(audioSwitchBtn), 0, TimeUnit.MILLISECONDS);
+        new AudioSwitchService(audioSwitchBtn).start();
         event.consume();
     }
 
