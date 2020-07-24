@@ -11,8 +11,7 @@ import util.JsonUtil;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static common.bean.OperationType.HOST_CHANGE;
-import static common.bean.OperationType.MANAGER_ADD;
+import static common.bean.OperationType.*;
 import static common.bean.ResultCode.ERROR;
 
 @RestController
@@ -102,6 +101,9 @@ public class MeetingController {
         }
         else if (op == MANAGER_ADD) {
             return meetingService.addManger(meetingID, userName);
+        }
+        else if (op == MANAGER_REMOVE) {
+            return meetingService.removeManager(meetingID, userName);
         }
         return new HttpResult<>(ERROR, "Operation is not supported!");
     }

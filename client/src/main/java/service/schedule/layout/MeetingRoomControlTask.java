@@ -39,19 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 import static common.bean.OperationType.*;
 
-class LayoutChangeMessage {
-    final OperationType type;
-    final String controlID;
-    final StackPane pane;
-
-    public LayoutChangeMessage(OperationType type, String controlID, StackPane pane) {
-        this.type = type;
-        this.controlID = controlID;
-        this.pane = pane;
-    }
-}
-
-public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
+public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
 
     private static final Logger log = LoggerFactory.getLogger(TaskStarter.class);
     public static final Config config = Config.getInstance();
@@ -73,14 +61,14 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
     }
 
     private void initListener(Pane userListLayout) {
-        valueProperty().addListener((observable, oldValue, layoutChangeMessage) -> {
-            if (layoutChangeMessage != null) {
-                OperationType type = layoutChangeMessage.type;
-                String controlID = layoutChangeMessage.controlID;
+        valueProperty().addListener((observable, oldValue, layoutChangeSignal) -> {
+            if (layoutChangeSignal != null) {
+                OperationType type = layoutChangeSignal.getOp();
+                String controlID = layoutChangeSignal.getControlID();
                 if (type == USER_ADD) {
                     log.warn("USER_ADD[{}]", controlID);
-                    userListLayout.getChildren().add(layoutChangeMessage.pane);
-                } else if (type == USER_LEAVE) {
+                    userListLayout.getChildren().add(layoutChangeSignal.getPane());
+                } else if (type == USER_REMOVE) {
                     log.warn("USER_LEAVE[{}]", controlID);
                     Node node = userListLayout.lookup("#" + controlID);
                     userListLayout.getChildren().remove(node);
@@ -158,27 +146,27 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
         messageReceiveTask.valueProperty().addListener((observable, oldValue, msg) -> {
             if (msg != null) {
                 String data = msg.getData();
+                Meeting meeting = sessionManager.getCurrentMeeting();
                 OperationType op = msg.getType();
                 if (op == USER_ADD) {
                     User user = JsonUtil.jsonToObject(data, User.class);
                     addUser(user);
-                } else if (op == USER_LEAVE) {
+                } else if (op == USER_REMOVE) {
                     User user = JsonUtil.jsonToObject(data, User.class);
-                    this.updateValue(new LayoutChangeMessage(USER_LEAVE, user.getName(), null));
+                    this.updateValue(new LayoutChangeSignal(USER_REMOVE, user.getName(), null));
                 } else if (op == END_MEETING) { // TODO end meeting process
                     log.warn("Meeting is end.");
                 } else if (op == HOST_CHANGE) {
                     log.warn("Host change to {}", data);
                     SystemUtil.showSystemInfo(String.format("Host change to %s", data));
                     hostLabel.setText(data);
-                    Meeting meeting = sessionManager.getCurrentMeeting();
                     String oldHost = meeting.getHost();
                     meeting.setHost(data);
                     meeting.getManagers().remove(oldHost);
                 } else if (op == MANAGER_ADD) {
-                    log.warn("{} is manager now", data);
-                    SystemUtil.showSystemInfo(String.format("%s is manager now", data));
-                    sessionManager.getCurrentMeeting().getManagers().add(data);
+                    meeting.getManagers().add(data);
+                } else if (op == MANAGER_REMOVE) {
+                    meeting.getManagers().remove(data);
                 }
             }
         });
@@ -245,7 +233,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
             }
         });
 
-        updateValue(new LayoutChangeMessage(USER_ADD, userName, stackPane));
+        updateValue(new LayoutChangeSignal(USER_ADD, userName, stackPane));
         try {
             // Waiting for layout loading
             Thread.sleep(600);
@@ -364,7 +352,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeMessage> {
     }
 
     @Override
-    protected LayoutChangeMessage call() {
+    protected LayoutChangeSignal call() {
         init();
         return null;
     }

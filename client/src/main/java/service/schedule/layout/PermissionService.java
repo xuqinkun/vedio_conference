@@ -12,8 +12,6 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import util.SystemUtil;
 
-import static common.bean.OperationType.HOST_CHANGE;
-import static common.bean.OperationType.MANAGER_ADD;
 import static common.bean.ResultCode.ERROR;
 
 public class PermissionService extends Service<HttpResult<String>> {

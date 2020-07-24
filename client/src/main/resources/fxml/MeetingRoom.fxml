@@ -79,7 +79,7 @@
          <children>
             <GridPane fx:id="toolbar" alignment="CENTER" hgap="10.0" prefHeight="90.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <Button fx:id="leaveMeetingBtn" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave Meeting" textFill="RED" GridPane.columnIndex="7" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER">
+                  <Button fx:id="leaveMeetingBtn" alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave Meeting" textFill="RED" wrapText="true" GridPane.columnIndex="7" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER">
                      <font>
                         <Font size="14.0" />
                      </font></Button>
@@ -97,14 +97,14 @@
                         </Label>
                      </children>
                   </VBox>
-                  <VBox fx:id="managerBtn" alignment="CENTER" onMouseClicked="#openManager" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
+                  <VBox fx:id="managerBtn" alignment="CENTER" onMouseClicked="#viewManager" prefHeight="54.0" prefWidth="86.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
                      <children>
                         <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@img/managers.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="videoBtnLabel11" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Manager">
+                        <Label fx:id="managerIconLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Manager">
                            <font>
                               <Font size="14.0" />
                            </font>

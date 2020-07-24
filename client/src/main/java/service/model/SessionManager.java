@@ -2,6 +2,7 @@ package service.model;
 
 import common.bean.Meeting;
 import common.bean.User;
+import service.schedule.layout.ManagerLayoutRefreshService;
 import service.schedule.video.GrabberScheduledService;
 import util.Config;
 import util.DeviceManager;
@@ -150,5 +151,15 @@ public class SessionManager {
 
     public boolean isMeetingManager(String userName) {
         return getManagers().contains(userName);
+    }
+
+    private ManagerLayoutRefreshService refreshService;
+
+    public void setManagerLayoutRefreshService(ManagerLayoutRefreshService refreshService) {
+        this.refreshService = refreshService;
+    }
+
+    public ManagerLayoutRefreshService getRefreshService() {
+        return refreshService;
     }
 }

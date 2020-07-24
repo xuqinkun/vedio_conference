@@ -81,7 +81,7 @@ public class MeetingService {
             log.warn("Meeting[{}] is ended", meetingID);
             return new HttpResult<>(OK, String.format("Meeting[%s] is ended", meetingID));
         } else {
-            kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
+            kafkaService.sendMessage(meetingID, new Message(USER_REMOVE, JsonUtil.toJsonString(user)));
             meetingCache.removeUser(meetingID, userName);
             return new HttpResult<>(OK, String.format("You leave meeting[%s]", meetingID));
         }
@@ -100,7 +100,7 @@ public class MeetingService {
 
     public void removeUser(String meetingID, User user) {
         meetingCache.removeUser(meetingID, user.getName());
-        kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
+        kafkaService.sendMessage(meetingID, new Message(USER_REMOVE, JsonUtil.toJsonString(user)));
     }
 
     public HttpResult<String> getUserList(String uuid) {
@@ -159,5 +159,19 @@ public class MeetingService {
         meetingDao.updateManagers(meetingID, managers);
         kafkaService.sendMessage(meetingID, new Message(MANAGER_ADD, userName));
         return new HttpResult<>(OK, String.format("User[%s] is manager now!", userName));
+    }
+
+    public HttpResult<String> removeManager(String meetingID, String userName) {
+        Meeting oldMeeting = findMeeting(meetingID);
+        if (oldMeeting == null) {
+            String errMsg = String.format("Can't find meeting[ID=%s]", meetingID);
+            log.error(errMsg);
+            return new HttpResult<>(ERROR, errMsg);
+        }
+        Set<String> managers = oldMeeting.getManagers();
+        managers.remove(userName);
+        meetingDao.updateManagers(meetingID, managers);
+        kafkaService.sendMessage(meetingID, new Message(MANAGER_REMOVE, userName));
+        return new HttpResult<>(OK, String.format("User[%s] is removed from manager members!", userName));
     }
 }

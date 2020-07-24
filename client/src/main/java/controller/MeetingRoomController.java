@@ -56,6 +56,8 @@ public class MeetingRoomController implements Initializable {
     @FXML
     private Label meetingTypeLabel;
     @FXML
+    private Label managerIconLabel;
+    @FXML
     private Label timeLabel;
     private double lastX;
     private double lastY;
@@ -68,6 +70,7 @@ public class MeetingRoomController implements Initializable {
     private TimeCounterService timeCounterService;
     private boolean videoIsOpen = false;
     private boolean audioIsOpen = false;
+    private ManagerNumRefreshService managerNumRefreshService;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -96,6 +99,9 @@ public class MeetingRoomController implements Initializable {
         exec.schedule(client, 0, TimeUnit.MILLISECONDS);
         initToolbar();
         initStatusBar();
+        managerNumRefreshService = new ManagerNumRefreshService(managerIconLabel);
+        managerNumRefreshService.setPeriod(Duration.seconds(1));
+        managerNumRefreshService.start();
     }
 
     private void initStatusBar() {
@@ -143,12 +149,6 @@ public class MeetingRoomController implements Initializable {
     }
 
     @FXML
-    public void openManager(MouseEvent event) {
-
-        event.consume();
-    }
-
-    @FXML
     public void leaveMeeting(ActionEvent event) {
         try {
             if (sessionManager.isMeetingHost()) {
@@ -184,6 +184,8 @@ public class MeetingRoomController implements Initializable {
             exec.remove(client);
             exec.remove(controlTask);
             timeCounterService.cancel();
+            managerNumRefreshService.cancel();
+            sessionManager.getRefreshService().cancel();
         });
         cancelBtn.setOnMouseClicked((event) -> {
             dialogStage.close();
@@ -248,6 +250,26 @@ public class MeetingRoomController implements Initializable {
             Label infoLabel = (Label) invitationStage.getScene().getRoot().getChildrenUnmodifiable().get(2);
             infoLabel.setText("");
         });
+        event.consume();
+    }
+
+    private Stage managerViewStage;
+
+    @FXML
+    public void viewManager(MouseEvent event) throws IOException {
+        if (managerViewStage == null) {
+            Stage mainStage = (Stage) rootLayout.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/ManagerLayout.fxml"));
+            managerViewStage = new Stage();
+            managerViewStage.setResizable(false);
+            managerViewStage.setScene(new Scene(root));
+            managerViewStage.initOwner(mainStage);
+            managerViewStage.show();
+        } else if (managerViewStage.isShowing()) {
+            managerViewStage.close();
+        } else {
+            managerViewStage.show();
+        }
         event.consume();
     }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MeetingCache {
     private static final MeetingCache INSTANCE = new MeetingCache();
 
-    private Map<String, Map<String, User>> meetingUserMap = new ConcurrentHashMap<>();
+    private volatile Map<String, Map<String, User>> meetingUserMap = new ConcurrentHashMap<>();
 
     private MeetingCache() {
     }
@@ -22,11 +22,12 @@ public class MeetingCache {
 
     public void addUser(String meetingId, User user) {
         if (meetingUserMap.get(meetingId) == null) {
-            Map<String, User> users = new ConcurrentHashMap<>();
-            users.put(user.getName(), user);
-            meetingUserMap.put(meetingId, users);
-        } else {
-            meetingUserMap.get(meetingId).put(user.getName(), user);
+            Map<String, User> userMap = new ConcurrentHashMap<>();
+            meetingUserMap.put(meetingId, userMap);
+        }
+        Map<String, User> userMap = meetingUserMap.get(meetingId);
+        if (!userMap.containsKey(user.getName())) {
+            userMap.put(user.getName(), user);
         }
     }
 

@@ -62,6 +62,7 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
                 String username = SessionManager.getInstance().getCurrentUser().getName();
                 meeting.setHost(username);
                 meeting.setCreator(username);
+                meeting.getManagers().add(username);
                 HttpResult<String> response = HttpClientUtil.getInstance().doPost(UrlMap.getCreateMeetingUrl(), meeting);
                 if (response != null && response.getResult() == ResultCode.OK) {
                     log.warn("Create meeting[{}] succeed", meeting);

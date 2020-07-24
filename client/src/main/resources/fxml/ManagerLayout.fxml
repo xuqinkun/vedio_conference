@@ -1,38 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.text.*?>
-<?import javafx.geometry.*?>
 <?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
 
-<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="247.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<ScrollPane hbarPolicy="NEVER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="418.0" prefWidth="419.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ManagerViewController">
    <content>
-      <VBox prefHeight="397.0" prefWidth="245.0">
-         <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="11.0" prefWidth="223.0">
-               <padding>
-                  <Insets bottom="2.0" left="3.0" right="3.0" top="2.0" />
-               </padding>
-               <children>
-                  <Label prefHeight="22.0" prefWidth="67.0" text="username">
-                     <font>
-                        <Font size="15.0" />
-                     </font>
-                  </Label>
-                  <Button mnemonicParsing="false" prefHeight="27.0" prefWidth="65.0" style="-fx-background-color: white; -fx-border-color: red;" text="Remove" textFill="RED">
-                     <HBox.margin>
-                        <Insets left="90.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
-         </children>
+      <VBox alignment="TOP_CENTER" maxHeight="415.0" maxWidth="-Infinity" prefHeight="415.0" prefWidth="414.0" style="-fx-background-color: white;">
          <padding>
-            <Insets bottom="5.0" top="5.0" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
+         <children>
+            <Label text="Managers" wrapText="true">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </VBox.margin>
+            </Label>
+            <VBox fx:id="managerBox" prefHeight="377.0" prefWidth="404.0" />
+         </children>
       </VBox>
    </content>
 </ScrollPane>
