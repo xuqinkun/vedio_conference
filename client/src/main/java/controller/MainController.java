@@ -144,9 +144,10 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    public void goToRegister(MouseEvent event) {
+    public void goToRegister(ActionEvent event) {
         hideControl(loginLayout);
         displayControl(registerLayout);
+        event.consume();
     }
 
     @FXML

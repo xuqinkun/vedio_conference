@@ -85,9 +85,9 @@ public class MeetingRoomController implements Initializable {
         String username = sessionManager.getCurrentUser().getName();
         String meetingId = sessionManager.getCurrentMeeting().getUuid();
         if (sessionManager.isMeetingHost()) {
-            leaveMeetingBtn.setText("End Meeting");
+            leaveMeetingBtn.setText("End");
         } else {
-            leaveMeetingBtn.setText("Leave Meeting");
+            leaveMeetingBtn.setText("Leave");
         }
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
         controlTask = new MeetingRoomControlTask(meetingHostLabel, userListLayout, globalImageView);

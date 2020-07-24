@@ -79,7 +79,7 @@
          <children>
             <GridPane fx:id="toolbar" alignment="CENTER" hgap="10.0" prefHeight="90.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <Button fx:id="leaveMeetingBtn" alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave Meeting" textFill="RED" wrapText="true" GridPane.columnIndex="7" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER">
+                  <Button fx:id="leaveMeetingBtn" alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#leaveMeeting" prefHeight="40.0" prefWidth="87.0" style="-fx-background-color: #ffffff; -fx-border-color: #ff0000; -fx-border-radius: 5;" text="Leave" textFill="RED" wrapText="true" GridPane.columnIndex="7" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowSpan="3" GridPane.valignment="CENTER">
                      <font>
                         <Font size="14.0" />
                      </font></Button>

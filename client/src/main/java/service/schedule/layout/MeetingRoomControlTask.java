@@ -161,8 +161,8 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
     private MessageReceiveService personalReceiveTask;
 
     private void messageListener(Meeting currentMeeting, String userName) {
-        globalReceiveService = new MessageReceiveService(currentMeeting.getUuid(), hostLabel, sessionManager.getCurrentUser().getName(), this);
-        personalReceiveTask = new MessageReceiveService(userName, hostLabel, sessionManager.getCurrentUser().getName(), this);
+        globalReceiveService = new MessageReceiveService(currentMeeting.getUuid(), hostLabel, userName + "_global", this);
+        personalReceiveTask = new MessageReceiveService(userName, hostLabel, userName + "_local", this);
         globalReceiveService.start();
         personalReceiveTask.start();
     }
