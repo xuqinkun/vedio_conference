@@ -230,6 +230,7 @@ public class MeetingRoomController implements Initializable {
         if (invitationStage == null) {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/Invitation.fxml"));
             invitationStage = new Stage();
+            invitationStage.setTitle("Invitation");
             invitationStage.setResizable(false);
             invitationStage.setScene(new Scene(root));
             invitationStage.show();

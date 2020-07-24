@@ -93,8 +93,11 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                         new AudioSwitchService(audioSwitchBtn).start();
                     }
                 } else if (type == VIDEO_CLOSE) {
-                    ImageView userView = (ImageView) root.lookup(controlID + USERVIEW_ID_SUFFIX);
-                    userView.setImage(new Image(Config.getInstance().getDefaultPortraitSrc()));
+                    if (!controlID.equals(sessionManager.getCurrentUser().getName())) {
+                        log.warn("{} closed video", controlID);
+                        ImageView userView = (ImageView) root.lookup("#" + controlID + USERVIEW_ID_SUFFIX);
+                        userView.setImage(new Image(Config.getInstance().getDefaultPortraitSrc()));
+                    }
                 }
             }
         });
