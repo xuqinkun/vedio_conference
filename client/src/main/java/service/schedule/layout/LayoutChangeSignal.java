@@ -5,12 +5,12 @@ import javafx.scene.layout.Pane;
 
 public class LayoutChangeSignal {
     private final OperationType op;
-    private final String controlID;
+    private final String userName;
     private final Pane pane;
 
-    public LayoutChangeSignal(OperationType op, String controlID, Pane pane) {
+    public LayoutChangeSignal(OperationType op, String userName, Pane pane) {
         this.op = op;
-        this.controlID = controlID;
+        this.userName = userName;
         this.pane = pane;
     }
 
@@ -18,8 +18,8 @@ public class LayoutChangeSignal {
         return op;
     }
 
-    public String getControlID() {
-        return controlID;
+    public String getUserName() {
+        return userName;
     }
 
     public Pane getPane() {

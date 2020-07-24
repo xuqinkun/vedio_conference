@@ -36,7 +36,7 @@ public class ManagerLayoutRefreshService extends ScheduledService<LayoutChangeSi
         valueProperty().addListener((observable, oldValue, layoutChangeSignal) -> {
             if (layoutChangeSignal != null) {
                 OperationType op = layoutChangeSignal.getOp();
-                String paneId = layoutChangeSignal.getControlID();
+                String paneId = layoutChangeSignal.getUserName();
                 if (op == MANAGER_ADD && managerBox.lookup("#" + paneId) == null) {
                     log.warn("Add manager[{}] to layout", paneId);
                     managerBox.getChildren().add(layoutChangeSignal.getPane());

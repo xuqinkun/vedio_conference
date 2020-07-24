@@ -2,32 +2,30 @@ package controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.TextAlignment;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import service.model.SessionManager;
+import service.schedule.layout.ChatSenderService;
+import service.schedule.layout.ReceiverChoiceBoxService;
 
 import java.net.URL;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 public class ChatRoomController implements Initializable {
 
-    @FXML
-    private Pane chatLayout;
+    private static final Logger log = LoggerFactory.getLogger(ChatRoomController.class);
 
-    @FXML
-    private VBox chatMessageContainer;
-
+    public static final String ALL = "All";
     @FXML
     private TextArea chatInputArea;
 
@@ -35,16 +33,14 @@ public class ChatRoomController implements Initializable {
     private Label sendMessageLabel;
 
     @FXML
-    private ScrollBar chatBoxScrollBar;
-
-    private double chatBoxFillHeight;
+    private ScrollPane chatBoxScrollPane;
 
     @FXML
     private ChoiceBox<String> receiverChoiceBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        receiverChoiceBox.getItems().add("All");
+        receiverChoiceBox.getItems().add(ALL);
         receiverChoiceBox.getSelectionModel().selectFirst();
         chatInputArea.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!StringUtils.isEmpty(newValue)) {
@@ -53,64 +49,38 @@ public class ChatRoomController implements Initializable {
                 sendMessageLabel.setTextFill(Paint.valueOf("#999999"));
             }
         });
-
-        chatBoxScrollBar.valueProperty().addListener((observable, oldValue, newValue) -> {
-            chatMessageContainer.setLayoutY(-newValue.doubleValue());
-        });
+        VBox chatMessageBox = new VBox();
+        chatMessageBox.setPrefHeight(chatBoxScrollPane.getPrefHeight() - 10);
+        chatMessageBox.setStyle("-fx-background-color: white");
+        chatBoxScrollPane.setContent(chatMessageBox);
+        new ReceiverChoiceBoxService(receiverChoiceBox).start();
     }
 
     @FXML
     public void sendMessage(MouseEvent event) {
-        send();
-        sendMessageLabel.requestFocus();
+        doSend();
         event.consume();
+    }
+
+    private void doSend() {
+        String text = chatInputArea.getText();
+        String target = receiverChoiceBox.getValue();
+        log.warn("Send text[{}] to {}", text, target);
+        if (target.equals(ALL)) {
+            target = SessionManager.getInstance().getCurrentMeeting().getUuid();
+        }
+        new ChatSenderService(chatBoxScrollPane, target, text).start();
+        chatInputArea.clear();
+        sendMessageLabel.requestFocus();
     }
 
     @FXML
     public void keyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            send();
-            sendMessageLabel.requestFocus();
+            doSend();
         }
+        event.consume();
     }
 
-    private void send() {
-        String text = chatInputArea.getText();
-        displayMessage(text);
-        chatInputArea.clear();
-    }
 
-    private void displayMessage(String text) {
-        if (!StringUtils.isEmpty(text.trim())) {
-            VBox vBox = new VBox();
-            vBox.setSpacing(5);
-
-            double width = chatMessageContainer.getWidth();
-            int labelHeight = 30;
-            Label time = decorate(width, labelHeight, new Date().toString());
-            Label username = decorate(width, labelHeight, "username");
-            Label msg = decorate(width, labelHeight, text);
-            username.setStyle("-fx-text-fill: green;");
-
-            vBox.getChildren().addAll(time, username, msg);
-            chatMessageContainer.getChildren().add(vBox);
-        }
-    }
-
-    private Label decorate(double width, int height, String str) {
-        Label label = new Label(str);
-        label.setPadding(new Insets(5));
-        label.setPrefSize(width, height);
-        label.setMinSize(width, height);
-        label.setMaxSize(width, height);
-        label.setTextAlignment(TextAlignment.CENTER);
-
-        /** ScrollBar*/
-        if (chatBoxFillHeight + height > chatMessageContainer.getPrefHeight()) {
-            chatMessageContainer.setLayoutY(chatMessageContainer.getLayoutY() - height);
-        } else {
-            chatBoxFillHeight += height;
-        }
-        return label;
-    }
 }

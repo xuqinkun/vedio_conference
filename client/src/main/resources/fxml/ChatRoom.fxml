@@ -2,17 +2,14 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox fx:id="chatLayout" maxWidth="387.0" minWidth="300.0" prefHeight="453.0" prefWidth="387.0" style="-fx-border-color: #dddddd;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ChatRoomController">
+<VBox fx:id="chatLayout" maxWidth="423.0" minWidth="300.0" prefHeight="489.0" prefWidth="423.0" style="-fx-border-color: #dddddd; -fx-background-color: white;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ChatRoomController">
    <children>
-      <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="306.0" prefWidth="385.0">
-         <children>
-            <VBox fx:id="chatMessageContainer" maxWidth="-Infinity" minHeight="306.0" minWidth="-Infinity" prefHeight="306.0" prefWidth="370.0" spacing="5.0" AnchorPane.leftAnchor="0.0" />
-            <ScrollBar fx:id="chatBoxScrollBar" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-         </children>
-      </AnchorPane>
-      <HBox prefHeight="35.0" prefWidth="266.0">
+      <ScrollPane fx:id="chatBoxScrollPane" hbarPolicy="NEVER" pannable="true" prefHeight="357.0" prefWidth="421.0" style="-fx-background-color: white;" />
+      <Separator prefWidth="200.0" />
+      <HBox prefHeight="35.0" prefWidth="266.0" style="-fx-background-color: white;">
          <children>
             <Label prefHeight="34.0" prefWidth="58.0" text="Send to">
                <font>
@@ -29,19 +26,22 @@
             <Insets left="5.0" />
          </padding>
       </HBox>
-      <TextArea fx:id="chatInputArea" onKeyReleased="#keyReleased" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-radius: 0; -fx-background-radius: 0; -fx-border-width: 0;">
+      <TextArea fx:id="chatInputArea" onKeyReleased="#keyReleased" prefHeight="78.0" prefWidth="272.0" promptText="Please input message" style="-fx-border-color: white;">
          <VBox.margin>
             <Insets left="5.0" right="5.0" />
          </VBox.margin></TextArea>
-      <HBox alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="266.0">
+      <HBox alignment="CENTER_RIGHT" prefHeight="31.0" prefWidth="266.0" style="-fx-background-color: white;">
          <children>
-            <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" prefHeight="29.0" prefWidth="302.0" text="Send" textFill="#999999">
+            <Label fx:id="sendMessageLabel" alignment="CENTER_RIGHT" onMouseClicked="#sendMessage" prefHeight="29.0" prefWidth="45.0" text="Send" textFill="#999999">
                <font>
                   <Font size="14.0" />
                </font>
                <HBox.margin>
-                  <Insets right="5.0" />
+                  <Insets right="6.0" />
                </HBox.margin>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </Label>
          </children>
       </HBox>

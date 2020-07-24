@@ -73,6 +73,10 @@ public class SessionManager {
         return userCache.get(username);
     }
 
+    public Set<String> getUserList() {
+        return userCache.keySet();
+    }
+
     private User createDefault() {
         return new User("user_" + System.currentTimeMillis(), false);
     }

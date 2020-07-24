@@ -71,7 +71,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                 ImageView globalImageView = (ImageView) root.lookup("#globalImageView");
 
                 OperationType type = layoutChangeSignal.getOp();
-                String controlID = layoutChangeSignal.getControlID();
+                String controlID = layoutChangeSignal.getUserName();
                 if (type == USER_ADD) {
                     log.warn("USER_ADD[{}]", controlID);
                     userListLayout.getChildren().add(layoutChangeSignal.getPane());
