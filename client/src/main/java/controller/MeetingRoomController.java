@@ -142,19 +142,18 @@ public class MeetingRoomController implements Initializable {
         });
     }
 
-    private boolean openChat;
-
     @FXML
     public void openOrCloseChat(MouseEvent event) throws IOException {
-        openChat = !openChat;
-        if (openChat) {
+        if (chatStage == null) {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/ChatRoom.fxml"));
             chatStage = new Stage();
             chatStage.setScene(new Scene(root));
+            chatStage.setResizable(false);
             chatStage.show();
-        } else if (chatStage != null) {
+        } else if (chatStage.isShowing()) {
             chatStage.close();
-            chatStage = null;
+        } else {
+            chatStage.show();
         }
         event.consume();
     }

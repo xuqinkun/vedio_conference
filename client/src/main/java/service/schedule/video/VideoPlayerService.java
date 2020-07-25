@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.schedule.SlowTaskHolder;
+import util.Config;
 import util.DeviceManager;
 import util.ImageUtil;
 
@@ -38,7 +39,7 @@ public class VideoPlayerService extends ScheduledService<Image> {
         this.globalView = globalView;
         videoGrabberHolder = DeviceManager.getFFmpegFrameGrabber(inStream);
         grabber = videoGrabberHolder.getContent();
-        portraitSrc = SessionManager.getInstance().getPortraitSrc(layoutName);
+        portraitSrc = Config.getInstance().getDefaultPortraitSrc();
         init();
     }
 

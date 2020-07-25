@@ -59,6 +59,7 @@ public class ManagerLayoutRefreshService extends ScheduledService<LayoutChangeSi
             protected LayoutChangeSignal call() throws Exception {
                 Set<String> managers = sessionManager.getManagers();
                 managerAddScan(managers);
+                Thread.sleep(1000);
                 managerRemoveScan();
                 return null;
             }

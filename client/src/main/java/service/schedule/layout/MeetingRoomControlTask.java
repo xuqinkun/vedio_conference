@@ -372,8 +372,10 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         for (AudioPlayerService service : audioPlayerServiceMap.values()) {
             service.cancel();
         }
-        globalReceiveService.cancel();
-        personalReceiveTask.cancel();
+        if (globalReceiveService != null)
+            globalReceiveService.cancel();
+        if (personalReceiveTask != null)
+            personalReceiveTask.cancel();
         exec.remove(videoRecordTask);
         exec.shutdownNow();
     }

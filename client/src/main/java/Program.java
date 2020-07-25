@@ -37,7 +37,7 @@ public class Program extends Application {
             root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
         }
         primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(true);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

@@ -102,6 +102,7 @@ public class MessageReceiveService extends ScheduledService<Message> {
                 } else if (op == CHAT_MESSAGE) {
                     ChatMessage chatMessage = JsonUtil.jsonToObject(data, ChatMessage.class);
                     String userName = chatMessage.getSenderName();
+                    log.warn("Accept chat[{}]", chatMessage);
                     if (!userName.equals(sessionManager.getCurrentUser().getName())) {
                         ChatMessageContainer.getInstance().addMessage(chatMessage);
                     }

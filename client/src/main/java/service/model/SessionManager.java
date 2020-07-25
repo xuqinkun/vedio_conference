@@ -105,11 +105,6 @@ public class SessionManager {
         return grabberScheduledService;
     }
 
-    public String getPortraitSrc(String username) {
-        User user = userCache.get(username);
-        return user == null || user.getPortraitSrc() == null ? config.getDefaultPortraitSrc() : user.getPortraitSrc();
-    }
-
     public boolean isMeetingHost() {
         return currentMeeting.getHost().equals(currentUser.getName());
     }

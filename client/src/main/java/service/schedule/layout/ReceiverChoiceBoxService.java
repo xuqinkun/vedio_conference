@@ -38,6 +38,7 @@ public class ReceiverChoiceBoxService extends ScheduledService<LayoutChangeSigna
                         updateValue(new LayoutChangeSignal(USER_ADD, userName, null));
                     }
                 }
+                Thread.sleep(1000);
                 for (String userName : receiverChoiceBox.getItems()) {
                     if (!userName.equals("All") && !sessionManager.getUserList().contains(userName)) {
                         updateValue(new LayoutChangeSignal(USER_REMOVE, userName, null));

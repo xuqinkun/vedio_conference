@@ -3,6 +3,7 @@ package service.schedule.layout;
 import common.bean.Message;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,13 +25,14 @@ public class ChatSenderService extends Service<VBox> {
 
     private ChatMessage chatMessage;
 
-    public ChatSenderService(VBox chatBox, ChatMessage chatMessage) {
-        this.chatBox = chatBox;
+    public ChatSenderService(ScrollPane chatBoxScrollPane, ChatMessage chatMessage) {
+        this.chatBox = (VBox) chatBoxScrollPane.getContent();
         this.chatMessage = chatMessage;
 
         valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 chatBox.getChildren().add(newValue);
+                chatBoxScrollPane.setVvalue(chatBoxScrollPane.getVmax());
             }
         });
     }
@@ -41,8 +43,6 @@ public class ChatSenderService extends Service<VBox> {
             @Override
             protected VBox call() throws Exception {
                 double width = chatBox.getPrefWidth() - 10;
-                String userName = SessionManager.getInstance().getCurrentUser().getName();
-
                 VBox vBox = LayoutUtil.drawChatItemBox(width, chatMessage, true);
 
                 String topic = chatMessage.getReceiver();

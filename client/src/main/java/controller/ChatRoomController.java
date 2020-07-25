@@ -60,7 +60,7 @@ public class ChatRoomController implements Initializable {
         chatBoxScrollPane.setContent(chatMessageBox);
 
         new ReceiverChoiceBoxService(receiverChoiceBox).start();
-        ChatDisplayService chatDisplayService = new ChatDisplayService(chatMessageBox);
+        ChatDisplayService chatDisplayService = new ChatDisplayService(chatBoxScrollPane);
         chatDisplayService.setDelay(Duration.millis(0));
         chatDisplayService.setPeriod(Duration.millis(400));
         chatDisplayService.start();
@@ -87,7 +87,7 @@ public class ChatRoomController implements Initializable {
             chat.setPersonal(true);
             chat.setReceiver(target);
         }
-        new ChatSenderService((VBox) chatBoxScrollPane.getContent(), chat).start();
+        new ChatSenderService(chatBoxScrollPane, chat).start();
         chatInputArea.clear();
         sendMessageLabel.requestFocus();
     }

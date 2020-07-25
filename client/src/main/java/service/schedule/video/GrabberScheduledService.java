@@ -8,6 +8,7 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
+import util.Config;
 
 public class GrabberScheduledService extends ScheduledService<Image> {
     private static final Logger LOG = LoggerFactory.getLogger(GrabberScheduledService.class);
@@ -27,7 +28,7 @@ public class GrabberScheduledService extends ScheduledService<Image> {
         initListener();
         setDelay(Duration.millis(0));
         setPeriod(Duration.millis(5));
-        portraitSrc = SessionManager.getInstance().getPortraitSrc(layoutName);
+        portraitSrc = Config.getInstance().getDefaultPortraitSrc();
     }
 
     protected void initListener() {
