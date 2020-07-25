@@ -53,9 +53,10 @@ public class JoinMeetingService extends Service<HttpResult<String>> {
     private void displayMeetingRoom() {
         Parent root = LayoutUtil.loadFXML("/fxml/MeetingRoom.fxml");
         Stage roomStage = new Stage();
-        String username = SessionManager.getInstance().getCurrentUser().getName();
-        roomStage.setTitle(username  + "'s meeting");
+        String host = SessionManager.getInstance().getCurrentMeeting().getHost();
+        roomStage.setTitle(host  + "'s meeting");
         roomStage.setScene(new Scene(root));
+        roomStage.setResizable(false);
         Stage joinStage = (Stage) joinMeetingBtn.getScene().getWindow();
         Stage mainStage = (Stage) joinStage.getOwner();
 

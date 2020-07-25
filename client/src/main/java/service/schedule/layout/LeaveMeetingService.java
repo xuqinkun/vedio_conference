@@ -14,6 +14,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
 import util.LayoutUtil;
+import util.SystemUtil;
 
 import java.io.IOException;
 
@@ -39,8 +40,8 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
                     e.printStackTrace();
                 }
             } else {
-                // TODO print response
                 log.warn(response.getMessage());
+                SystemUtil.showSystemInfo(response.getMessage());
             }
         });
     }

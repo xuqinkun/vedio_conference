@@ -112,7 +112,6 @@ public class HeartBeatsServer extends Thread {
                 cacheUser.setTimeStamp(System.currentTimeMillis());
             }
         } else {
-            // TODO check the remote address, remove the close connection
             log.warn("User state is null or leave, maybe connection is close.");
         }
     }

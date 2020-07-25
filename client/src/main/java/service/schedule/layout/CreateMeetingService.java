@@ -76,8 +76,8 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
     private void drawMeetingRoom() {
         Parent root = LayoutUtil.loadFXML("/fxml/MeetingRoom.fxml");
         Stage roomStage = new Stage();
-        String username = SessionManager.getInstance().getCurrentUser().getName();
-        roomStage.setTitle(username  + "'s meeting");
+        String host = SessionManager.getInstance().getCurrentMeeting().getHost();
+        roomStage.setTitle(host  + "'s meeting");
         roomStage.setScene(new Scene(root));
         currentStage.close();
         ((Stage) currentStage.getOwner()).close();
@@ -86,6 +86,7 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
             leaveMeetingBtn.fire();
             event.consume();
         });
+        roomStage.setResizable(false);
         roomStage.show();
     }
 }
