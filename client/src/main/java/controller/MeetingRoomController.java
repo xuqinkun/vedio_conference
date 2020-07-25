@@ -60,6 +60,10 @@ public class MeetingRoomController implements Initializable {
     private Label managerIconLabel;
     @FXML
     private Label timeLabel;
+    @FXML
+    private Label chatIconLabel;
+
+
     private double lastX;
     private double lastY;
     private double oldStageX;
@@ -68,8 +72,9 @@ public class MeetingRoomController implements Initializable {
     private Stage invitationStage;
     private MeetingRoomControlTask controlTask;
     private HeartBeatsClient client;
-    private TimeCounterService timeCounterService;
+    private TimerService timerService;
     private ManagerNumRefreshService managerNumRefreshService;
+    private ChatNumRefreshService chatNumRefreshService;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -98,9 +103,16 @@ public class MeetingRoomController implements Initializable {
         exec.schedule(client, 0, TimeUnit.MILLISECONDS);
         initToolbar();
         initStatusBar();
+        initRefreshService();
+    }
+
+    private void initRefreshService() {
         managerNumRefreshService = new ManagerNumRefreshService(managerIconLabel);
         managerNumRefreshService.setPeriod(Duration.seconds(1));
         managerNumRefreshService.start();
+        chatNumRefreshService = new ChatNumRefreshService(chatIconLabel);
+        chatNumRefreshService.setPeriod(Duration.seconds(1));
+        chatNumRefreshService.start();
     }
 
     private void initStatusBar() {
@@ -108,9 +120,9 @@ public class MeetingRoomController implements Initializable {
         Meeting currentMeeting = sessionManager.getCurrentMeeting();
         meetingHostLabel.setText(currentMeeting.getHost());
         meetingTypeLabel.setText(currentMeeting.getMeetingType());
-        timeCounterService = new TimeCounterService(timeLabel);
-        timeCounterService.setPeriod(Duration.seconds(1));
-        timeCounterService.start();
+        timerService = new TimerService(timeLabel);
+        timerService.setPeriod(Duration.seconds(1));
+        timerService.start();
     }
 
     private void initToolbar() {
@@ -185,7 +197,7 @@ public class MeetingRoomController implements Initializable {
             controlTask.stopMeeting();
             exec.remove(client);
             exec.remove(controlTask);
-            timeCounterService.cancel();
+            timerService.cancel();
             managerNumRefreshService.cancel();
             ManagerLayoutRefreshService refreshService = sessionManager.getRefreshService();
             if (refreshService != null) {

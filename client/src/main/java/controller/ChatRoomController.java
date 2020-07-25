@@ -11,10 +11,12 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
+import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
+import service.schedule.layout.ChatDisplayService;
 import service.schedule.layout.ChatSenderService;
 import service.schedule.layout.ReceiverChoiceBoxService;
 
@@ -50,10 +52,16 @@ public class ChatRoomController implements Initializable {
             }
         });
         VBox chatMessageBox = new VBox();
-        chatMessageBox.setPrefHeight(chatBoxScrollPane.getPrefHeight() - 10);
+        chatMessageBox.setPrefSize(chatBoxScrollPane.getPrefWidth() - 10,
+                chatBoxScrollPane.getPrefHeight() - 10);
         chatMessageBox.setStyle("-fx-background-color: white");
         chatBoxScrollPane.setContent(chatMessageBox);
+
         new ReceiverChoiceBoxService(receiverChoiceBox).start();
+        ChatDisplayService chatDisplayService = new ChatDisplayService(chatMessageBox);
+        chatDisplayService.setDelay(Duration.millis(0));
+        chatDisplayService.setPeriod(Duration.millis(200));
+        chatDisplayService.start();
     }
 
     @FXML
@@ -69,7 +77,7 @@ public class ChatRoomController implements Initializable {
         if (target.equals(ALL)) {
             target = SessionManager.getInstance().getCurrentMeeting().getUuid();
         }
-        new ChatSenderService(chatBoxScrollPane, target, text).start();
+        new ChatSenderService((VBox) chatBoxScrollPane.getContent(), target, text).start();
         chatInputArea.clear();
         sendMessageLabel.requestFocus();
     }

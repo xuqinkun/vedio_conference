@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import service.model.ChatMessage;
+import service.model.ChatMessageContainer;
 import service.model.SessionManager;
 import service.schedule.layout.LayoutChangeSignal;
 import service.schedule.layout.MeetingRoomControlTask;
@@ -97,6 +99,12 @@ public class MessageReceiveService extends ScheduledService<Message> {
                     task.addSignal(new LayoutChangeSignal(AUDIO_OFF, data, null));
                 } else if (op == VIDEO_CLOSE) {
                     task.addSignal(new LayoutChangeSignal(VIDEO_CLOSE, data, null));
+                } else if (op == CHAT_MESSAGE) {
+                    ChatMessage chatMessage = JsonUtil.jsonToObject(data, ChatMessage.class);
+                    String userName = chatMessage.getUserName();
+                    if (!userName.equals(sessionManager.getCurrentUser().getName())) {
+                        ChatMessageContainer.getInstance().addMessage(chatMessage);
+                    }
                 }
             }
         });

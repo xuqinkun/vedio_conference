@@ -32,8 +32,9 @@ public class ReceiverChoiceBoxService extends ScheduledService<LayoutChangeSigna
             @Override
             protected LayoutChangeSignal call() throws Exception {
                 SessionManager sessionManager = SessionManager.getInstance();
+                String currentUser = sessionManager.getCurrentUser().getName();
                 for (String userName : sessionManager.getUserList()) {
-                    if (!receiverChoiceBox.getItems().contains(userName)) {
+                    if (!receiverChoiceBox.getItems().contains(userName) && !userName.equals(currentUser)) {
                         updateValue(new LayoutChangeSignal(USER_ADD, userName, null));
                     }
                 }

@@ -5,11 +5,11 @@ import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import util.Helper;
 
-public class TimeCounterService extends ScheduledService<String> {
+public class TimerService extends ScheduledService<String> {
 
     private long startTime;
 
-    public TimeCounterService(Label label) {
+    public TimerService(Label label) {
         startTime = System.currentTimeMillis();
         valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {

@@ -146,7 +146,7 @@
                               <Image url="@img/chat.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="videoBtnLabel111" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Chat">
+                        <Label fx:id="chatIconLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Chat">
                            <font>
                               <Font size="14.0" />
                            </font>
