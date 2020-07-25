@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
+import service.messaging.MessageManager;
 import service.messaging.MessageReceiveService;
 import service.model.SessionManager;
 import service.schedule.TaskStarter;
@@ -34,9 +35,7 @@ import service.schedule.video.VideoPlayerService;
 import service.schedule.video.VideoRecordTask;
 import util.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -333,6 +332,10 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
             }
         });
         videoSwitch.setOnAction(event -> {
+            if (!sessionManager.isMeetingManager(currentUser)) {
+                SystemUtil.showSystemInfo("You are not manager. Operation not supported!");
+                return;
+            }
             if (videoSwitch.getText().contains("on")) {
                 videoSwitch.setText("Video off");
                 new PermissionService(meetingID, userName, VIDEO_ON).start();
@@ -392,6 +395,13 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
             personalReceiveTask.cancel();
         exec.remove(videoRecordTask);
         exec.shutdownNow();
+        if (sessionManager.isMeetingHost()) {
+            // Delete topics after meeting
+            Set<String> userList = sessionManager.getUserList();
+            List<String> topicList = new ArrayList<>(userList);
+            topicList.add(sessionManager.getCurrentMeeting().getUuid());
+            MessageManager.getInstance().deleteTopics(topicList);
+        }
     }
 
     @Override
