@@ -22,14 +22,11 @@ public class ChatSenderService extends Service<VBox> {
 
     private VBox chatBox;
 
-    private String topic;
+    private ChatMessage chatMessage;
 
-    private String text;
-
-    public ChatSenderService(VBox chatBox, String topic, String text) {
+    public ChatSenderService(VBox chatBox, ChatMessage chatMessage) {
         this.chatBox = chatBox;
-        this.topic = topic;
-        this.text = text;
+        this.chatMessage = chatMessage;
 
         valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -43,19 +40,16 @@ public class ChatSenderService extends Service<VBox> {
         return new Task<VBox>() {
             @Override
             protected VBox call() throws Exception {
-                if (!StringUtils.isEmpty(text.trim())) {
-                    double width = chatBox.getPrefWidth() - 10;
-                    String userName = SessionManager.getInstance().getCurrentUser().getName();
-                    ChatMessage chat = new ChatMessage(Helper.currentDate(), userName, text);
+                double width = chatBox.getPrefWidth() - 10;
+                String userName = SessionManager.getInstance().getCurrentUser().getName();
 
-                    VBox vBox = LayoutUtil.drawChatItemBox(width, chat);
+                VBox vBox = LayoutUtil.drawChatItemBox(width, chatMessage, true);
 
-                    MessageSender.getInstance().send(topic, new Message(CHAT_MESSAGE, JsonUtil.toJsonString(chat)));
-                    log.warn("Send message[{}] to [{}]", chat, topic);
+                String topic = chatMessage.getReceiver();
+                MessageSender.getInstance().send(topic, new Message(CHAT_MESSAGE, JsonUtil.toJsonString(chatMessage)));
+                log.warn("Send message[{}] to [{}]", chatMessage, topic);
 
-                    return vBox;
-                }
-                return null;
+                return vBox;
             }
         };
     }

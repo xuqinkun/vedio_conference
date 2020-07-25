@@ -101,7 +101,7 @@ public class MessageReceiveService extends ScheduledService<Message> {
                     task.addSignal(new LayoutChangeSignal(VIDEO_CLOSE, data, null));
                 } else if (op == CHAT_MESSAGE) {
                     ChatMessage chatMessage = JsonUtil.jsonToObject(data, ChatMessage.class);
-                    String userName = chatMessage.getUserName();
+                    String userName = chatMessage.getSenderName();
                     if (!userName.equals(sessionManager.getCurrentUser().getName())) {
                         ChatMessageContainer.getInstance().addMessage(chatMessage);
                     }

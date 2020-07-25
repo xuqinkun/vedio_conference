@@ -15,10 +15,12 @@ import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.model.ChatMessage;
 import service.model.SessionManager;
 import service.schedule.layout.ChatDisplayService;
 import service.schedule.layout.ChatSenderService;
 import service.schedule.layout.ReceiverChoiceBoxService;
+import util.Helper;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -60,7 +62,7 @@ public class ChatRoomController implements Initializable {
         new ReceiverChoiceBoxService(receiverChoiceBox).start();
         ChatDisplayService chatDisplayService = new ChatDisplayService(chatMessageBox);
         chatDisplayService.setDelay(Duration.millis(0));
-        chatDisplayService.setPeriod(Duration.millis(200));
+        chatDisplayService.setPeriod(Duration.millis(400));
         chatDisplayService.start();
     }
 
@@ -74,10 +76,18 @@ public class ChatRoomController implements Initializable {
         String text = chatInputArea.getText();
         String target = receiverChoiceBox.getValue();
         log.warn("Send text[{}] to {}", text, target);
+        SessionManager sessionManager = SessionManager.getInstance();
+        String senderName = sessionManager.getCurrentUser().getName();
+
+        ChatMessage chat = new ChatMessage(Helper.currentDate(), senderName, text);
         if (target.equals(ALL)) {
-            target = SessionManager.getInstance().getCurrentMeeting().getUuid();
+            chat.setReceiver(sessionManager.getCurrentMeeting().getUuid());
+            chat.setPersonal(false);
+        } else {
+            chat.setPersonal(true);
+            chat.setReceiver(target);
         }
-        new ChatSenderService((VBox) chatBoxScrollPane.getContent(), target, text).start();
+        new ChatSenderService((VBox) chatBoxScrollPane.getContent(), chat).start();
         chatInputArea.clear();
         sendMessageLabel.requestFocus();
     }

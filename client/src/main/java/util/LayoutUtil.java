@@ -9,7 +9,7 @@ import service.model.ChatMessage;
 
 public class LayoutUtil {
 
-    public static VBox drawChatItemBox(double width, ChatMessage chatMessage) {
+    public static VBox drawChatItemBox(double width, ChatMessage chatMessage, boolean isLocalMessage) {
         VBox vBox = new VBox();
         vBox.setSpacing(5);
         vBox.setPrefWidth(width);
@@ -20,7 +20,12 @@ public class LayoutUtil {
         timeLabel.setTextAlignment(TextAlignment.CENTER);
         timeLabel.setAlignment(Pos.CENTER);
 
-        Label usernameLabel = decorate(width, labelHeight, chatMessage.getUserName());
+        String suffix = "";
+        if (!isLocalMessage) {
+            suffix = chatMessage.isPersonal() ? "(Personal)" : "(All)";
+        }
+
+        Label usernameLabel = decorate(width, labelHeight, chatMessage.getSenderName() + " " + suffix);
         usernameLabel.setStyle("-fx-text-fill: green;-fx-font-size: 14");
 
         Label msgLabel = decorate(width, labelHeight, chatMessage.getContent());

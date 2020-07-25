@@ -26,7 +26,7 @@ public class ChatDisplayService extends ScheduledService<VBox> {
             @Override
             protected VBox call() throws Exception {
                 ChatMessage msg = ChatMessageContainer.getInstance().next();
-                return msg == null ? null : LayoutUtil.drawChatItemBox(chatBox.getWidth() - 10, msg);
+                return msg == null ? null : LayoutUtil.drawChatItemBox(chatBox.getWidth() - 10, msg, false);
             }
         };
     }
