@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
+import util.LayoutUtil;
 
 import java.io.IOException;
 
@@ -37,12 +38,8 @@ public class LoginService extends Service<HttpResult<String>> {
     private void initListener(Button loginBtn, Label loginMessageLabel) {
         valueProperty().addListener((observable, oldValue, response) -> {
             if (response.getResult() == ResultCode.OK) {
-                try {
-                    loginBtn.setDisable(true);
-                    gotoProfile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                loginBtn.setDisable(true);
+                gotoProfile();
             } else {
                 loginMessageLabel.setStyle("-fx-text-fill: red");
                 loginMessageLabel.setText(response.getMessage());
@@ -54,11 +51,10 @@ public class LoginService extends Service<HttpResult<String>> {
         });
     }
 
-    private void gotoProfile() throws IOException {
+    private void gotoProfile() {
         Stage stage = (Stage) mainLayout.getScene().getWindow();
         stage.close();
-        Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/profile.fxml"));
+        Parent root = LayoutUtil.loadFXML("/fxml/Profile.fxml");
         Stage profileStage = new Stage();
         profileStage.setScene(new Scene(root));
         profileStage.show();

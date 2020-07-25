@@ -3,8 +3,8 @@ package controller;
 import common.bean.Meeting;
 import common.bean.User;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -14,7 +14,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.slf4j.Logger;
@@ -23,6 +22,7 @@ import service.model.SessionManager;
 import service.network.HeartBeatsClient;
 import service.schedule.layout.*;
 import service.schedule.video.GrabberScheduledService;
+import util.LayoutUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -145,7 +145,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void openOrCloseChat(MouseEvent event) throws IOException {
         if (chatStage == null) {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/ChatRoom.fxml"));
+            Parent root = LayoutUtil.loadFXML("/fxml/ChatRoom.fxml");
             chatStage = new Stage();
             chatStage.setScene(new Scene(root));
             chatStage.setResizable(false);
@@ -158,55 +158,35 @@ public class MeetingRoomController implements Initializable {
         event.consume();
     }
 
+    private EventHandler<MouseEvent> handler = event -> {
+        new LeaveMeetingService(rootLayout).start();
+        GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
+        if (grabberScheduledService != null) {
+            grabberScheduledService.cancel();
+        }
+        controlTask.stopMeeting();
+        exec.remove(client);
+        exec.remove(controlTask);
+        timerService.cancel();
+        managerNumRefreshService.cancel();
+        ManagerLayoutRefreshService refreshService = sessionManager.getRefreshService();
+        if (refreshService != null) {
+            refreshService.cancel();
+        }
+    };
+
     @FXML
     public void leaveMeeting(ActionEvent event) {
-        try {
-            if (sessionManager.isMeetingHost()) {
-                // Ask for end meeting else leave meeting, set meeting host before leaving
-                showDialog("You can appoint a host before leaving or end meeting directly.");
-            } else {
-                showDialog("Are you sure to leave.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Stage mainStage = (Stage) rootLayout.getScene().getWindow();
+        if (sessionManager.isMeetingHost()) {
+            // Ask for end meeting else leave meeting, set meeting host before leaving
+            String content = "You can appoint a host before leaving or end meeting directly.";
+            LayoutUtil.showDialog(mainStage, content, handler);
+        } else {
+            String content = "Are you sure to leave.";
+            LayoutUtil.showDialog(mainStage, content, handler);
         }
         event.consume();
-    }
-
-    private void showDialog(String content) throws IOException {
-        Stage mainStage = (Stage) rootLayout.getScene().getWindow();
-        Parent dialog = FXMLLoader.load(getClass().getResource("/fxml/Dialog.fxml"));
-        Label titleLabel = (Label) dialog.lookup("#titleLabel");
-        Label contentLabel = (Label) dialog.lookup("#contentLabel");
-        Button cancelBtn = (Button) dialog.lookup("#cancelBtn");
-        Button confirmBtn = (Button) dialog.lookup("#confirmBtn");
-        titleLabel.setText("Leave Meeting");
-        contentLabel.setText(content);
-        Stage dialogStage = new Stage();
-        dialogStage.setScene(new Scene(dialog));
-        dialogStage.initOwner(mainStage);
-        dialogStage.initModality(Modality.APPLICATION_MODAL);
-        confirmBtn.setOnMouseClicked(event -> {
-            dialogStage.close();
-            new LeaveMeetingService(rootLayout).start();
-            GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
-            if (grabberScheduledService != null) {
-                grabberScheduledService.cancel();
-            }
-            controlTask.stopMeeting();
-            exec.remove(client);
-            exec.remove(controlTask);
-            timerService.cancel();
-            managerNumRefreshService.cancel();
-            ManagerLayoutRefreshService refreshService = sessionManager.getRefreshService();
-            if (refreshService != null) {
-                refreshService.cancel();
-            }
-        });
-        cancelBtn.setOnMouseClicked((event) -> {
-            dialogStage.close();
-        });
-        dialogStage.show();
     }
 
     @FXML
@@ -246,7 +226,7 @@ public class MeetingRoomController implements Initializable {
     @FXML
     public void invite(MouseEvent event) throws IOException {
         if (invitationStage == null) {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/Invitation.fxml"));
+            Parent root = LayoutUtil.loadFXML("/fxml/Invitation.fxml");
             invitationStage = new Stage();
             invitationStage.setTitle("Invitation");
             invitationStage.setResizable(false);
@@ -267,10 +247,10 @@ public class MeetingRoomController implements Initializable {
     private Stage managerViewStage;
 
     @FXML
-    public void viewManager(MouseEvent event) throws IOException {
+    public void viewManager(MouseEvent event) {
         if (managerViewStage == null) {
             Stage mainStage = (Stage) rootLayout.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/ManagerLayout.fxml"));
+            Parent root = LayoutUtil.loadFXML("/fxml/ManagerLayout.fxml");
             managerViewStage = new Stage();
             managerViewStage.setResizable(false);
             managerViewStage.setScene(new Scene(root));

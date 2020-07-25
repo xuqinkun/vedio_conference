@@ -91,7 +91,7 @@
                      <children>
                         <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@img/invitation.png" />
+                              <Image url="/fxml/img/invitation.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="videoBtnLabel1" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Invite">
@@ -105,7 +105,7 @@
                      <children>
                         <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@img/managers.png" />
+                              <Image url="/fxml/img/managers.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="managerIconLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Manager">
@@ -119,7 +119,7 @@
                      <children>
                         <ImageView fx:id="audioIcon" fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@img/audio_off.png" />
+                              <Image url="/fxml/img/audio_off.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="audioBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Audio Off">
@@ -133,7 +133,7 @@
                      <children>
                         <ImageView fx:id="videoIcon" fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@img/video_off.png" />
+                              <Image url="/fxml/img/video_off.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="videoBtnLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Video Off">
@@ -147,7 +147,7 @@
                      <children>
                         <ImageView fitHeight="22.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@img/chat.png" />
+                              <Image url="/fxml/img/chat.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="chatIconLabel" alignment="CENTER" prefHeight="17.0" prefWidth="104.0" text="Chat">

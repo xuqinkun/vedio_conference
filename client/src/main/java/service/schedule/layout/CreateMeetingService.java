@@ -17,6 +17,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
 import util.Helper;
+import util.LayoutUtil;
 import util.SystemUtil;
 
 import java.io.IOException;
@@ -39,11 +40,7 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
 
         valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getResult() == ResultCode.OK) {
-                try {
-                    drawMeetingRoom();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                drawMeetingRoom();
             } else {
                 createBtn.setDisable(false);
                 SystemUtil.showSystemInfo("Create meeting failed.");
@@ -76,9 +73,8 @@ public class CreateMeetingService extends Service<HttpResult<String>> {
         };
     }
 
-    private void drawMeetingRoom() throws java.io.IOException {
-        Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/MeetingRoom.fxml"));
+    private void drawMeetingRoom() {
+        Parent root = LayoutUtil.loadFXML("/fxml/MeetingRoom.fxml");
         Stage roomStage = new Stage();
         String username = SessionManager.getInstance().getCurrentUser().getName();
         roomStage.setTitle(username  + "'s meeting");

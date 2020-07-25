@@ -19,7 +19,7 @@
                   <center>
                       <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
                           <image>
-                              <Image url="@img/orange.png" />
+                              <Image url="/fxml/img/orange.png" />
                           </image>
                       </ImageView>
                   </center>
@@ -94,7 +94,7 @@
                <top>
                   <ImageView fitHeight="27.0" fitWidth="32.0" onMouseClicked="#backToHome" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_LEFT">
                      <image>
-                        <Image url="@img/back.png" />
+                        <Image url="/fxml/img/back.png" />
                      </image>
                      <BorderPane.margin>
                         <Insets left="25.0" />
@@ -253,7 +253,6 @@
                <top>
                   <ImageView fitHeight="27.0" fitWidth="32.0" onMouseClicked="#backToLogin" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_LEFT">
                      <image>
-                        <Image url="@img/back.png" />
                      </image>
                      <BorderPane.margin>
                         <Insets left="25.0" />

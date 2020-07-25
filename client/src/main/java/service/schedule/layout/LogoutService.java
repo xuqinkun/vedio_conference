@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
-
-import java.io.IOException;
+import util.LayoutUtil;
 
 import static common.bean.ResultCode.OK;
 
@@ -33,11 +32,7 @@ public class LogoutService extends Service<HttpResult<String>> {
     private void initListener(Button loginBtn) {
         valueProperty().addListener((observable, oldValue, response) -> {
             if (response.getResult() == OK) {
-                try {
-                    gotoMainLayout();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                gotoMainLayout();
             }
             loginBtn.setDisable(false);
         });
@@ -46,11 +41,10 @@ public class LogoutService extends Service<HttpResult<String>> {
         });
     }
 
-    private void gotoMainLayout() throws IOException {
+    private void gotoMainLayout() {
         Stage stage = (Stage) logoutBtn.getScene().getWindow();
         stage.close();
-        Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/main.fxml"));
+        Parent root = LayoutUtil.loadFXML("/fxml/Main.fxml");
         Stage profileStage = new Stage();
         profileStage.setScene(new Scene(root));
         profileStage.show();

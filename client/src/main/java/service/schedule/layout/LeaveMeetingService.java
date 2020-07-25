@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
+import util.LayoutUtil;
 
 import java.io.IOException;
 
@@ -52,8 +53,7 @@ public class LeaveMeetingService extends Service<HttpResult<String>> {
             e.printStackTrace();
         }
         stage.close();
-        Parent root = FXMLLoader.load(
-                getClass().getResource(fxmlPath));
+        Parent root = LayoutUtil.loadFXML(fxmlPath);
         Stage profileStage = new Stage();
         profileStage.setScene(new Scene(root));
         profileStage.show();

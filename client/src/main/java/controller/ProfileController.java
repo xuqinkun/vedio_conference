@@ -14,8 +14,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import service.schedule.layout.LogoutService;
+import util.LayoutUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -51,18 +54,13 @@ public class ProfileController implements Initializable {
 
     @FXML
     public void createMeetingClick(MouseEvent event) {
-        try {
-            Stage profileStage = (Stage) usernameLabel.getScene().getWindow();
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/fxml/CreateMeeting.fxml"));
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.initOwner(profileStage);
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Stage profileStage = (Stage) usernameLabel.getScene().getWindow();
+        Parent root = LayoutUtil.loadFXML("/fxml/CreateMeeting.fxml");
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.initOwner(profileStage);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.show();
         event.consume();
     }
 
@@ -72,7 +70,7 @@ public class ProfileController implements Initializable {
     public void joinMeeting(MouseEvent event) throws IOException {
         if (joinMeetingStage == null) {
             Stage profileStage = (Stage) usernameLabel.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/JoinMeeting.fxml"));
+            Parent root = LayoutUtil.loadFXML("/fxml/JoinMeeting.fxml");
             joinMeetingStage = new Stage();
             joinMeetingStage.setResizable(false);
             joinMeetingStage.setScene(new Scene(root));

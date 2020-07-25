@@ -23,7 +23,7 @@
          <children>
                   <ImageView fx:id="portrait" fitHeight="45.0" fitWidth="79.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="10.0">
                       <image>
-                          <Image url="@img/orange.png" />
+                          <Image url="/fxml/img/orange.png" />
                       </image>
                   </ImageView>
                   <Label fx:id="usernameLabel" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="20.0">
@@ -47,7 +47,7 @@
                     <children>
                         <ImageView fitHeight="55.0" fitWidth="69.0" onMouseClicked="#joinMeeting" pickOnBounds="true" preserveRatio="true">
                             <image>
-                                <Image url="@img/join.png" />
+                                <Image url="/fxml/img/join.png" />
                             </image>
                             <cursor>
                                 <Cursor fx:constant="HAND" />
@@ -64,7 +64,7 @@
                     <children>
                         <ImageView fitHeight="55.0" fitWidth="69.0" onMouseClicked="#createMeetingClick" pickOnBounds="true" preserveRatio="true">
                             <image>
-                                <Image url="@img/create.png" />
+                                <Image url="/fxml/img/create.png" />
                             </image>
                             <cursor>
                                 <Cursor fx:constant="HAND" />
@@ -84,7 +84,7 @@
                     <children>
                         <ImageView fitHeight="55.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
                             <image>
-                                <Image url="@img/reserve.png" />
+                                <Image url="/fxml/img/reserve.png" />
                             </image>
                             <VBox.margin>
                                 <Insets />

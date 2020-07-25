@@ -16,6 +16,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.model.SessionManager;
 import util.JsonUtil;
+import util.LayoutUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,19 +44,14 @@ public class JoinMeetingService extends Service<HttpResult<String>> {
                 joinMeetingMessageLabel.setStyle("-fx-text-fill: red");
                 joinMeetingMessageLabel.setText(response.getMessage());
             } else {
-                try {
-                    displayMeetingRoom();
-                    joinMeetingMessageLabel.setText("");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                displayMeetingRoom();
+                joinMeetingMessageLabel.setText("");
             }
         });
     }
 
-    private void displayMeetingRoom() throws IOException {
-        Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/MeetingRoom.fxml"));
+    private void displayMeetingRoom() {
+        Parent root = LayoutUtil.loadFXML("/fxml/MeetingRoom.fxml");
         Stage roomStage = new Stage();
         String username = SessionManager.getInstance().getCurrentUser().getName();
         roomStage.setTitle(username  + "'s meeting");

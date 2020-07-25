@@ -1,15 +1,26 @@
+package app;
+
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.model.SessionManager;
 import util.Config;
 import util.DeviceManager;
+import util.LayoutUtil;
 
+import java.io.IOException;
 import java.util.List;
 
 public class Program extends Application {
+
+    private static final Logger log = LoggerFactory.getLogger(Program.class);
 
     @Override
     public void init() throws Exception {
@@ -31,13 +42,29 @@ public class Program extends Application {
         primaryStage.setTitle("Meeting");
         Parent root;
         SessionManager.getInstance().setDebugMode(debugMode);
+
         if (debugMode) {
-            root = FXMLLoader.load(getClass().getResource("/fxml/MeetingRoom.fxml"));
+            root = LayoutUtil.loadFXML("/fxml/MeetingRoom.fxml");
         } else {
-            root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
+            root = LayoutUtil.loadFXML("/fxml/Main.fxml");
+        }
+        if (root == null) {
+            log.error("Load fxml failed");
+            System.exit(1);
         }
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);
+
+        EventHandler<MouseEvent> handler = event -> {
+            log.warn("Exit");
+            System.exit(0);
+        };
+
+        primaryStage.setOnCloseRequest(event -> {
+            LayoutUtil.showDialog(primaryStage, "Are you are to exit?", handler);
+            event.consume();
+        });
+
         primaryStage.show();
     }
 

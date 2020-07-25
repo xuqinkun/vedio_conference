@@ -28,6 +28,7 @@ import service.http.HttpClientUtil;
 import service.http.UrlMap;
 import service.schedule.layout.LoginService;
 import util.InputChecker;
+import util.LayoutUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -86,7 +87,6 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         hideControl(loginLayout);
         hideControl(registerLayout);
-//        displayControl(homeLayout);
         registerBtn.setDisable(true);
         loginUserName.textProperty().addListener((observable, oldValue, newValue) -> loginCheck());
         loginPassword.textProperty().addListener((observable, oldValue, newValue) -> loginCheck());
@@ -98,28 +98,23 @@ public class MainController implements Initializable {
 
     @FXML
     public void joinMeeting(ActionEvent event) {
-        try {
-            if (joinStage == null) {
-                root = FXMLLoader.load(
-                        getClass().getResource("/fxml/JoinMeeting.fxml"));
-                joinStage = new Stage();
-                joinStage.setScene(new Scene(root));
-                joinStage.setTitle("Join Meeting");
-                joinStage.setResizable(false);
-                joinStage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
-                joinStage.setY(mainLayout.getScene().getWindow().getY());
-                Stage mainStage = (Stage) mainLayout.getScene().getWindow();
-                joinStage.initOwner(mainStage);
-                joinStage.show();
-            }
-            else if (joinStage.isShowing()) {
-                joinStage.hide();
-            }
-            else {
-                joinStage.show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (joinStage == null) {
+            root = LayoutUtil.loadFXML("/fxml/JoinMeeting.fxml");
+            joinStage = new Stage();
+            joinStage.setScene(new Scene(root));
+            joinStage.setTitle("Join Meeting");
+            joinStage.setResizable(false);
+            joinStage.setX(mainLayout.getScene().getWindow().getX() + mainLayout.getWidth() + 10);
+            joinStage.setY(mainLayout.getScene().getWindow().getY());
+            Stage mainStage = (Stage) mainLayout.getScene().getWindow();
+            joinStage.initOwner(mainStage);
+            joinStage.show();
+        }
+        else if (joinStage.isShowing()) {
+            joinStage.hide();
+        }
+        else {
+            joinStage.show();
         }
     }
 
