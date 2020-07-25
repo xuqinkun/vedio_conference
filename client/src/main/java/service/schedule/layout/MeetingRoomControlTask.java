@@ -220,11 +220,13 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         hBox.setAlignment(Pos.BOTTOM_CENTER);
         hBox.getChildren().add(label);
 
-        String meetingID = sessionManager.getCurrentMeeting().getUuid();
+        Meeting currentMeeting = sessionManager.getCurrentMeeting();
+        String meetingID = currentMeeting.getUuid();
         String currentUser = sessionManager.getCurrentUser().getName();
 
         // It's not necessary to add menubar for current user
-        if (!currentUser.equals(userName)) {
+        // Only add menubar for Business meeting
+        if (!currentUser.equals(userName) && currentMeeting.getMeetingType().equals("Business")) {
             MenuBar menuBar = createMenuBar(userName, meetingID);
             hBox.getChildren().add(menuBar);
         }
@@ -341,6 +343,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         });
 
         menu.getItems().addAll(audioSwitch, videoSwitch);
+
         menuBar.getMenus().add(menu);
         return menuBar;
     }

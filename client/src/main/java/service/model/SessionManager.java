@@ -116,9 +116,12 @@ public class SessionManager {
 
     public boolean hasPermission(OperationType operation, boolean showInfo) {
         String meetingType = currentMeeting.getMeetingType();
-        if (meetingType == null) {
+        if (meetingType == null) { // For debug
             return true;
-        } else if (meetingType.equals(PERSONAL.getValue())) {
+        } else if (isMeetingHost()) {
+            return true;
+        }
+        else if (meetingType.equals(PERSONAL.getValue())) {
             return true;
         } else if (meetingType.equals(BUSINESS.getValue())) {
             if (isMeetingManager()) {
