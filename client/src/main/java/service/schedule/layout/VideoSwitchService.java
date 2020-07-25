@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import service.messaging.MessageSender;
 import service.model.SessionManager;
 import service.schedule.video.GrabberScheduledService;
+import util.DeviceManager;
 import util.SystemUtil;
 
 import static common.bean.OperationType.VIDEO_CLOSE;
@@ -45,7 +46,7 @@ public class VideoSwitchService extends Service<Boolean> {
                 return;
             }
             GrabberScheduledService grabberScheduledService = sessionManager.getGrabberScheduledService();
-            if (grabberScheduledService == null) {
+            if (grabberScheduledService == null || !DeviceManager.getOpenCVFrameGrabber(0).isStarted()) {
                 String info = "Please wait for system initializing";
                 SystemUtil.showSystemInfo(info);
                 return;

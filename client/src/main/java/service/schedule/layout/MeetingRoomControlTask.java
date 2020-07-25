@@ -221,9 +221,14 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         hBox.getChildren().add(label);
 
         String meetingID = sessionManager.getCurrentMeeting().getUuid();
-        MenuBar menuBar = createMenuBar(userName, meetingID);
+        String currentUser = sessionManager.getCurrentUser().getName();
 
-        hBox.getChildren().add(menuBar);
+        // It's not necessary to add menubar for current user
+        if (!currentUser.equals(userName)) {
+            MenuBar menuBar = createMenuBar(userName, meetingID);
+            hBox.getChildren().add(menuBar);
+        }
+
         stackPane.getChildren().add(userView);
         stackPane.getChildren().add(hBox);
 
@@ -310,7 +315,13 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
         MenuItem audioSwitch = new MenuItem("Audio on");
         MenuItem videoSwitch = new MenuItem("Video on");
 
+        String currentUser = sessionManager.getCurrentUser().getName();
+
         audioSwitch.setOnAction(event -> {
+            if (!sessionManager.isMeetingManager(currentUser)) {
+                SystemUtil.showSystemInfo("You are not manager. Operation not supported!");
+                return;
+            }
             if (audioSwitch.getText().contains("on")) {
                 audioSwitch.setText("Audio off");
                 new PermissionService(meetingID, userName, AUDIO_ON).start();

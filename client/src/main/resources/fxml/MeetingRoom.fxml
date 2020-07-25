@@ -66,15 +66,19 @@
             <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
          </VBox.margin>
       </AnchorPane>
-      <AnchorPane maxHeight="582.0" minHeight="-Infinity" prefHeight="582.0" prefWidth="1000.0" style="-fx-background-color: #ffffff;">
+      <HBox prefHeight="561.0" prefWidth="1000.0" spacing="2.0">
          <children>
-            <ImageView fx:id="globalImageView" fitHeight="560.0" fitWidth="725.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="0.0" />
-            <VBox fx:id="userListLayout" alignment="TOP_CENTER" layoutY="-6.0" maxHeight="552.0" minHeight="-Infinity" prefHeight="542.0" prefWidth="270.0" spacing="5.0" style="-fx-background-color: #717478;" AnchorPane.bottomAnchor="19.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="0.0">
+            <ImageView fx:id="globalImageView" fitHeight="553.0" fitWidth="739.0" pickOnBounds="true" preserveRatio="true">
+               <HBox.margin>
+                  <Insets left="2.0" />
+               </HBox.margin></ImageView>
+            <VBox fx:id="userListLayout" alignment="TOP_CENTER" maxHeight="552.0" minHeight="-Infinity" prefHeight="551.0" prefWidth="264.0" spacing="5.0" style="-fx-background-color: #717478;">
                <padding>
                   <Insets bottom="10.0" top="10.0" />
-               </padding></VBox>
+               </padding>
+            </VBox>
          </children>
-      </AnchorPane>
+      </HBox>
       <AnchorPane prefHeight="91.0" prefWidth="999.0" style="-fx-background-color: #ffffff;">
          <children>
             <GridPane fx:id="toolbar" alignment="CENTER" hgap="10.0" prefHeight="90.0" prefWidth="999.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
