@@ -4,7 +4,6 @@ import common.bean.HttpResult;
 import common.bean.ResultCode;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -45,9 +44,13 @@ public class LogoutService extends Service<HttpResult<String>> {
         Stage stage = (Stage) logoutBtn.getScene().getWindow();
         stage.close();
         Parent root = LayoutUtil.loadFXML("/fxml/Main.fxml");
-        Stage profileStage = new Stage();
-        profileStage.setScene(new Scene(root));
-        profileStage.show();
+        Stage mainStage = new Stage();
+        mainStage.setScene(new Scene(root));
+        mainStage.setOnCloseRequest(event -> {
+            log.warn("Exit");
+            System.exit(0);
+        });
+        mainStage.show();
     }
 
     @Override
