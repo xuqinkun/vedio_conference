@@ -38,7 +38,7 @@ public class Program extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         boolean debugMode = parseParameters();
-
+        System.out.println(Thread.currentThread());
         primaryStage.setTitle("Meeting");
         Parent root;
         SessionManager.getInstance().setDebugMode(debugMode);

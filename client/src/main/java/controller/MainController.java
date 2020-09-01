@@ -200,7 +200,6 @@ public class MainController implements Initializable {
 
     @FXML
     public void register(ActionEvent event) {
-        System.out.println("register");
         String username = registerUserName.getText();
         String password = registerPassword.getText();
         String email = registerEmail.getText();
@@ -214,6 +213,7 @@ public class MainController implements Initializable {
         } else {
             openDialog();
         }
+        event.consume();
     }
 
     private void openDialog() {

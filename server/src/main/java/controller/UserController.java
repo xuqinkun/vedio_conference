@@ -40,7 +40,7 @@ public class UserController {
             }
             if (session.getAttribute(user.getName()) != null) {
                 log.debug("User[{}] has login before!", user.getName());
-                return new ResponseEntity<>(new HttpResult<>(ERROR, user.getName() + " has login before!"), HttpStatus.OK);
+                return new ResponseEntity<>(new HttpResult<>(OK, user.getName() + " has login before!"), HttpStatus.OK);
             }
             HttpResult<String> result = userService.login(user);
             if (result.getResult() == OK) {

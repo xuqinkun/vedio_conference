@@ -74,7 +74,7 @@ public class MeetingRoomControlTask extends Task<LayoutChangeSignal> {
                 if (type == USER_ADD) {
                     log.warn("USER_ADD[{}]", controlID);
                     userListLayout.getChildren().add(layoutChangeSignal.getPane());
-                } else if (type == USER_REMOVE) {
+                } else if (type == USER_LEAVE) {
                     log.warn("USER_LEAVE[{}]", controlID);
                     Node node = userListLayout.lookup("#" + controlID);
                     userListLayout.getChildren().remove(node);

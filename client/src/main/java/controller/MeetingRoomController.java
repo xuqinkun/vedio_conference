@@ -96,6 +96,7 @@ public class MeetingRoomController implements Initializable {
             leaveMeetingBtn.setText("Leave");
         }
         titleBar.prefWidthProperty().bind(rootLayout.widthProperty());
+
         controlTask = new MeetingRoomControlTask(meetingHostLabel, userListLayout, globalImageView);
         exec.schedule(controlTask, 0, TimeUnit.MILLISECONDS);
         // Start HeartBeats Report

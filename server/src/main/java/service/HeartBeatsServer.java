@@ -105,7 +105,6 @@ public class HeartBeatsServer extends Thread {
             String username = packet.getUsername();
             User user = meetingCache.getUser(meetingId, username);
             if (user == null) {
-                //log.debug("Invalid heart beats packet[{}], abandon it.", packet);
                 meetingCache.addUser(meetingId, new User(username, System.currentTimeMillis()));
             } else {
                 User cacheUser = meetingCache.getUser(meetingId, username);

@@ -38,9 +38,9 @@ public class AudioSwitchService extends Service<Boolean> {
         });
     }
 
-    protected void updateValue(Boolean isOpen) {
+    protected void updateValue(Boolean openAudio) {
         Label label = (Label) audioSwitchBtn.getParent().lookup("#audioBtnLabel");
-        if (isOpen) {
+        if (openAudio) {
             if (!sessionManager.hasPermission(AUDIO_ON, true)) {
                 return;
             }
@@ -58,8 +58,8 @@ public class AudioSwitchService extends Service<Boolean> {
             }
         } else {
             log.debug("Audio close");
-            audioIcon.setImage(new Image("/fxml/img/audio_off.png"));
             label.setText("Audio Off");
+            audioIcon.setImage(new Image("/fxml/img/audio_off.png"));
             audioRecordService.cancel();
         }
     }

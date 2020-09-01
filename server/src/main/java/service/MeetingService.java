@@ -81,7 +81,7 @@ public class MeetingService {
             log.warn("Meeting[{}] is ended", meetingID);
             return new HttpResult<>(OK, String.format("Meeting[%s] is ended", meetingID));
         } else {
-            kafkaService.sendMessage(meetingID, new Message(USER_REMOVE, JsonUtil.toJsonString(user)));
+            kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
             meetingCache.removeUser(meetingID, userName);
             return new HttpResult<>(OK, String.format("You leave meeting[%s]", meetingID));
         }
@@ -100,7 +100,7 @@ public class MeetingService {
 
     public void removeUser(String meetingID, User user) {
         meetingCache.removeUser(meetingID, user.getName());
-        kafkaService.sendMessage(meetingID, new Message(USER_REMOVE, JsonUtil.toJsonString(user)));
+        kafkaService.sendMessage(meetingID, new Message(USER_LEAVE, JsonUtil.toJsonString(user)));
     }
 
     public HttpResult<String> getUserList(String uuid) {

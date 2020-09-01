@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -30,10 +31,6 @@ public class HttpClientUtil {
         return INSTANCE;
     }
 
-    public HttpClient getClient() {
-        return HttpClientBuilder.create().build();
-    }
-
     public <T> HttpResult<T> doPost(String url, Object data) {
         if (data instanceof String) {
             return post(url, data.toString());
@@ -41,6 +38,7 @@ public class HttpClientUtil {
             return post(url, JsonUtil.toJsonString(data));
         }
     }
+
     private <T> HttpResult<T> post(String url, String data) {
         log.warn("POST url={} data={}", url, data);
         HttpPost post = new HttpPost(url);
@@ -50,7 +48,8 @@ public class HttpClientUtil {
             post.setHeader("cookie", COOKIE);
         }
         try {
-            HttpResponse response = getClient().execute(post);
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpResponse response = client.execute(post);
             Header[] headers = response.getHeaders("Set-Cookie");
             if (headers.length != 0) {
                 refreshCookie(headers[0]);
@@ -71,15 +70,5 @@ public class HttpClientUtil {
     private void refreshCookie(Header header) {
         COOKIE = header.getValue();
         log.debug("Refresh cookie:{}", COOKIE);
-    }
-
-    public static void main(String[] args) {
-        User user = new User("aa", "aa", "aa", "bb");
-        Meeting meeting = new Meeting();
-        meeting.setPassword("123");
-        meeting.setUuid(Helper.getUuid());
-        HttpResult<String> httpResult = getInstance().
-                doPost(UrlMap.getJoinMeetingUrl(), new MeetingContext(user, meeting));
-        System.out.println(httpResult);
     }
 }

@@ -64,9 +64,9 @@ public class MessageReceiveService extends ScheduledService<Message> {
                 if (op == USER_ADD) {
                     User user = JsonUtil.jsonToObject(data, User.class);
                     task.createUserLayout(user);
-                } else if (op == USER_REMOVE) {
+                } else if (op == USER_LEAVE) {
                     User user = JsonUtil.jsonToObject(data, User.class);
-                    task.addSignal(new LayoutChangeSignal(USER_REMOVE, user.getName(), null));
+                    task.addSignal(new LayoutChangeSignal(USER_LEAVE, user.getName(), null));
                 } else if (op == END_MEETING) {
                     log.warn("Meeting is end");
                     SystemUtil.showSystemInfo("Meeting is end");

@@ -7,7 +7,7 @@ import javafx.scene.control.ChoiceBox;
 import service.model.SessionManager;
 
 import static common.bean.OperationType.USER_ADD;
-import static common.bean.OperationType.USER_REMOVE;
+import static common.bean.OperationType.USER_LEAVE;
 
 public class ReceiverChoiceBoxService extends ScheduledService<LayoutChangeSignal> {
     private ChoiceBox<String> receiverChoiceBox;
@@ -41,7 +41,7 @@ public class ReceiverChoiceBoxService extends ScheduledService<LayoutChangeSigna
                 Thread.sleep(1000);
                 for (String userName : receiverChoiceBox.getItems()) {
                     if (!userName.equals("All") && !sessionManager.getUserList().contains(userName)) {
-                        updateValue(new LayoutChangeSignal(USER_REMOVE, userName, null));
+                        updateValue(new LayoutChangeSignal(USER_LEAVE, userName, null));
                     }
                 }
                 return null;

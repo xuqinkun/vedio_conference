@@ -40,8 +40,8 @@ public class VideoSwitchService extends Service<Boolean> {
         });
     }
 
-    protected void updateValue(Boolean isOpen) {
-        if (isOpen) {
+    protected void updateValue(Boolean openCamera) {
+        if (openCamera) {
             if (!sessionManager.hasPermission(VIDEO_ON, true)) {
                 return;
             }
